@@ -34,7 +34,7 @@
             cursor: pointer; border: none; background: none; flex: 1;
             text-transform: uppercase; letter-spacing: 0.4px; padding: 5px 0;
         }
-        .nav-item.active { color: var(--rust); }
+        .nav-item.active { color: var(--accent); }
         .nav-item svg { width: 21px; height: 21px; stroke-width: 2.3; }
 
         /* ---------- SCANNER LOCKOUT & CONTROLS ---------- */

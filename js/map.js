@@ -208,11 +208,8 @@ function pinIcon(cat, dimmed) {
   const col = CATEGORIES[cat].raw;
   return L.divIcon({
     className: 'hrn-pin' + (dimmed ? ' dim' : ''),
-    iconSize: [30, 38], iconAnchor: [15, 36], popupAnchor: [0, -32],
-    html: '<svg width="30" height="38" viewBox="-15 -30 30 38">' +
-          '<path d="M0 6 L-6.4 -3 A11.4 11.4 0 1 1 6.4 -3 Z" fill="#fffdf9"/>' +
-          '<circle cx="0" cy="-11" r="10.4" fill="' + col + '"/>' +
-          '<g transform="translate(0,-11) scale(0.92)">' + ICONS[cat] + '</g></svg>'
+    iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12],
+    html: `<div style="width:24px;height:24px;background:${col};border:2px solid #fffdf9;border-radius:50%;box-shadow:0 3px 5px rgba(22,35,61,0.3);"></div>`
   });
 }
 
@@ -236,11 +233,12 @@ function initMap() {
     maxBounds: [[32.6, -113.7], [34.3, -111.0]], maxBoundsViscosity: 0.6
   });
 
-  // Official ArcGIS / Esri World Street Map basemap (matches MAG Heat Relief Network official GIS layer)
-  // Clean, high-resolution street network with zero API key or token requirements.
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-    attribution: 'Tiles &copy; Esri · Sites: MAG Heat Relief Network',
-    maxZoom: 19, minZoom: 9
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+    maxZoom: 16, minZoom: 9
+  }).addTo(MAP);
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 16, minZoom: 9
   }).addTo(MAP);
 
   clusterGroup = L.markerClusterGroup({
@@ -298,34 +296,74 @@ function renderRail() {
   };
   rail.appendChild(openChip);
 
+  const filterBtn = document.createElement('button');
+  const hasExtraFilters = activeCats.size !== Object.keys(CATEGORIES).length || activeSvcs.size > 0;
+  filterBtn.className = 'chip chip-filters' + (hasExtraFilters ? '' : ' off');
+  filterBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg> Filters';
+  filterBtn.onclick = () => {
+    showFiltersMenu();
+  };
+  rail.appendChild(filterBtn);
+}
+
+function showFiltersMenu() {
+  activePoi = null;
+  document.getElementById('sheet-title-text').innerText = 'Filters';
+  document.getElementById('sheet-count').style.display = 'none';
+  document.getElementById('sheet-source').style.display = 'none';
+
+  let html = `
+    <div style="margin-bottom: 15px;">
+      <button class="btn-back" onclick="closeFiltersMenu()" style="background:none;border:none;color:var(--accent);font-weight:700;font-size:0.85rem;padding:0;cursor:pointer;display:flex;align-items:center;gap:4px;">
+        &larr; Apply & Back
+      </button>
+    </div>
+    <div style="margin-bottom: 10px; font-weight: 700; font-size: 0.85rem;">Categories</div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;" id="filter-cats"></div>
+    <div style="margin-bottom: 10px; font-weight: 700; font-size: 0.85rem;">Services</div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;" id="filter-svcs"></div>
+  `;
+  document.getElementById('sheet-list').innerHTML = html;
+
+  const catContainer = document.getElementById('filter-cats');
   Object.keys(CATEGORIES).forEach(key => {
     const cat = CATEGORIES[key];
     const chip = document.createElement('button');
     chip.className = 'chip' + (activeCats.has(key) ? '' : ' off');
+    chip.style.border = '1px solid var(--border-soft)';
     chip.innerHTML = '<span class="dot" style="background:' + cat.raw + '"></span>' + cat.label;
     chip.onclick = () => {
       if (activeCats.has(key)) activeCats.delete(key); else activeCats.add(key);
-      chip.classList.toggle('off', !activeCats.has(key));
-      applyFilters();
+      chip.className = 'chip' + (activeCats.has(key) ? '' : ' off');
+      applyFilters(); 
+      renderRail();
     };
-    rail.appendChild(chip);
+    catContainer.appendChild(chip);
   });
 
-  const sep = document.createElement('span');
-  sep.className = 'rail-sep';
-  rail.appendChild(sep);
-
+  const svcContainer = document.getElementById('filter-svcs');
   Object.keys(SERVICES).forEach(key => {
     const chip = document.createElement('button');
-    chip.className = 'chip chip-svc off';
+    chip.className = 'chip chip-svc' + (activeSvcs.has(key) ? '' : ' off');
+    chip.style.border = '1px solid var(--border-soft)';
     chip.textContent = SERVICES[key].label;
     chip.onclick = () => {
       if (activeSvcs.has(key)) activeSvcs.delete(key); else activeSvcs.add(key);
-      chip.classList.toggle('off', !activeSvcs.has(key));
+      chip.className = 'chip chip-svc' + (activeSvcs.has(key) ? '' : ' off');
       applyFilters();
+      renderRail();
     };
-    rail.appendChild(chip);
+    svcContainer.appendChild(chip);
   });
+
+  document.getElementById('sheet').classList.add('expanded');
+}
+
+function closeFiltersMenu() {
+  document.getElementById('sheet-title-text').innerText = 'Heat relief nearby';
+  document.getElementById('sheet-count').style.display = 'block';
+  document.getElementById('sheet-source').style.display = 'block';
+  renderList();
 }
 
 /* ---------- List, sorted by distance from where you're looking ---------- */
@@ -343,6 +381,9 @@ function renderList() {
 
   document.getElementById('sheet-count').innerText = rows.length + ' sites';
   document.getElementById('sheet-source').innerText = dataStamp;
+
+  const titleEl = document.getElementById('sheet-title-text');
+  if (titleEl && titleEl.innerText !== 'Heat relief nearby') return;
 
   if (!rows.length) {
     list.innerHTML = '<div class="empty-note">No sites match these filters. ' +
@@ -386,22 +427,21 @@ function openPoi(i) {
   activePoi = i;
   const st = statusOf(s);
 
-  document.getElementById('poi-badges').innerHTML = s.c.map(c =>
+  const badgesHtml = s.c.map(c =>
     '<span class="poi-badge" style="background:' + CATEGORIES[c].raw + '">' +
     esc(CATEGORIES[c].short) + '</span>').join('');
 
-  document.getElementById('poi-name').innerHTML = '<span class="poi-title">' + esc(s.n) + '</span>';
-  document.getElementById('poi-org').innerHTML = s.o && s.o !== s.n
+  const nameHtml = '<span class="poi-title">' + esc(s.n) + '</span>';
+  const orgHtml = s.o && s.o !== s.n
     ? '<span class="poi-org">' + esc(s.o) + '</span>' : '';
 
-  document.getElementById('poi-status').innerHTML =
-    '<span class="status-pill ' + st.tone + '">' + esc(st.label) + '</span>' +
+  const statusHtml = '<span class="status-pill ' + st.tone + '">' + esc(st.label) + '</span>' +
     (userLL ? '<span class="poi-dist">' + getWalkInfo(userLL, s, i).distText + ' away</span>' : '');
 
   const addr = esc(s.a || '');
-  document.getElementById('poi-addr').innerHTML = addr ? '<div class="poi-addr">' + addr + '</div>' : '';
+  const addrHtml = addr ? '<div class="poi-addr">' + addr + '</div>' : '';
 
-  document.getElementById('poi-hours').innerHTML = weekTable(s);
+  const hoursHtml = weekTable(s);
 
   const tags = [];
   (s.sv || []).forEach(v => { if (SERVICES[v]) tags.push(SERVICES[v].label); });
@@ -410,22 +450,53 @@ function openPoi(i) {
   if (s.ada === 1) tags.push('ADA accessible');
   if (s.pet === 1) tags.push('Pets welcome');
   else if (s.pet === 0) tags.push('No pets');
-  document.getElementById('poi-tags').innerHTML =
-    tags.map(t => '<span class="tag">' + esc(t) + '</span>').join('');
+  
+  const tagsHtml = tags.map(t => '<span class="tag">' + esc(t) + '</span>').join('');
+  const noteHtml = s.nt ? '<div class="poi-note">' + esc(s.nt) + '</div>' : '';
+  
+  const callHtml = s.ph 
+    ? `<button class="dir-btn ghost" onclick="window.location.href='tel:${s.ph.replace(/[^0-9+]/g, '')}'" aria-label="Call ${esc(s.n)}">
+         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>
+         Call
+       </button>`
+    : '';
 
-  document.getElementById('poi-note').innerHTML =
-    s.nt ? '<div class="poi-note">' + esc(s.nt) + '</div>' : '';
+  const actionsHtml = `
+    <div class="poi-actions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 7px;">
+      <button class="dir-btn" onclick="openDirections(${i},'walking')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="2"/><path d="m9 21 1.5-6.5L8 12l1-5 3.5 2 3 1.5"/><path d="M14.5 14.5 17 21"/></svg>
+        Walk there
+      </button>
+      <button class="dir-btn ghost" onclick="openDirections(${i},'transit')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 10h16"/><path d="m7 17-2 4M17 17l2 4"/></svg>
+        Bus
+      </button>
+      ${callHtml}
+    </div>
+  `;
 
-  const call = document.getElementById('poi-call');
-  if (s.ph) {
-    call.style.display = '';
-    call.onclick = () => { window.location.href = 'tel:' + s.ph.replace(/[^0-9+]/g, ''); };
-    call.setAttribute('aria-label', 'Call ' + s.n + ' at ' + s.ph);
-  } else {
-    call.style.display = 'none';
-  }
+  document.getElementById('sheet-list').innerHTML = `
+    <div style="margin-bottom: 15px;">
+      <button class="btn-back" onclick="closePoi()" style="background:none;border:none;color:var(--accent);font-weight:700;font-size:0.85rem;padding:0;cursor:pointer;display:flex;align-items:center;gap:4px;">
+        &larr; Back to List
+      </button>
+    </div>
+    <div class="poi-badges" style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px;">${badgesHtml}</div>
+    <div style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;color:var(--ink);line-height:1.25;">${nameHtml}</div>
+    ${orgHtml ? `<div class="poi-org" style="font-size:0.7rem;color:var(--text-muted);font-weight:600;">${orgHtml}</div>` : ''}
+    <div class="poi-status" style="display:flex;align-items:center;gap:8px;margin-top:7px;flex-wrap:wrap;">${statusHtml}</div>
+    ${addrHtml}
+    ${hoursHtml}
+    ${tags.length ? `<div class="poi-tags" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:9px;">${tagsHtml}</div>` : ''}
+    ${noteHtml}
+    ${actionsHtml}
+  `;
 
-  document.getElementById('poi-sheet').classList.add('show');
+  document.getElementById('sheet-title-text').innerText = 'Site Details';
+  document.getElementById('sheet-count').style.display = 'none';
+  document.getElementById('sheet-source').style.display = 'none';
+
+  document.getElementById('sheet').classList.add('expanded');
   positionOverlays();
 }
 
@@ -446,8 +517,11 @@ function weekTable(s) {
 }
 
 function closePoi() {
-  document.getElementById('poi-sheet').classList.remove('show');
   activePoi = null;
+  document.getElementById('sheet-title-text').innerText = 'Heat relief nearby';
+  document.getElementById('sheet-count').style.display = 'block';
+  document.getElementById('sheet-source').style.display = 'block';
+  renderList();
   positionOverlays();
 }
 
@@ -548,10 +622,11 @@ function positionOverlays() {
   const wrap = document.querySelector('.map-wrap');
   if (!wrap) return;
   const wrapH = wrap.clientHeight;
+  const sheet = document.getElementById('sheet');
+  
   let floor = wrapH - 200;
-  const poi = document.getElementById('poi-sheet');
-  if (poi && poi.classList.contains('show')) {
-    floor = Math.min(floor, wrapH - 212 - poi.offsetHeight - 12);
+  if (sheet && sheet.classList.contains('expanded')) {
+    floor = wrapH - sheet.offsetHeight;
   }
   document.getElementById('map-controls').style.top = Math.max(56, floor - 148) + 'px';
 }

@@ -20,11 +20,11 @@
     <!-- Design tokens first, then base/shell, then shared components, then
          per-screen styles. Change a color or spacing value once in tokens.css
          and it updates everywhere. -->
-    <link rel="stylesheet" href="css/tokens.css?v=v8">
-    <link rel="stylesheet" href="css/base.css?v=v8">
-    <link rel="stylesheet" href="css/components.css?v=v8">
-    <link rel="stylesheet" href="css/map.css?v=v8">
-    <link rel="stylesheet" href="css/scanner.css?v=v8">
+    <link rel="stylesheet" href="css/tokens.css?v=v11">
+    <link rel="stylesheet" href="css/base.css?v=v11">
+    <link rel="stylesheet" href="css/components.css?v=v11">
+    <link rel="stylesheet" href="css/map.css?v=v11">
+    <link rel="stylesheet" href="css/scanner.css?v=v11">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
@@ -61,38 +61,11 @@
           </button>
         </div>
 
-        <!-- Site detail card -->
-        <div class="poi-sheet" id="poi-sheet">
-          <button class="poi-close" onclick="closePoi()" aria-label="Close">&times;</button>
-          <div class="poi-badges" id="poi-badges"></div>
-          <div id="poi-name"></div>
-          <div id="poi-org"></div>
-          <div class="poi-status" id="poi-status"></div>
-          <div id="poi-addr"></div>
-          <div class="poi-hours" id="poi-hours"></div>
-          <div class="poi-tags" id="poi-tags"></div>
-          <div id="poi-note"></div>
-          <div class="poi-actions">
-            <button class="dir-btn" onclick="openDirections(activePoi,'walking')">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="2"/><path d="m9 21 1.5-6.5L8 12l1-5 3.5 2 3 1.5"/><path d="M14.5 14.5 17 21"/></svg>
-              Walk there
-            </button>
-            <button class="dir-btn ghost" onclick="openDirections(activePoi,'transit')" aria-label="Transit directions">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 10h16"/><path d="m7 17-2 4M17 17l2 4"/></svg>
-              Bus
-            </button>
-            <button class="dir-btn ghost" id="poi-call" aria-label="Call this site">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>
-              Call
-            </button>
-          </div>
-        </div>
-
         <!-- Resource list sheet -->
         <div class="sheet" id="sheet">
           <div class="sheet-grip" id="sheet-grip"><span></span></div>
           <div class="sheet-head">
-            <div class="sheet-title">Heat relief nearby</div>
+            <div class="sheet-title" id="sheet-title-text">Heat relief nearby</div>
             <div class="sheet-count" id="sheet-count"></div>
           </div>
           <div class="sheet-source" id="sheet-source"></div>
@@ -623,10 +596,10 @@
     <!-- Site data + HRN-feed mapping helpers first, then the screens that
          consume them. Order matters here: each file expects the one before
          it to already be loaded. -->
-    <script src="js/data.js?v=v8"></script>
-    <script src="js/map.js?v=v8"></script>
-    <script src="js/ui.js?v=v8"></script>
-    <script src="js/scanner.js?v=v8"></script>
+    <script src="js/data.js?v=v11"></script>
+    <script src="js/map.js?v=v11"></script>
+    <script src="js/ui.js?v=v11"></script>
+    <script src="js/scanner.js?v=v11"></script>
 
     <script>
       if ('serviceWorker' in navigator) {
