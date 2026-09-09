@@ -223,9 +223,14 @@ function pinIcon(cat, dimmed) {
 
 
 function primaryCat(s) {
-  return s.c.indexOf('resp') > -1 ? 'resp'
-       : s.c.indexOf('cool') > -1 ? 'cool'
-       : s.c.indexOf('hydr') > -1 ? 'hydr' : 'coll';
+  const candidateCats = (activeCats && activeCats.size)
+    ? s.c.filter(c => activeCats.has(c))
+    : s.c;
+  const catsToUse = candidateCats.length ? candidateCats : s.c;
+
+  return catsToUse.indexOf('resp') > -1 ? 'resp'
+       : catsToUse.indexOf('cool') > -1 ? 'cool'
+       : catsToUse.indexOf('hydr') > -1 ? 'hydr' : 'coll';
 }
 
 function matchesFilters(s) {
@@ -291,7 +296,12 @@ function buildMarkers() {
 function applyFilters() {
   clusterGroup.clearLayers();
   const shown = [];
-  SITES.forEach((s, i) => { if (matchesFilters(s)) shown.push(markers[i]); });
+  SITES.forEach((s, i) => {
+    if (matchesFilters(s)) {
+      markers[i].setIcon(pinIcon(primaryCat(s)));
+      shown.push(markers[i]);
+    }
+  });
   clusterGroup.addLayers(shown);
   renderList();
 }
@@ -442,7 +452,12 @@ function openPoi(i) {
   activePoi = i;
   const st = statusOf(s);
 
-  const badgesHtml = s.c.map(c =>
+  const sortedCats = s.c.slice().sort((a, b) => {
+    const aActive = activeCats.has(a) ? 1 : 0;
+    const bActive = activeCats.has(b) ? 1 : 0;
+    return bActive - aActive;
+  });
+  const badgesHtml = sortedCats.map(c =>
     '<span class="poi-badge" style="background:' + CATEGORIES[c].raw + '">' +
     esc(CATEGORIES[c].short) + '</span>').join('');
 
