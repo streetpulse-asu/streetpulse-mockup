@@ -23,7 +23,7 @@
         .hrn-pin.dim { opacity: 0.35; }
         .hrn-cluster div {
             background: rgba(255,253,249,0.45);
-            border: 2px solid rgba(22,35,61,0.45);
+            border: 2px solid rgba(120,108,88,0.52);
             color: #16233d;
             border-radius: 50%; text-align: center;
             font-weight: 800; font-size: 0.74rem; letter-spacing: -0.01em;
