@@ -21,35 +21,13 @@
             font-size: 0.58rem; font-weight: 600; text-transform: uppercase;
             letter-spacing: 0.85px; color: #64748b; line-height: 1.1; margin-top: 2px;
         }
-        .mode-selector { position: relative; }
-        .bt-status {
-            display: flex; align-items: center; gap: 5px; font-size: 0.68rem;
-            font-weight: 700; color: var(--ink); background-color: var(--bg-app);
-            padding: 7px 12px; border-radius: 20px; cursor: pointer;
-            border: 1px solid var(--border-soft); text-transform: uppercase; letter-spacing: 0.5px;
-        }
-        .dropdown-menu {
-            position: absolute; top: 118%; right: 0; background: var(--surface);
-            border: 1px solid var(--border-soft); border-radius: 14px;
-            box-shadow: 0 16px 32px -6px rgba(22, 35, 61, 0.2); width: 150px;
-            display: none; flex-direction: column; overflow: hidden; z-index: 2500;
-        }
-        .dropdown-menu.show { display: flex; }
-        .dropdown-item {
-            padding: 12px 16px; font-size: 0.78rem; font-weight: 600; color: var(--text-main);
-            display: flex; align-items: center; gap: 8px; cursor: pointer; border-bottom: 1px solid var(--border-soft);
-        }
-        .dropdown-item:last-child { border-bottom: none; }
-        .dropdown-item svg { color: var(--accent); }
-
-        /* ---------- BOTTOM NAV ---------- */
+        /* ---------- BOTTOM NAV (PERMANENT OUTREACH NAV) ---------- */
         .bottom-nav {
             background-color: var(--surface); border-top: 1px solid var(--border-soft);
-            display: none; justify-content: space-evenly;
+            display: flex; justify-content: space-evenly;
             padding: 9px 10px calc(env(safe-area-inset-bottom) + 12px) 10px;
             position: absolute; bottom: 0; width: 100%; box-sizing: border-box; z-index: 1100;
         }
-        .bottom-nav.show { display: flex; }
         .nav-item {
             display: flex; flex-direction: column; align-items: center; gap: 3px;
             color: var(--text-muted); font-size: 0.6rem; font-weight: 700;
@@ -58,6 +36,47 @@
         }
         .nav-item.active { color: var(--rust); }
         .nav-item svg { width: 21px; height: 21px; stroke-width: 2.3; }
+
+        /* ---------- SCANNER LOCKOUT & CONTROLS ---------- */
+        .scanner-locked-container {
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            padding: 38px 22px 30px 22px; background: var(--surface);
+            border: 1px solid var(--border-soft); border-radius: 20px;
+            box-shadow: 0 10px 25px -5px rgba(22, 35, 61, 0.08); margin: auto 0;
+        }
+        .lock-shield {
+            width: 68px; height: 68px; border-radius: 50%;
+            background: rgba(15, 110, 106, 0.09); color: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 18px;
+        }
+        .lock-title {
+            font-family: 'Literata', Georgia, serif; font-size: 1.35rem; font-weight: 700;
+            color: var(--ink); margin: 0 0 10px 0;
+        }
+        .lock-subtitle {
+            font-size: 0.82rem; line-height: 1.5; color: var(--text-muted);
+            max-width: 300px; margin: 0 0 24px 0;
+        }
+        .lock-connect-btn {
+            width: 100%; max-width: 280px; display: flex; align-items: center;
+            justify-content: center; gap: 8px;
+        }
+        .badge-disconnect {
+            background: rgba(46, 125, 50, 0.1); color: #1e6b23;
+            border: 1px solid rgba(46, 125, 50, 0.25); border-radius: 12px;
+            padding: 3px 8px; font-size: 0.62rem; font-weight: 700;
+            cursor: pointer; letter-spacing: 0.2px; transition: background 0.15s;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .connected-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: #16a34a; display: inline-block;
+        }
+        .badge-disconnect:hover {
+            background: rgba(194, 65, 12, 0.12); color: #9a3412;
+            border-color: rgba(194, 65, 12, 0.25);
+        }
 
         /* ---------- MODALS ---------- */
         .modal-overlay {

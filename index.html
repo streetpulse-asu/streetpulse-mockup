@@ -40,22 +40,6 @@
                     <div class="brand-subtitle">Outreach Triage &amp; Telemetry</div>
                 </div>
             </div>
-            <div class="mode-selector">
-                <div class="bt-status" onclick="toggleDropdown()">
-                    <span id="current-mode-text">Individual</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m6 9 6 6 6-6"/></svg>
-                </div>
-                <div class="dropdown-menu" id="mode-dropdown">
-                    <div class="dropdown-item" onclick="selectMode('Individual')">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                        Individual
-                    </div>
-                    <div class="dropdown-item" onclick="selectMode('Worker')">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                        Worker
-                    </div>
-                </div>
-            </div>
         </div>
     </header>
 
@@ -116,66 +100,92 @@
 
     <!-- ============ TAB: SCANNER ============ -->
     <main class="tab-content" id="tab-scanner">
-        <div class="guidance-banner">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-            <span><strong>Scan required:</strong> Secure contact with forehead and hold still for 5 seconds.</span>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
-            <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px;">Live telemetry</span>
-            <button class="guide-kebab-btn" onclick="openFieldGuide()" aria-label="Clinical Field Guide" title="Clinical Field Guide">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+        <!-- Locked View (when sensor probe is disconnected) -->
+        <div class="scanner-locked-container" id="scanner-locked-view">
+            <div class="lock-shield">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+            </div>
+            <h2 class="lock-title">Sensor Connection Required</h2>
+            <p class="lock-subtitle">
+                Pair your StreetPulse forehead telemetry probe via Bluetooth to stream live vitals, monitor heat stroke risk, and unlock triage guides.
+            </p>
+            <button class="btn btn-primary lock-connect-btn" onclick="openPairModal()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7 7 10 10-5 5V2l5 5-10 10"/></svg>
+                Connect StreetPulse Sensor
+            </button>
+            <button class="btn btn-secondary" onclick="openManualEntry()" style="margin-top: 10px; border: 1px dashed var(--border-soft); width: 100%; max-width: 280px;">
+                Record Manual Vitals Instead
             </button>
         </div>
 
-        <div class="vitals-grid">
-            <div class="vital-card" id="bp-card" style="display: none;">
-                <div class="vital-label">Blood pressure</div>
-                <div class="vital-value-container"><span class="vital-value vital-bp" id="bp-val">--/--</span></div>
+        <!-- Active View (unlocked when sensor is connected) -->
+        <div class="scanner-active-container" id="scanner-active-view" style="display: none; flex-direction: column; gap: 16px; width: 100%;">
+            <div class="guidance-banner">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                <span><strong>Scan required:</strong> Secure contact with forehead and hold still for 5 seconds.</span>
             </div>
-            <div class="vital-card" id="rr-card" style="display: none;">
-                <div class="vital-label">Resp. rate</div>
-                <div class="vital-value-container"><span class="vital-value" id="rr-val">--</span><span class="vital-unit">rpm</span></div>
-            </div>
-            <div class="vital-card clickable-vital" onclick="openFieldGuide('pulse')" title="View Heart Rate Field Guidelines">
-                <div class="vital-label">Heart rate</div>
-                <div class="vital-value-container"><span class="vital-value" id="hr-val">--</span><span class="vital-unit">bpm</span></div>
-            </div>
-            <div class="vital-card clickable-vital" onclick="openFieldGuide('spo2')" title="View SpO2 Field Guidelines">
-                <div class="vital-label">Oxygen sat.</div>
-                <div class="vital-value-container"><span class="vital-value" id="spo2-val">--</span><span class="vital-unit">%</span></div>
-            </div>
-            <div class="vital-card full-width clickable-vital" onclick="openFieldGuide('hyper')" title="View Temperature & Heat Guidelines">
-                <div class="vital-label">Forehead temperature</div>
-                <div class="vital-value-container"><span class="vital-value" id="temp-val">--</span><span class="vital-unit">&deg;F</span></div>
-            </div>
-        </div>
 
-        <div class="status-panel normal" id="status-panel">
-            <div class="status-icon" id="status-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px;">Live telemetry</span>
+                    <button class="badge-disconnect" onclick="disconnectDevice()" title="Disconnect sensor probe"><span class="connected-dot"></span> Connected &bull; Disconnect</button>
+                </div>
+                <button class="guide-kebab-btn" onclick="openFieldGuide()" aria-label="Clinical Field Guide" title="Clinical Field Guide">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+                </button>
             </div>
-            <div class="status-text-group">
-                <span class="status-label">Telemetry status</span>
-                <span class="status-value" id="status-text">All readings in normal range</span>
+
+            <div class="vitals-grid">
+                <div class="vital-card" id="bp-card" style="display: none;">
+                    <div class="vital-label">Blood pressure</div>
+                    <div class="vital-value-container"><span class="vital-value vital-bp" id="bp-val">--/--</span></div>
+                </div>
+                <div class="vital-card" id="rr-card" style="display: none;">
+                    <div class="vital-label">Resp. rate</div>
+                    <div class="vital-value-container"><span class="vital-value" id="rr-val">--</span><span class="vital-unit">rpm</span></div>
+                </div>
+                <div class="vital-card clickable-vital" onclick="openFieldGuide('pulse')" title="View Heart Rate Field Guidelines">
+                    <div class="vital-label">Heart rate</div>
+                    <div class="vital-value-container"><span class="vital-value" id="hr-val">--</span><span class="vital-unit">bpm</span></div>
+                </div>
+                <div class="vital-card clickable-vital" onclick="openFieldGuide('spo2')" title="View SpO2 Field Guidelines">
+                    <div class="vital-label">Oxygen sat.</div>
+                    <div class="vital-value-container"><span class="vital-value" id="spo2-val">--</span><span class="vital-unit">%</span></div>
+                </div>
+                <div class="vital-card full-width clickable-vital" onclick="openFieldGuide('hyper')" title="View Temperature & Heat Guidelines">
+                    <div class="vital-label">Forehead temperature</div>
+                    <div class="vital-value-container"><span class="vital-value" id="temp-val">--</span><span class="vital-unit">&deg;F</span></div>
+                </div>
             </div>
-        </div>
 
-        <button class="btn-more-info" id="btn-more-info" onclick="openFieldGuide(currentAlertTopic)" aria-label="Tap for more information">
-            <span class="more-info-title">TAP FOR MORE INFORMATION</span>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </button>
+            <div class="status-panel normal" id="status-panel">
+                <div class="status-icon" id="status-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <div class="status-text-group">
+                    <span class="status-label">Telemetry status</span>
+                    <span class="status-value" id="status-text">All readings in normal range</span>
+                </div>
+            </div>
 
-                
-        <div class="controls-container">
-            <button class="btn btn-secondary" onclick="openManualEntry()" style="border: 2px dashed var(--accent); color: var(--accent-deep); background-color: rgba(15, 110, 106, 0.07);">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-                Add manual entry
+            <button class="btn-more-info" id="btn-more-info" onclick="openFieldGuide(currentAlertTopic)" aria-label="Tap for more information">
+                <span class="more-info-title">TAP FOR MORE INFORMATION</span>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </button>
-            <button class="btn btn-primary" onclick="simulateNewReading()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                Capture from device
-            </button>
+
+            <div class="controls-container">
+                <button class="btn btn-secondary" onclick="openManualEntry()" style="border: 2px dashed var(--accent); color: var(--accent-deep); background-color: rgba(15, 110, 106, 0.07);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                    Add manual entry
+                </button>
+                <button class="btn btn-primary" onclick="simulateNewReading()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                    Capture from device
+                </button>
+            </div>
         </div>
     </main>
 
@@ -426,8 +436,8 @@
             <div class="modal-icon">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7 7 10 10-5 5V2l5 5-10 10"/></svg>
             </div>
-            <h3 class="modal-title">Connect StreetPulse</h3>
-            <p class="modal-desc">Turn on your StreetPulse device to unlock Worker mode.</p>
+            <h3 class="modal-title">Connect StreetPulse Sensor</h3>
+            <p class="modal-desc">Turn on your forehead optical telemetry probe to stream live vitals.</p>
             <button class="btn btn-primary" id="pair-btn" onclick="simulatePairing()">
                 <span id="pair-text">Search for device</span>
                 <div class="loader" id="pair-loader"></div>
