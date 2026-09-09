@@ -22,10 +22,10 @@ let SITES = [{"n":"Aguila Library","o":"Maricopa County Library District","a":"5
 let dataStamp = 'MAG Heat Relief Network · 2026 season snapshot';
 
 const CATEGORIES = {
-  cool: { label: 'Cooling center',    raw: '#0f6e6a', short: 'Cooling' },
-  hydr: { label: 'Hydration station', raw: '#3f9c96', short: 'Hydration' },
-  resp: { label: 'Respite center',    raw: '#16233d', short: 'Respite' },
-  coll: { label: 'Donation drop-off', raw: '#8d7f63', short: 'Donations' }
+  cool: { label: 'Cooling center',    raw: '#64b5f6', short: 'Cooling' },   /* light sky blue  */
+  hydr: { label: 'Hydration station', raw: '#0288d1', short: 'Hydration' }, /* ocean blue      */
+  resp: { label: 'Respite center',    raw: '#e53935', short: 'Respite' },   /* warm red        */
+  coll: { label: 'Donation drop-off', raw: '#2e7d32', short: 'Donations' } /* forest green    */
 };
 
 const SERVICES = {

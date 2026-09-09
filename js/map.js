@@ -206,12 +206,21 @@ function haversine(a, b) {
 
 function pinIcon(cat, dimmed) {
   const col = CATEGORIES[cat].raw;
+  const icon = (ICONS[cat] || '').replace(/stroke="#fff"/g, `stroke="${col}"`).replace(/fill="#fff"/g, `fill="${col}"`);
+  // Teardrop outer shape (colored), white inner circle, colored icon on white
+  const shape = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 36 44">
+    <path d="M18 1 C9.163 1 2 8.163 2 17 C2 26.5 10 35 18 43 C26 35 34 26.5 34 17 C34 8.163 26.837 1 18 1Z"
+          fill="${col}" stroke="rgba(0,0,0,0.12)" stroke-width="0.8"/>
+    <circle cx="18" cy="16" r="10" fill="white"/>
+    <g transform="translate(18,16)">${icon}</g>
+  </svg>`;
   return L.divIcon({
     className: 'hrn-pin' + (dimmed ? ' dim' : ''),
-    iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12],
-    html: `<div style="width:24px;height:24px;background:${col};border:2px solid #fffdf9;border-radius:50%;box-shadow:0 3px 5px rgba(22,35,61,0.3);"></div>`
+    iconSize: [36, 44], iconAnchor: [18, 44], popupAnchor: [0, -46],
+    html: `<div style="width:36px;height:44px;filter:${dimmed ? 'opacity(0.4)' : 'drop-shadow(0 3px 6px rgba(0,0,0,0.28))'}">${shape}</div>`
   });
 }
+
 
 function primaryCat(s) {
   return s.c.indexOf('resp') > -1 ? 'resp'
