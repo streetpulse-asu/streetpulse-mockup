@@ -180,6 +180,12 @@
             </button>
 
             <div class="controls-container">
+                <button class="btn btn-telehealth" id="btn-call-telehealth" onclick="openTelehealthPrompt()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                    </svg>
+                    <span>Call Telehealth</span>
+                </button>
                 <button class="btn btn-secondary" onclick="openManualEntry()" style="border: 2px dashed var(--accent); color: var(--accent-deep); background-color: rgba(15, 110, 106, 0.07);">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
                     Add manual entry
@@ -480,6 +486,129 @@
             </div>
             <button class="btn btn-primary" onclick="saveManualEntry()">Save entry</button>
             <button class="btn btn-secondary" onclick="closeManualEntry()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- ============ TELEHEALTH CAMERA PERMISSION MODAL ============ -->
+    <div class="modal-overlay" id="telehealth-perm-modal">
+        <div class="modal-card" style="padding: 26px 22px; max-width: 360px;">
+            <div class="modal-icon" style="background: rgba(15, 110, 106, 0.12); color: var(--accent);">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                </svg>
+            </div>
+            <h3 class="modal-title" style="font-size: 1.25rem;">Allow Camera Access?</h3>
+            <p class="modal-desc" style="font-size: 0.85rem; margin-bottom: 20px; line-height: 1.5;">
+                StreetPulse Outreach uses your camera for live telehealth video consultations with the on-call physician.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <button class="btn btn-primary" style="background: var(--accent-deep);" onclick="grantCameraAndCall(true)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="20 6 9 17 4 12"/></svg>
+                    Allow Camera &amp; Connect
+                </button>
+                <button class="btn btn-secondary" onclick="grantCameraAndCall(false)" style="font-size: 0.82rem; margin-top: 0;">
+                    Continue with Simulated Video
+                </button>
+                <button class="btn" style="background: transparent; color: var(--text-muted); font-size: 0.8rem; padding: 8px; margin-top: 2px;" onclick="closeTelehealthPrompt()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ TELEHEALTH ACTIVE CALL MODAL ============ -->
+    <div class="modal-overlay" id="telehealth-call-modal" style="padding: 0; background: #0c1524;">
+        <div class="telehealth-call-container">
+            <!-- Call Header -->
+            <div class="telehealth-top-bar">
+                <div class="th-clinician-info">
+                    <div class="th-live-dot"></div>
+                    <div>
+                        <div class="th-doctor-name">Dr. Maya Rivera, MD</div>
+                        <div class="th-dept">Valleywise Street Medicine &bull; On-Call</div>
+                    </div>
+                </div>
+                <div class="th-call-timer" id="th-call-timer">00:00</div>
+            </div>
+
+            <!-- Video Stage -->
+            <div class="th-video-stage">
+                <!-- Clinician Remote Video Feed (Simulation) -->
+                <div class="th-remote-feed">
+                    <div class="th-avatar-container">
+                        <div class="th-doctor-avatar">
+                            <svg width="68" height="68" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.6"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M12 11v3M10.5 12.5h3"/></svg>
+                        </div>
+                        <div class="th-audio-wave">
+                            <span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span>
+                        </div>
+                    </div>
+                    <div class="th-remote-tag">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        Encrypted Triage Channel &bull; Valleywise Medical Center
+                    </div>
+                </div>
+
+                <!-- Self / Field Camera PIP -->
+                <div class="th-pip-window" id="th-pip-window">
+                    <video id="th-local-video" autoplay playsinline muted></video>
+                    <div class="th-pip-fallback" id="th-pip-fallback">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                        <span>Worker Cam</span>
+                    </div>
+                    <div class="th-pip-label">Field Cam (Self)</div>
+                </div>
+
+                <!-- Live Synchronized Vitals HUD -->
+                <div class="th-vitals-hud">
+                    <div class="th-hud-header">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        <span>Live Outreach Telemetry Shared</span>
+                    </div>
+                    <div class="th-hud-metrics">
+                        <div class="th-metric">
+                            <span class="th-m-label">HR</span>
+                            <span class="th-m-val" id="th-val-hr">--</span>
+                            <span class="th-m-unit">bpm</span>
+                        </div>
+                        <div class="th-metric">
+                            <span class="th-m-label">SpO2</span>
+                            <span class="th-m-val" id="th-val-spo2">--</span>
+                            <span class="th-m-unit">%</span>
+                        </div>
+                        <div class="th-metric">
+                            <span class="th-m-label">Temp</span>
+                            <span class="th-m-val" id="th-val-temp">--</span>
+                            <span class="th-m-unit">&deg;F</span>
+                        </div>
+                        <div class="th-metric">
+                            <span class="th-m-label">BP</span>
+                            <span class="th-m-val" id="th-val-bp">--/--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Call Controls Bar -->
+            <div class="th-controls-bar">
+                <button class="th-ctrl-btn" id="th-btn-mic" onclick="toggleTelehealthMic()" title="Mute/Unmute">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                    <span>Mute</span>
+                </button>
+                <button class="th-ctrl-btn" id="th-btn-cam" onclick="toggleTelehealthCam()" title="Camera Toggle">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                    <span>Camera</span>
+                </button>
+                <button class="th-ctrl-btn" onclick="sendVitalsSnapshot()" title="Push Snapshot">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    <span>Send Vitals</span>
+                </button>
+                <button class="th-ctrl-btn th-end-call" onclick="endTelehealthCall()" title="End Consultation">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-6-6 19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"/><line x1="23" y1="1" x2="1" y2="23"/></svg>
+                    <span>End Call</span>
+                </button>
+            </div>
         </div>
     </div>
 

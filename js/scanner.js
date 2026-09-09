@@ -155,6 +155,7 @@ function simulateNewReading() {
   const tempEl = document.getElementById('temp-val');
   const tempVal = tempEl ? tempEl.innerText : '--';
   evaluateVitals(tempVal === '--' ? null : tempVal, parseInt(spo2), hr);
+  syncTelehealthVitals();
 }
 
 function openManualEntry() {
@@ -212,7 +213,160 @@ function saveManualEntry() {
 
   // Always evaluate, passing hr
   evaluateVitals(temp === '--' ? null : temp, spo2, hr);
+  syncTelehealthVitals();
   closeManualEntry();
 }
 
-/* ---------- Boot ---------- */
+/* ==========================================================
+   TELEHEALTH CONSULTATION CONTROLLER
+   ========================================================== */
+let thStream = null;
+let thTimerInterval = null;
+let thTimerSeconds = 0;
+let thMicMuted = false;
+let thCamOff = false;
+
+function openTelehealthPrompt() {
+  document.getElementById('telehealth-perm-modal').classList.add('show');
+}
+
+function closeTelehealthPrompt() {
+  document.getElementById('telehealth-perm-modal').classList.remove('show');
+}
+
+async function grantCameraAndCall(useCamera) {
+  closeTelehealthPrompt();
+  
+  // Sync current vitals to the Telehealth HUD
+  syncTelehealthVitals();
+
+  const callModal = document.getElementById('telehealth-call-modal');
+  callModal.classList.add('show');
+  
+  const videoEl = document.getElementById('th-local-video');
+  const fallbackEl = document.getElementById('th-pip-fallback');
+
+  if (useCamera && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    try {
+      thStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      if (videoEl && thStream) {
+        videoEl.srcObject = thStream;
+        videoEl.style.display = 'block';
+        if (fallbackEl) fallbackEl.style.display = 'none';
+      }
+    } catch (err) {
+      console.warn('Camera access declined or unavailable, falling back to simulated view:', err);
+      if (videoEl) videoEl.style.display = 'none';
+      if (fallbackEl) fallbackEl.style.display = 'flex';
+    }
+  } else {
+    if (videoEl) videoEl.style.display = 'none';
+    if (fallbackEl) fallbackEl.style.display = 'flex';
+  }
+
+  // Start call timer
+  thTimerSeconds = 0;
+  updateCallTimerDisplay();
+  clearInterval(thTimerInterval);
+  thTimerInterval = setInterval(() => {
+    thTimerSeconds++;
+    updateCallTimerDisplay();
+  }, 1000);
+}
+
+function updateCallTimerDisplay() {
+  const m = String(Math.floor(thTimerSeconds / 60)).padStart(2, '0');
+  const s = String(thTimerSeconds % 60).padStart(2, '0');
+  const timerEl = document.getElementById('th-call-timer');
+  if (timerEl) timerEl.innerText = `${m}:${s}`;
+}
+
+function syncTelehealthVitals() {
+  const hr = document.getElementById('hr-val')?.innerText || '--';
+  const spo2 = document.getElementById('spo2-val')?.innerText || '--';
+  const temp = document.getElementById('temp-val')?.innerText || '--';
+  const bp = document.getElementById('bp-val')?.innerText || '--/--';
+
+  const thHr = document.getElementById('th-val-hr');
+  const thSpo2 = document.getElementById('th-val-spo2');
+  const thTemp = document.getElementById('th-val-temp');
+  const thBp = document.getElementById('th-val-bp');
+
+  if (thHr) thHr.innerText = hr;
+  if (thSpo2) thSpo2.innerText = spo2;
+  if (thTemp) thTemp.innerText = temp;
+  if (thBp) thBp.innerText = bp;
+}
+
+function toggleTelehealthMic() {
+  thMicMuted = !thMicMuted;
+  const btn = document.getElementById('th-btn-mic');
+  if (thStream) {
+    thStream.getAudioTracks().forEach(t => t.enabled = !thMicMuted);
+  }
+  if (btn) {
+    btn.classList.toggle('active-off', thMicMuted);
+    btn.querySelector('span').innerText = thMicMuted ? 'Muted' : 'Mute';
+  }
+}
+
+function toggleTelehealthCam() {
+  thCamOff = !thCamOff;
+  const btn = document.getElementById('th-btn-cam');
+  const videoEl = document.getElementById('th-local-video');
+  const fallbackEl = document.getElementById('th-pip-fallback');
+
+  if (thStream) {
+    thStream.getVideoTracks().forEach(t => t.enabled = !thCamOff);
+  }
+  if (videoEl) videoEl.style.display = thCamOff ? 'none' : (thStream ? 'block' : 'none');
+  if (fallbackEl) fallbackEl.style.display = thCamOff || !thStream ? 'flex' : 'none';
+
+  if (btn) {
+    btn.classList.toggle('active-off', thCamOff);
+    btn.querySelector('span').innerText = thCamOff ? 'Cam Off' : 'Camera';
+  }
+}
+
+function sendVitalsSnapshot() {
+  syncTelehealthVitals();
+  const hudHeader = document.querySelector('.th-hud-header span');
+  if (hudHeader) {
+    const originalText = hudHeader.innerText;
+    hudHeader.innerText = '✓ Vitals Snapshot Transmitted to Dr. Rivera';
+    hudHeader.style.color = '#4ade80';
+    setTimeout(() => {
+      hudHeader.innerText = originalText;
+      hudHeader.style.color = '#38bdf8';
+    }, 2400);
+  }
+}
+
+function endTelehealthCall() {
+  clearInterval(thTimerInterval);
+  thTimerInterval = null;
+
+  if (thStream) {
+    thStream.getTracks().forEach(track => track.stop());
+    thStream = null;
+  }
+  const videoEl = document.getElementById('th-local-video');
+  if (videoEl) videoEl.srcObject = null;
+
+  const callModal = document.getElementById('telehealth-call-modal');
+  if (callModal) callModal.classList.remove('show');
+
+  // Reset controls state
+  thMicMuted = false;
+  thCamOff = false;
+  const micBtn = document.getElementById('th-btn-mic');
+  const camBtn = document.getElementById('th-btn-cam');
+  if (micBtn) {
+    micBtn.classList.remove('active-off');
+    micBtn.querySelector('span').innerText = 'Mute';
+  }
+  if (camBtn) {
+    camBtn.classList.remove('active-off');
+    camBtn.querySelector('span').innerText = 'Camera';
+  }
+}
