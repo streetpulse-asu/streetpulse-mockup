@@ -5,12 +5,11 @@
    tiles/scripts are NOT cached here, so the map tiles need a connection;
    everything else (screens, data, vitals simulation) works offline. */
 
-const CACHE_NAME = 'streetpulse-shell-v2';
+const CACHE_NAME = 'streetpulse-shell-v3';
 
 const APP_SHELL = [
   './',
   './index.html',
-  './presentation.html',
   './manifest.webmanifest',
   './assets/icon.png',
   './css/tokens.css',
