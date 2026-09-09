@@ -1,0 +1,20 @@
+        * { -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; overscroll-behavior: none; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-app);
+            margin: 0; padding: 0; overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .phone-container {
+            width: 100vw; height: 100dvh;
+            background-color: var(--bg-app);
+            position: relative; overflow: hidden; display: flex; flex-direction: column;
+        }
+
+        /* ---------- TABS ---------- */
+        .tab-content { flex: 1; min-height: 0; display: none; flex-direction: column; }
+        .tab-content.active { display: flex; }
+        #tab-scanner { padding: 16px 20px 0 20px; gap: 16px; overflow-y: auto; }
+        #tab-scanner::after { content: ''; display: block; flex: 0 0 calc(env(safe-area-inset-bottom) + 90px); }

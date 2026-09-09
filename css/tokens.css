@@ -1,0 +1,28 @@
+        :root {
+            --primary: #16233d;
+            --ink: #16233d;
+            --accent: #0f6e6a;
+            --accent-deep: #0b524f;
+            --rust: #b5502f;
+            --rust-deep: #93401f;
+            --bg-app: #f7f4ee;
+            --surface: #fffdf9;
+            --text-main: #16233d;
+            --text-muted: #746e63;
+            --border-soft: rgba(120, 108, 88, 0.16);
+            --shadow-soft: 0 14px 34px -10px rgba(22, 35, 61, 0.14), 0 4px 10px -4px rgba(22, 35, 61, 0.06);
+
+            --success-bg: #eef4ea; --success-text: #3f6b3a; --success-border: rgba(146, 179, 130, 0.5);
+            --warning-bg: #fbf1e2; --warning-text: #a8641c; --warning-border: rgba(216, 165, 103, 0.55);
+            --alert-bg: #fbeae5; --alert-text: #a13c22; --alert-border: rgba(207, 128, 100, 0.5);
+
+            /* Resource category colors */
+            --cat-shelter: #16233d;
+            --cat-cooling: #0f6e6a;
+            --cat-water: #3f9c96;
+            --cat-meals: #a8641c;
+            --cat-medical: #3f6b3a;
+            --cat-naloxone: #b5502f;
+            --cat-hygiene: #5b6b7d;
+            --amber: #d8a567;
+        }
