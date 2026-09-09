@@ -20,11 +20,11 @@
     <!-- Design tokens first, then base/shell, then shared components, then
          per-screen styles. Change a color or spacing value once in tokens.css
          and it updates everywhere. -->
-    <link rel="stylesheet" href="css/tokens.css?v=v4">
-    <link rel="stylesheet" href="css/base.css?v=v4">
-    <link rel="stylesheet" href="css/components.css?v=v4">
-    <link rel="stylesheet" href="css/map.css?v=v4">
-    <link rel="stylesheet" href="css/scanner.css?v=v4">
+    <link rel="stylesheet" href="css/tokens.css?v=v8">
+    <link rel="stylesheet" href="css/base.css?v=v8">
+    <link rel="stylesheet" href="css/components.css?v=v8">
+    <link rel="stylesheet" href="css/map.css?v=v8">
+    <link rel="stylesheet" href="css/scanner.css?v=v8">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
@@ -121,6 +121,12 @@
             </button>
             <button class="btn btn-secondary" onclick="openManualEntry()" style="margin-top: 10px; border: 1px dashed var(--border-soft); width: 100%; max-width: 280px;">
                 Record Manual Vitals Instead
+            </button>
+            <button class="btn btn-telehealth" style="margin-top: 10px; width: 100%; max-width: 280px;" onclick="openTelehealthPrompt()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                </svg>
+                <span>Call Telehealth</span>
             </button>
         </div>
 
@@ -617,10 +623,10 @@
     <!-- Site data + HRN-feed mapping helpers first, then the screens that
          consume them. Order matters here: each file expects the one before
          it to already be loaded. -->
-    <script src="js/data.js"></script>
-    <script src="js/map.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/scanner.js"></script>
+    <script src="js/data.js?v=v8"></script>
+    <script src="js/map.js?v=v8"></script>
+    <script src="js/ui.js?v=v8"></script>
+    <script src="js/scanner.js?v=v8"></script>
 
     <script>
       if ('serviceWorker' in navigator) {

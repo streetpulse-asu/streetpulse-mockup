@@ -215,6 +215,14 @@ function saveManualEntry() {
   evaluateVitals(temp === '--' ? null : temp, spo2, hr);
   syncTelehealthVitals();
   closeManualEntry();
+
+  // Reveal active vitals view if currently locked
+  const lockedView = document.getElementById('scanner-locked-view');
+  const activeView = document.getElementById('scanner-active-view');
+  if (lockedView && activeView && lockedView.style.display !== 'none') {
+    lockedView.style.display = 'none';
+    activeView.style.display = 'flex';
+  }
 }
 
 /* ==========================================================
