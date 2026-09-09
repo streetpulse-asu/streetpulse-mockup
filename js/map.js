@@ -236,11 +236,11 @@ function initMap() {
     maxBounds: [[32.6, -113.7], [34.3, -111.0]], maxBoundsViscosity: 0.6
   });
 
-  // Real street data, warmed to the StreetPulse palette by a CSS filter on the
-  // tile pane, so every arterial, alley and canal is there at any zoom.
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap &copy; CARTO · sites: MAG Heat Relief Network',
-    subdomains: 'abcd', maxZoom: 19, minZoom: 9, detectRetina: true
+  // Official ArcGIS / Esri World Street Map basemap (matches MAG Heat Relief Network official GIS layer)
+  // Clean, high-resolution street network with zero API key or token requirements.
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri · Sites: MAG Heat Relief Network',
+    maxZoom: 19, minZoom: 9
   }).addTo(MAP);
 
   clusterGroup = L.markerClusterGroup({
