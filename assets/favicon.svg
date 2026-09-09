@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="115" ry="115" fill="#2563eb"/>
+  <!-- Centered high-legibility minimal brand mark without text -->
+  <g transform="translate(0, 20)">
+    <path d="M 256 36
+             C 342 36, 408 102, 408 188
+             C 408 244, 370 302, 320 350
+             C 288 378, 268 402, 256 412
+             C 244 402, 224 378, 192 350
+             C 142 302, 104 244, 104 188
+             C 104 102, 170 36, 256 36 Z"
+          fill="none" stroke="#ffffff" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 160 196 L 200 196 L 230 96 L 253 290 L 280 148 L 310 196 L 352 196"
+          fill="none" stroke="#ffffff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
