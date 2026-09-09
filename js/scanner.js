@@ -99,16 +99,17 @@ function evaluateVitals(temp, spo2, hr) {
   const infoBtn = document.getElementById('btn-more-info');
   
   // Convert to numbers to prevent string comparison bugs
-  temp = parseFloat(temp) || 98.6;
+  const hasTemp = temp !== undefined && temp !== null && temp !== '--' && temp !== '' && !isNaN(parseFloat(temp));
+  const tempNum = hasTemp ? parseFloat(temp) : null;
   spo2 = parseInt(spo2) || 99;
   hr = parseInt(hr) || 80;
   
-  if (temp >= 104.0) {
+  if (tempNum !== null && tempNum >= 104.0) {
     currentAlertTopic = 'hyper';
     panel.className = 'status-panel alert'; iconContainer.innerHTML = iconAlert;
     textEl.innerText = 'Critical: High body temperature';
     if (infoBtn) triggerButtonPulse(infoBtn, 'alert-mode');
-  } else if (temp < 95.0 && temp > 0) {
+  } else if (tempNum !== null && tempNum < 95.0 && tempNum > 0) {
     currentAlertTopic = 'hypo';
     panel.className = 'status-panel alert'; iconContainer.innerHTML = iconAlert;
     textEl.innerText = 'Critical: Low body temperature';
@@ -123,10 +124,15 @@ function evaluateVitals(temp, spo2, hr) {
     panel.className = 'status-panel alert'; iconContainer.innerHTML = iconAlert;
     textEl.innerText = 'Critical: Abnormal heart rate';
     if (infoBtn) triggerButtonPulse(infoBtn, 'alert-mode');
-  } else if (temp >= 100.4) {
+  } else if (tempNum !== null && tempNum >= 100.4) {
     currentAlertTopic = 'hyper';
     panel.className = 'status-panel warning'; iconContainer.innerHTML = iconWarning;
     textEl.innerText = 'Warning: Elevated body temperature';
+    if (infoBtn) triggerButtonPulse(infoBtn, 'warning-mode');
+  } else if (spo2 < 95) {
+    currentAlertTopic = 'spo2';
+    panel.className = 'status-panel warning'; iconContainer.innerHTML = iconWarning;
+    textEl.innerText = 'Warning: Mildly decreased oxygen (SpO2)';
     if (infoBtn) triggerButtonPulse(infoBtn, 'warning-mode');
   } else {
     currentAlertTopic = 'spo2';
@@ -142,11 +148,13 @@ function evaluateVitals(temp, spo2, hr) {
 function simulateNewReading() {
   const hr = Math.floor(Math.random() * (115 - 72 + 1)) + 72;
   const spo2 = Math.floor(Math.random() * (100 - 88 + 1)) + 88;
-  const temp = (Math.random() * (103.5 - 97.2) + 97.2).toFixed(1);
   document.getElementById('hr-val').innerText = hr;
   document.getElementById('spo2-val').innerText = spo2;
-  document.getElementById('temp-val').innerText = temp;
-  evaluateVitals(parseFloat(temp), parseInt(spo2), hr);
+  
+  // Check if temperature was manually entered
+  const tempEl = document.getElementById('temp-val');
+  const tempVal = tempEl ? tempEl.innerText : '--';
+  evaluateVitals(tempVal === '--' ? null : tempVal, parseInt(spo2), hr);
 }
 
 function openManualEntry() {
@@ -190,12 +198,20 @@ function saveManualEntry() {
     document.getElementById('rr-val').innerText = '--';
     document.getElementById('rr-card').style.display = 'none';
   }
+  if (temp && temp !== '--' && temp.trim() !== '') {
+    document.getElementById('temp-val').innerText = temp;
+    const tempCard = document.getElementById('temp-card');
+    if (tempCard) tempCard.style.display = 'flex';
+  } else {
+    document.getElementById('temp-val').innerText = '--';
+    const tempCard = document.getElementById('temp-card');
+    if (tempCard) tempCard.style.display = 'none';
+  }
   document.getElementById('hr-val').innerText = hr;
   document.getElementById('spo2-val').innerText = spo2;
-  document.getElementById('temp-val').innerText = temp;
 
   // Always evaluate, passing hr
-  evaluateVitals(temp, spo2, hr);
+  evaluateVitals(temp === '--' ? null : temp, spo2, hr);
   closeManualEntry();
 }
 
