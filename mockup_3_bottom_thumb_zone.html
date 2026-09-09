@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>StreetPulse Mockup 3: Bottom Thumb Zone</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,600;0,7..72,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/tokens.css?v=v17">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body {
+            background: #0f172a;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #16233d;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh;
+        }
+        .phone-frame {
+            width: 412px; height: 890px;
+            background: #fffdf9;
+            position: relative; overflow: hidden;
+            display: flex; flex-direction: column;
+            border-radius: 40px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4), 0 0 0 10px #1e293b;
+        }
+        #map { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
+
+        /* Top Ambient Warning Pill */
+        .top-ambient {
+            position: absolute; top: 16px; left: 0; right: 0;
+            z-index: 800; display: flex; justify-content: center;
+        }
+        .weather-pill {
+            background: rgba(22, 35, 61, 0.92);
+            color: #fff; padding: 6px 14px; border-radius: 20px;
+            font-size: 0.74rem; font-weight: 700; display: flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            backdrop-filter: blur(8px);
+        }
+        .warning-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.35);
+        }
+
+        /* Left-Side Zoom Pill (Ergonomic for Thumb) */
+        .left-controls {
+            position: absolute; left: 14px; top: 45%; transform: translateY(-50%);
+            z-index: 800; display: flex; flex-direction: column; gap: 6px;
+        }
+        .vertical-capsule {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            border-radius: 20px; overflow: hidden;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.1);
+        }
+        .capsule-btn {
+            width: 42px; height: 44px; background: none; border: none;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.25rem; font-weight: 700; color: #16233d; cursor: pointer;
+        }
+        .capsule-divider { height: 1px; background: #e2e8f0; }
+
+        /* Right-Side Locate Button */
+        .right-locate {
+            position: absolute; right: 14px; top: 45%; transform: translateY(-50%);
+            z-index: 800;
+        }
+        .locate-fab {
+            width: 46px; height: 46px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            color: #0f6e6a; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12); cursor: pointer;
+        }
+
+        /* Bottom Heavy Thumb Area */
+        .thumb-dock-area {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            z-index: 900; display: flex; flex-direction: column;
+        }
+
+        /* Floating Filter & Search Rail */
+        .floating-action-rail {
+            margin: 0 14px 10px 14px;
+            display: flex; gap: 8px; align-items: center;
+        }
+        .btn-search-icon {
+            width: 48px; height: 48px; border-radius: 50%;
+            background: #ffffff; border: 1px solid rgba(15, 23, 42, 0.12);
+            color: #16233d; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08); cursor: pointer;
+        }
+        .btn-main-filter {
+            flex: 1; height: 48px; border-radius: 24px;
+            background: #ffffff; border: 1px solid rgba(15, 23, 42, 0.12);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+            cursor: pointer; font-family: inherit;
+        }
+        .bmf-left { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.84rem; color: #16233d; }
+        .bmf-badge {
+            background: #0f6e6a; color: #fff; font-size: 0.7rem; font-weight: 800;
+            padding: 2px 8px; border-radius: 10px;
+        }
+        .toggle-open-pill {
+            height: 48px; border-radius: 24px;
+            background: #ffffff; border: 1px solid rgba(15, 23, 42, 0.12);
+            padding: 0 14px; display: flex; align-items: center; gap: 6px;
+            font-size: 0.78rem; font-weight: 700; color: #15803d;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08); cursor: pointer;
+        }
+        .live-dot {
+            width: 7px; height: 7px; border-radius: 50%; background: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.25);
+        }
+
+        /* Peek Site Ribbon */
+        .peek-ribbon {
+            margin: 0 14px 12px 14px;
+            background: #16233d; color: #fff;
+            border-radius: 16px; padding: 12px 16px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 8px 24px rgba(22, 35, 61, 0.25);
+        }
+        .ribbon-info { display: flex; flex-direction: column; gap: 2px; }
+        .ribbon-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #64b5f6; }
+        .ribbon-name { font-family: 'Literata', serif; font-size: 0.95rem; font-weight: 700; }
+        .ribbon-meta { font-size: 0.74rem; color: #94a3b8; }
+        .ribbon-btn {
+            background: #0f6e6a; color: #fff; border: none; border-radius: 10px;
+            padding: 8px 14px; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; gap: 4px;
+        }
+
+        /* Bottom Nav */
+        .bottom-nav-bar {
+            background: #ffffff;
+            border-top: 1px solid rgba(15, 23, 42, 0.08);
+            display: flex; justify-content: space-around; padding: 10px 0 24px 0;
+        }
+        .nav-link {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            font-size: 0.72rem; font-weight: 600; color: #64748b; text-decoration: none;
+        }
+        .nav-link.active { color: #0f6e6a; font-weight: 700; }
+
+        /* Cluster Bubble */
+        .hrn-cluster div {
+            background: rgba(255,253,249,0.125);
+            border: 2px solid rgba(120,108,88,0.52);
+            color: #16233d; border-radius: 50%; text-align: center;
+            font-weight: 800; font-size: 0.74rem;
+            box-shadow: 0 2px 8px rgba(22,35,61,0.18);
+        }
+    </style>
+</head>
+<body>
+
+<div class="phone-frame">
+    <div id="map"></div>
+
+    <!-- Top Ambient Weather Warning -->
+    <div class="top-ambient">
+        <div class="weather-pill">
+            <div class="warning-dot"></div>
+            <span>Excessive Heat Warning · 114°F at 3:30 PM</span>
+        </div>
+    </div>
+
+    <!-- Left Controls (Thumb reach) -->
+    <div class="left-controls">
+        <div class="vertical-capsule">
+            <button class="capsule-btn" onclick="map.zoomIn()">+</button>
+            <div class="capsule-divider"></div>
+            <button class="capsule-btn" onclick="map.zoomOut()">−</button>
+        </div>
+    </div>
+
+    <!-- Right Locate Button -->
+    <div class="right-locate">
+        <button class="locate-fab" title="Current Location">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polygon points="12 8 16 16 12 14 8 16 12 8"></polygon>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Bottom Thumb Area -->
+    <div class="thumb-dock-area">
+        <!-- Floating Action Rail -->
+        <div class="floating-action-rail">
+            <button class="btn-search-icon" title="Search">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </button>
+            <button class="btn-main-filter">
+                <div class="bmf-left">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                    </svg>
+                    <span>Filters</span>
+                </div>
+                <span class="bmf-badge">3 Active</span>
+            </button>
+            <div class="toggle-open-pill">
+                <div class="live-dot"></div>
+                <span>Open Now</span>
+            </div>
+        </div>
+
+        <!-- Peek Ribbon -->
+        <div class="peek-ribbon">
+            <div class="ribbon-info">
+                <span class="ribbon-label">Closest Active Respite</span>
+                <div class="ribbon-name">Grace Lutheran Church</div>
+                <div class="ribbon-meta">0.3 mi · 6 min walk · Open until 8 PM</div>
+            </div>
+            <button class="ribbon-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+                </svg>
+                Go
+            </button>
+        </div>
+
+        <!-- Bottom Nav -->
+        <nav class="bottom-nav-bar">
+            <div class="nav-link active">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                <span>Relief Map</span>
+            </div>
+            <div class="nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                <span>Vitals Scan</span>
+            </div>
+            <div class="nav-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path><path d="M6 6h10"></path><path d="M6 10h10"></path></svg>
+                <span>Protocols</span>
+            </div>
+        </nav>
+    </div>
+</div>
+
+<script>
+    const map = L.map('map', {
+        center: [33.4484, -112.0740],
+        zoom: 14.5,
+        zoomControl: false,
+        attributionControl: false
+    });
+
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 16, minZoom: 9
+    }).addTo(map);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 16, minZoom: 9
+    }).addTo(map);
+
+    map.getPane('tilePane').style.filter = 'hue-rotate(195deg) saturate(0.55) brightness(0.97) contrast(1.04)';
+
+    function makePin(col, iconSvg) {
+        const shape = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 36 44">
+            <path d="M18 1 C9.163 1 2 8.163 2 17 C2 26.5 10 35 18 43 C26 35 34 26.5 34 17 C34 8.163 26.837 1 18 1Z"
+                  fill="${col}" stroke="rgba(0,0,0,0.12)" stroke-width="0.8"/>
+            <circle cx="18" cy="16" r="10" fill="white"/>
+            <g transform="translate(18,16)">${iconSvg}</g>
+        </svg>`;
+        return L.divIcon({
+            className: 'hrn-pin', iconSize: [36, 44], iconAnchor: [18, 44],
+            html: `<div style="width:36px;height:44px;filter:drop-shadow(0 3px 6px rgba(0,0,0,0.28))">${shape}</div>`
+        });
+    }
+
+    const icons = {
+        cool: '<path d="M0 -5.6V5.6M-4.8 -2.8L4.8 2.8M-4.8 2.8L4.8 -2.8" fill="none" stroke="#64b5f6" stroke-width="1.6" stroke-linecap="round"/>',
+        hydr: '<path d="M0 -5.4C3.6 -1.5 4.7 0.7 4.7 2.4A4.7 4.7 0 0 1 -4.7 2.4C-4.7 0.7 -3.6 -1.5 0 -5.4Z" fill="none" stroke="#0288d1" stroke-width="1.6" stroke-linejoin="round"/>',
+        resp: '<path d="M-5.2 2.4V-1.4A1.8 1.8 0 0 1 -3.4 -3.2H3.4A1.8 1.8 0 0 1 5.2 -1.4V2.4M-5.2 2.4H5.2M-5.2 2.4V4M5.2 2.4V4" fill="none" stroke="#e53935" stroke-width="1.5" stroke-linecap="round"/>',
+        coll: '<path d="M-4.6 -2.2H4.6V4.4H-4.6ZM-4.6 -2.2L-3 -4.6H3L4.6 -2.2M0 -2.2V4.4" fill="none" stroke="#2e7d32" stroke-width="1.4" stroke-linecap="round"/>'
+    };
+
+    L.marker([33.4475, -112.0735], { icon: makePin('#64b5f6', icons.cool) }).addTo(map);
+    L.marker([33.4430, -112.0810], { icon: makePin('#e53935', icons.resp) }).addTo(map);
+    L.marker([33.4520, -112.0680], { icon: makePin('#0288d1', icons.hydr) }).addTo(map);
+    L.marker([33.4560, -112.0790], { icon: makePin('#2e7d32', icons.coll) }).addTo(map);
+
+    const clusterDiv = L.divIcon({
+        className: 'hrn-cluster', iconSize: [36, 36],
+        html: '<div style="width:36px;height:36px;line-height:36px;">14</div>'
+    });
+    L.marker([33.4410, -112.0620], { icon: clusterDiv }).addTo(map);
+</script>
+</body>
+</html>

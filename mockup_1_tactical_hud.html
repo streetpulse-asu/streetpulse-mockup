@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>StreetPulse Mockup 1: Tactical HUD</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,500;0,7..72,700;1,7..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/tokens.css?v=v17">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body {
+            background: #0f172a;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #16233d;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh;
+        }
+        .phone-frame {
+            width: 412px; height: 890px;
+            background: #fffdf9;
+            position: relative; overflow: hidden;
+            display: flex; flex-direction: column;
+            border-radius: 40px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4), 0 0 0 10px #1e293b;
+        }
+        #map { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
+
+        /* Top HUD Bar */
+        .top-hud {
+            position: absolute; top: 16px; left: 14px; right: 14px;
+            z-index: 800; display: flex; flex-direction: column; gap: 8px;
+        }
+        .search-pill-row {
+            display: flex; align-items: center; gap: 8px;
+        }
+        .search-pill {
+            flex: 1; height: 50px;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            border-radius: 25px;
+            display: flex; align-items: center; padding: 0 14px; gap: 10px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+            backdrop-filter: blur(8px);
+        }
+        .search-pill img { width: 22px; height: 22px; }
+        .search-pill input {
+            border: none; outline: none; background: transparent;
+            font-family: inherit; font-size: 0.88rem; color: #16233d; font-weight: 500;
+            width: 100%;
+        }
+        .search-pill input::placeholder { color: #64748b; }
+        
+        .filter-fab {
+            width: 50px; height: 50px; flex-shrink: 0;
+            background: #0f6e6a; color: #fff;
+            border: none; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 14px rgba(15, 110, 106, 0.35);
+            cursor: pointer; position: relative;
+        }
+        .filter-fab svg { width: 20px; height: 20px; stroke: #fff; }
+        .filter-badge {
+            position: absolute; top: -3px; right: -3px;
+            background: #e53935; color: #fff; font-size: 0.65rem; font-weight: 800;
+            width: 18px; height: 18px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid #fff;
+        }
+
+        /* Location Status Chip */
+        .location-chip {
+            align-self: flex-start;
+            background: rgba(22, 35, 61, 0.9);
+            color: #f8fafc;
+            padding: 5px 12px; border-radius: 20px;
+            font-size: 0.72rem; font-weight: 600;
+            display: flex; align-items: center; gap: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            backdrop-filter: blur(6px);
+        }
+        .gps-pulse {
+            width: 7px; height: 7px; border-radius: 50%; background: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.35);
+        }
+
+        /* Right-Side Map Action Stack */
+        .map-actions-stack {
+            position: absolute; right: 14px; top: 130px; z-index: 800;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .zoom-capsule {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            border-radius: 24px; overflow: hidden;
+            display: flex; flex-direction: column;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+        }
+        .zoom-btn {
+            width: 44px; height: 44px; background: none; border: none;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; font-weight: 600; color: #16233d;
+            cursor: pointer; transition: background 0.15s;
+        }
+        .zoom-btn:active { background: #f1f5f9; }
+        .zoom-divider { height: 1px; background: rgba(15, 23, 42, 0.08); }
+
+        .locate-btn {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+            color: #2563eb; cursor: pointer;
+        }
+
+        /* Bottom Peek Card */
+        .bottom-area {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            z-index: 900; display: flex; flex-direction: column;
+        }
+        .quick-route-card {
+            margin: 0 14px 12px 14px;
+            background: #ffffff;
+            border: 1px solid rgba(15, 23, 42, 0.1);
+            border-radius: 18px; padding: 14px 16px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .qrc-top {
+            display: flex; justify-content: space-between; align-items: flex-start;
+        }
+        .qrc-tag {
+            font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.6px; color: #0f6e6a; background: #e6f4f3;
+            padding: 3px 8px; border-radius: 6px;
+        }
+        .qrc-title {
+            font-family: 'Literata', serif; font-size: 1.05rem; font-weight: 700;
+            color: #16233d; margin-top: 4px;
+        }
+        .qrc-meta {
+            font-size: 0.78rem; color: #64748b; margin-top: 2px;
+        }
+        .qrc-actions {
+            display: flex; gap: 8px;
+        }
+        .btn-walk {
+            flex: 1; height: 38px; background: #0f6e6a; color: #fff;
+            border: none; border-radius: 10px; font-weight: 700; font-size: 0.82rem;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            cursor: pointer;
+        }
+        .btn-details {
+            width: 80px; height: 38px; background: #f1f5f9; color: #16233d;
+            border: 1px solid #e2e8f0; border-radius: 10px; font-weight: 700;
+            font-size: 0.82rem; cursor: pointer;
+        }
+
+        /* Bottom Navigation Bar */
+        .bottom-nav {
+            background: #ffffff;
+            border-top: 1px solid rgba(15, 23, 42, 0.08);
+            display: flex; justify-content: space-around; padding: 10px 0 24px 0;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            color: #64748b; font-size: 0.72rem; font-weight: 600; text-decoration: none;
+            cursor: pointer;
+        }
+        .nav-item.active { color: #0f6e6a; font-weight: 700; }
+        .nav-item svg { width: 22px; height: 22px; }
+
+        /* Cluster Bubble */
+        .hrn-cluster div {
+            background: rgba(255,253,249,0.125);
+            border: 2px solid rgba(120,108,88,0.52);
+            color: #16233d; border-radius: 50%; text-align: center;
+            font-weight: 800; font-size: 0.74rem;
+            box-shadow: 0 2px 8px rgba(22,35,61,0.18);
+        }
+    </style>
+</head>
+<body>
+
+<div class="phone-frame">
+    <div id="map"></div>
+
+    <!-- Top HUD -->
+    <div class="top-hud">
+        <div class="search-pill-row">
+            <div class="search-pill">
+                <img src="assets/streetpulse_mark.svg" alt="StreetPulse">
+                <input type="text" placeholder="Search 263 heat relief sites..." readonly value="Central Phoenix">
+            </div>
+            <button class="filter-fab" title="Filter Resources">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="4" y1="21" x2="4" y2="14"></line>
+                    <line x1="4" y1="10" x2="4" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12" y2="3"></line>
+                    <line x1="20" y1="21" x2="20" y2="16"></line>
+                    <line x1="20" y1="12" x2="20" y2="3"></line>
+                    <line x1="1" y1="14" x2="7" y2="14"></line>
+                    <line x1="9" y1="8" x2="15" y2="8"></line>
+                    <line x1="17" y1="16" x2="23" y2="16"></line>
+                </svg>
+                <div class="filter-badge">3</div>
+            </button>
+        </div>
+        <div class="location-chip">
+            <div class="gps-pulse"></div>
+            <span>GPS Tracking · Central Ave & Van Buren</span>
+        </div>
+    </div>
+
+    <!-- Right Map Actions Stack -->
+    <div class="map-actions-stack">
+        <div class="zoom-capsule">
+            <button class="zoom-btn" onclick="map.zoomIn()">+</button>
+            <div class="zoom-divider"></div>
+            <button class="zoom-btn" onclick="map.zoomOut()">−</button>
+        </div>
+        <button class="locate-btn" title="Recenter on Me">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Bottom Area -->
+    <div class="bottom-area">
+        <!-- Quick Route Card -->
+        <div class="quick-route-card">
+            <div class="qrc-top">
+                <div>
+                    <span class="qrc-tag">Closest Cooling Center</span>
+                    <div class="qrc-title">Central Arizona Shelter (CASS)</div>
+                    <div class="qrc-meta">230 S. 12th Ave · Open until 7:00 PM · Pets Welcome</div>
+                </div>
+            </div>
+            <div class="qrc-actions">
+                <button class="btn-walk">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <circle cx="13" cy="4" r="2"/><path d="m9 21 1.5-6.5L8 12l1-5 3.5 2 3 1.5"/><path d="M14.5 14.5 17 21"/>
+                    </svg>
+                    Start 4 min walk (0.2 mi)
+                </button>
+                <button class="btn-details">Details</button>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <div class="nav-item active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                    <line x1="8" y1="2" x2="8" y2="18"></line>
+                    <line x1="16" y1="6" x2="16" y2="22"></line>
+                </svg>
+                <span>Relief Map</span>
+            </div>
+            <div class="nav-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                </svg>
+                <span>Vitals Scan</span>
+            </div>
+            <div class="nav-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
+                    <path d="M6 6h10"></path><path d="M6 10h10"></path>
+                </svg>
+                <span>Field Guide</span>
+            </div>
+        </nav>
+    </div>
+</div>
+
+<script src="js/data.js?v=v17"></script>
+<script>
+    const map = L.map('map', {
+        center: [33.4484, -112.0740],
+        zoom: 14.5,
+        zoomControl: false,
+        attributionControl: false
+    });
+
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 16, minZoom: 9
+    }).addTo(map);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 16, minZoom: 9
+    }).addTo(map);
+
+    map.getPane('tilePane').style.filter = 'hue-rotate(195deg) saturate(0.55) brightness(0.97) contrast(1.04)';
+
+    function makePin(col, iconSvg) {
+        const shape = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 36 44">
+            <path d="M18 1 C9.163 1 2 8.163 2 17 C2 26.5 10 35 18 43 C26 35 34 26.5 34 17 C34 8.163 26.837 1 18 1Z"
+                  fill="${col}" stroke="rgba(0,0,0,0.12)" stroke-width="0.8"/>
+            <circle cx="18" cy="16" r="10" fill="white"/>
+            <g transform="translate(18,16)">${iconSvg}</g>
+        </svg>`;
+        return L.divIcon({
+            className: 'hrn-pin', iconSize: [36, 44], iconAnchor: [18, 44],
+            html: `<div style="width:36px;height:44px;filter:drop-shadow(0 3px 6px rgba(0,0,0,0.28))">${shape}</div>`
+        });
+    }
+
+    const icons = {
+        cool: '<path d="M0 -5.6V5.6M-4.8 -2.8L4.8 2.8M-4.8 2.8L4.8 -2.8" fill="none" stroke="#64b5f6" stroke-width="1.6" stroke-linecap="round"/>',
+        hydr: '<path d="M0 -5.4C3.6 -1.5 4.7 0.7 4.7 2.4A4.7 4.7 0 0 1 -4.7 2.4C-4.7 0.7 -3.6 -1.5 0 -5.4Z" fill="none" stroke="#0288d1" stroke-width="1.6" stroke-linejoin="round"/>',
+        resp: '<path d="M-5.2 2.4V-1.4A1.8 1.8 0 0 1 -3.4 -3.2H3.4A1.8 1.8 0 0 1 5.2 -1.4V2.4M-5.2 2.4H5.2M-5.2 2.4V4M5.2 2.4V4" fill="none" stroke="#e53935" stroke-width="1.5" stroke-linecap="round"/>',
+        coll: '<path d="M-4.6 -2.2H4.6V4.4H-4.6ZM-4.6 -2.2L-3 -4.6H3L4.6 -2.2M0 -2.2V4.4" fill="none" stroke="#2e7d32" stroke-width="1.4" stroke-linecap="round"/>'
+    };
+
+    // Add sample pins around downtown Phoenix
+    L.marker([33.4475, -112.0735], { icon: makePin('#64b5f6', icons.cool) }).addTo(map);
+    L.marker([33.4430, -112.0810], { icon: makePin('#e53935', icons.resp) }).addTo(map);
+    L.marker([33.4520, -112.0680], { icon: makePin('#0288d1', icons.hydr) }).addTo(map);
+    L.marker([33.4560, -112.0790], { icon: makePin('#2e7d32', icons.coll) }).addTo(map);
+
+    // Sample cluster bubble
+    const clusterDiv = L.divIcon({
+        className: 'hrn-cluster', iconSize: [36, 36],
+        html: '<div style="width:36px;height:36px;line-height:36px;">7</div>'
+    });
+    L.marker([33.4410, -112.0620], { icon: clusterDiv }).addTo(map);
+</script>
+</body>
+</html>

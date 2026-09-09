@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>StreetPulse Mockup 4: Separate Filter Modal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,600;0,7..72,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/tokens.css?v=v17">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body {
+            background: #0f172a;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #16233d;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh;
+        }
+        .phone-frame {
+            width: 412px; height: 890px;
+            background: #fffdf9;
+            position: relative; overflow: hidden;
+            display: flex; flex-direction: column;
+            border-radius: 40px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4), 0 0 0 10px #1e293b;
+        }
+        #map { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; filter: brightness(0.85); }
+
+        /* Dimmed Backdrop */
+        .modal-overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex; align-items: flex-end; justify-content: center;
+        }
+
+        /* Filter Dialog Sheet */
+        .filter-dialog {
+            width: 100%; max-height: 84%;
+            background: #ffffff;
+            border-radius: 28px 28px 0 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 -12px 36px rgba(15, 23, 42, 0.25);
+            display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+        .dialog-grip {
+            width: 38px; height: 4px; border-radius: 2px;
+            background: #cbd5e1; margin: 12px auto 6px auto;
+        }
+        .dialog-header {
+            padding: 12px 20px 14px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .dialog-title {
+            font-family: 'Literata', serif; font-size: 1.2rem; font-weight: 700; color: #16233d;
+        }
+        .dialog-reset {
+            font-size: 0.78rem; font-weight: 700; color: #0f6e6a;
+            background: none; border: none; cursor: pointer;
+        }
+
+        .dialog-body {
+            padding: 16px 20px;
+            overflow-y: auto; display: flex; flex-direction: column; gap: 18px;
+        }
+        .section-label {
+            font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.8px; color: #64748b; margin-bottom: 8px;
+        }
+
+        /* Categories Check Grid */
+        .cat-grid {
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .cat-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 14px; border-radius: 12px;
+            border: 1.5px solid #e2e8f0; background: #fff;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .cat-row.selected {
+            border-color: #0f6e6a; background: #f0fdfa;
+        }
+        .cat-left {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.86rem; font-weight: 700; color: #16233d;
+        }
+        .cat-dot {
+            width: 12px; height: 12px; border-radius: 50%;
+        }
+        .cat-badge-count {
+            font-size: 0.72rem; color: #64748b; font-weight: 600;
+        }
+
+        /* Services Chips */
+        .chips-cloud {
+            display: flex; flex-wrap: wrap; gap: 8px;
+        }
+        .service-chip {
+            padding: 6px 12px; border-radius: 18px;
+            border: 1px solid #e2e8f0; background: #f8fafc;
+            font-size: 0.76rem; font-weight: 600; color: #334155;
+            cursor: pointer; display: flex; align-items: center; gap: 6px;
+        }
+        .service-chip.selected {
+            background: #0f6e6a; color: #fff; border-color: #0f6e6a;
+        }
+
+        /* Quick Switch */
+        .switch-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 14px; background: #f8fafc; border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        .switch-label { font-size: 0.84rem; font-weight: 700; color: #16233d; }
+        .toggle-switch {
+            width: 44px; height: 26px; border-radius: 13px;
+            background: #22c55e; position: relative; cursor: pointer;
+        }
+        .toggle-knob {
+            width: 20px; height: 20px; border-radius: 50%; background: #fff;
+            position: absolute; top: 3px; right: 3px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        /* Dialog Footer */
+        .dialog-footer {
+            padding: 14px 20px 24px 20px;
+            border-top: 1px solid #f1f5f9; background: #fff;
+        }
+        .btn-apply {
+            width: 100%; height: 50px; background: #0f6e6a; color: #fff;
+            border: none; border-radius: 14px;
+            font-size: 0.92rem; font-weight: 700; letter-spacing: -0.01em;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 4px 14px rgba(15, 110, 106, 0.3);
+        }
+
+        /* Cluster Bubble */
+        .hrn-cluster div {
+            background: rgba(255,253,249,0.125);
+            border: 2px solid rgba(120,108,88,0.52);
+            color: #16233d; border-radius: 50%; text-align: center;
+            font-weight: 800; font-size: 0.74rem;
+            box-shadow: 0 2px 8px rgba(22,35,61,0.18);
+        }
+    </style>
+</head>
+<body>
+
+<div class="phone-frame">
+    <div id="map"></div>
+
+    <!-- Modal Overlay -->
+    <div class="modal-overlay">
+        <div class="filter-dialog">
+            <div class="dialog-grip"></div>
+            <div class="dialog-header">
+                <div class="dialog-title">Filter Resources</div>
+                <button class="dialog-reset">Reset all</button>
+            </div>
+
+            <div class="dialog-body">
+                <!-- Section 1: Categories -->
+                <div>
+                    <div class="section-label">Resource Categories</div>
+                    <div class="cat-grid">
+                        <div class="cat-row selected">
+                            <div class="cat-left">
+                                <div class="cat-dot" style="background:#64b5f6;"></div>
+                                <span>Cooling Center</span>
+                            </div>
+                            <span class="cat-badge-count">92 sites</span>
+                        </div>
+                        <div class="cat-row selected">
+                            <div class="cat-left">
+                                <div class="cat-dot" style="background:#0288d1;"></div>
+                                <span>Hydration Station</span>
+                            </div>
+                            <span class="cat-badge-count">114 sites</span>
+                        </div>
+                        <div class="cat-row selected">
+                            <div class="cat-left">
+                                <div class="cat-dot" style="background:#e53935;"></div>
+                                <span>Respite Center</span>
+                            </div>
+                            <span class="cat-badge-count">38 sites</span>
+                        </div>
+                        <div class="cat-row">
+                            <div class="cat-left">
+                                <div class="cat-dot" style="background:#2e7d32;"></div>
+                                <span style="color:#64748b;">Donation Drop-off</span>
+                            </div>
+                            <span class="cat-badge-count">19 sites</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Services -->
+                <div>
+                    <div class="section-label">Key Services & Accessibility</div>
+                    <div class="chips-cloud">
+                        <div class="service-chip selected">✓ Food & Meals</div>
+                        <div class="service-chip selected">✓ Showers</div>
+                        <div class="service-chip">Wheelchair ADA</div>
+                        <div class="service-chip">Pets Welcome</div>
+                        <div class="service-chip">Medical Triage</div>
+                        <div class="service-chip">Hygiene Kits</div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Open Now -->
+                <div class="switch-row">
+                    <div>
+                        <div class="switch-label">Open Right Now Only</div>
+                        <div style="font-size:0.72rem; color:#64748b;">Hide sites currently closed</div>
+                    </div>
+                    <div class="toggle-switch">
+                        <div class="toggle-knob"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dialog-footer">
+                <button class="btn-apply">
+                    <span>Show 42 Matching Sites</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const map = L.map('map', {
+        center: [33.4484, -112.0740],
+        zoom: 14,
+        zoomControl: false,
+        attributionControl: false
+    });
+
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 16, minZoom: 9
+    }).addTo(map);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 16, minZoom: 9
+    }).addTo(map);
+
+    map.getPane('tilePane').style.filter = 'hue-rotate(195deg) saturate(0.55) brightness(0.97) contrast(1.04)';
+
+    function makePin(col, iconSvg) {
+        const shape = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 36 44">
+            <path d="M18 1 C9.163 1 2 8.163 2 17 C2 26.5 10 35 18 43 C26 35 34 26.5 34 17 C34 8.163 26.837 1 18 1Z"
+                  fill="${col}" stroke="rgba(0,0,0,0.12)" stroke-width="0.8"/>
+            <circle cx="18" cy="16" r="10" fill="white"/>
+            <g transform="translate(18,16)">${iconSvg}</g>
+        </svg>`;
+        return L.divIcon({
+            className: 'hrn-pin', iconSize: [36, 44], iconAnchor: [18, 44],
+            html: `<div style="width:36px;height:44px;filter:drop-shadow(0 3px 6px rgba(0,0,0,0.28))">${shape}</div>`
+        });
+    }
+
+    const icons = {
+        cool: '<path d="M0 -5.6V5.6M-4.8 -2.8L4.8 2.8M-4.8 2.8L4.8 -2.8" fill="none" stroke="#64b5f6" stroke-width="1.6" stroke-linecap="round"/>',
+        hydr: '<path d="M0 -5.4C3.6 -1.5 4.7 0.7 4.7 2.4A4.7 4.7 0 0 1 -4.7 2.4C-4.7 0.7 -3.6 -1.5 0 -5.4Z" fill="none" stroke="#0288d1" stroke-width="1.6" stroke-linejoin="round"/>',
+        resp: '<path d="M-5.2 2.4V-1.4A1.8 1.8 0 0 1 -3.4 -3.2H3.4A1.8 1.8 0 0 1 5.2 -1.4V2.4M-5.2 2.4H5.2M-5.2 2.4V4M5.2 2.4V4" fill="none" stroke="#e53935" stroke-width="1.5" stroke-linecap="round"/>',
+        coll: '<path d="M-4.6 -2.2H4.6V4.4H-4.6ZM-4.6 -2.2L-3 -4.6H3L4.6 -2.2M0 -2.2V4.4" fill="none" stroke="#2e7d32" stroke-width="1.4" stroke-linecap="round"/>'
+    };
+
+    L.marker([33.4475, -112.0735], { icon: makePin('#64b5f6', icons.cool) }).addTo(map);
+    L.marker([33.4430, -112.0810], { icon: makePin('#e53935', icons.resp) }).addTo(map);
+    L.marker([33.4520, -112.0680], { icon: makePin('#0288d1', icons.hydr) }).addTo(map);
+
+    const clusterDiv = L.divIcon({
+        className: 'hrn-cluster', iconSize: [36, 36],
+        html: '<div style="width:36px;height:36px;line-height:36px;">18</div>'
+    });
+    L.marker([33.4550, -112.0620], { icon: clusterDiv }).addTo(map);
+</script>
+</body>
+</html>
