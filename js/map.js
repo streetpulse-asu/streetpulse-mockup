@@ -250,6 +250,12 @@ function initMap() {
     maxZoom: 16, minZoom: 9
   }).addTo(MAP);
 
+  // Tint the basemap: cool blue-gray so roads/blocks are visible without being garish.
+  // hue-rotate pushes warm grays toward slate-blue; saturate/brightness keep it subtle.
+  MAP.getPane('tilePane').style.filter =
+    'hue-rotate(195deg) saturate(0.55) brightness(0.97) contrast(1.04)';
+
+
   clusterGroup = L.markerClusterGroup({
     maxClusterRadius: 60, showCoverageOnHover: false, spiderfyDistanceMultiplier: 1.5,
     disableClusteringAtZoom: 14,
