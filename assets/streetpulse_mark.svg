@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Pin Outline -->
+  <path d="M 256 50
+           C 342 50, 410 118, 410 204
+           C 410 256, 372 314, 320 362
+           C 292 388, 269 412, 256 426
+           C 243 412, 220 388, 192 362
+           C 140 314, 102 256, 102 204
+           C 102 118, 170 50, 256 50 Z"
+        fill="none" stroke="#2563eb" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Heartbeat ECG -->
+  <path d="M 158 214
+           L 198 214
+           L 229 114
+           L 252 308
+           L 279 162
+           L 310 214
+           L 354 214"
+        fill="none" stroke="#2563eb" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

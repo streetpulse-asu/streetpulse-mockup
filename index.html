@@ -12,16 +12,16 @@
     <link rel="icon" type="image/png" sizes="192x192" href="assets/icon.png">
     <link rel="manifest" href="manifest.webmanifest">
     <title>StreetPulse Outreach Companion</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Literata:opsz,wght@7..72,600;7..72,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Work+Sans:wght@500;600;700&display=swap" rel="stylesheet">
 
     <!-- Design tokens first, then base/shell, then shared components, then
          per-screen styles. Change a color or spacing value once in tokens.css
          and it updates everywhere. -->
-    <link rel="stylesheet" href="css/tokens.css">
-    <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/map.css">
-    <link rel="stylesheet" href="css/scanner.css">
+    <link rel="stylesheet" href="css/tokens.css?v=v4">
+    <link rel="stylesheet" href="css/base.css?v=v4">
+    <link rel="stylesheet" href="css/components.css?v=v4">
+    <link rel="stylesheet" href="css/map.css?v=v4">
+    <link rel="stylesheet" href="css/scanner.css?v=v4">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
@@ -33,9 +33,12 @@
 
     <header class="app-header">
         <div class="app-header-row">
-            <div class="app-title">
-                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                StreetPulse
+            <div class="brand-header">
+                <img src="assets/streetpulse_mark.svg" alt="StreetPulse" class="brand-mark">
+                <div class="brand-text-block">
+                    <div class="brand-name"><span class="name-street">Street</span><span class="name-pulse">Pulse</span></div>
+                    <div class="brand-subtitle">Outreach Triage &amp; Telemetry</div>
+                </div>
             </div>
             <div class="mode-selector">
                 <div class="bt-status" onclick="toggleDropdown()">
@@ -54,7 +57,6 @@
                 </div>
             </div>
         </div>
-        <div class="app-tagline">Street Outreach Triage</div>
     </header>
 
     <!-- ============ TAB: MAP ============ -->
@@ -481,7 +483,9 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('service-worker.js').catch(() => {});
+          navigator.serviceWorker.register('service-worker.js').then(reg => {
+            reg.update();
+          }).catch(() => {});
         });
       }
     </script>

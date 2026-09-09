@@ -5,13 +5,15 @@
    tiles/scripts are NOT cached here, so the map tiles need a connection;
    everything else (screens, data, vitals simulation) works offline. */
 
-const CACHE_NAME = 'streetpulse-shell-v3';
+const CACHE_NAME = 'streetpulse-shell-v4';
 
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './assets/icon.png',
+  './assets/streetpulse_mark.svg',
+  './assets/streetpulse_logo_horizontal.svg',
   './css/tokens.css',
   './css/base.css',
   './css/components.css',
@@ -46,6 +48,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
+    fetch(event.request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+        }
+        return networkResponse;
+      })
+      .catch(() => caches.match(event.request))
   );
 });

@@ -1,16 +1,13 @@
         /* ---------- MAP ---------- */
-        .map-wrap { position: relative; flex: 1; min-height: 0; overflow: hidden; background: #efe9dc; }
-        #leaf-map { position: absolute; inset: 0; background: #f2ece0; }
+        .map-wrap { position: relative; flex: 1; min-height: 0; overflow: hidden; background: #e0e9f8; }
+        #leaf-map { position: absolute; inset: 0; background: #e0e9f8; }
 
-        /* Real OSM street data. CARTO Voyager already reads warm cream, so the
-           tint here is deliberately almost nothing — a heavier sepia bleached
-           the road network into the background and cost more than it bought.
-           Filtering the tile pane only means pins and labels keep true colour. */
+        /* Crisp Oceanic Blue palette */
         #leaf-map .leaflet-tile-pane {
-            filter: sepia(0.07) saturate(0.94) contrast(1.04);
+            filter: hue-rotate(195deg) saturate(0.9) brightness(1.04) contrast(1.05);
         }
         .leaflet-container {
-            background: #f2ece0;
+            background: #e0e9f8;
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
         .leaflet-bottom.leaflet-right { bottom: 202px; }
