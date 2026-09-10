@@ -289,9 +289,9 @@
 
         /* ==========================================================
            VITALS SCAN — encounter record
-           Live channels read as an instrument (dark board, printed alarm
-           limits); everything recorded reads as a chart (timestamp, source,
-           log). Depth comes from the ground/surface step, not from shadow.
+           Live channels read as an instrument; everything recorded reads as a
+           chart (timestamp, source, log). The screen records and displays —
+           it never interprets a reading or renders a verdict on one.
            ========================================================== */
 
         .scanner-active-container { gap: 0; flex: 1; min-height: 0; }
@@ -313,6 +313,39 @@
         }
         .enc-bar .guide-kebab-btn { align-self: center; flex-shrink: 0; }
 
+        /* ---------- telemetry header row ---------- */
+        .telem-header-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 16px; background: var(--surface);
+            border-bottom: 1px solid var(--border-soft);
+        }
+        .telem-status-label {
+            font-size: 0.68rem; font-weight: 800; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.6px;
+        }
+        .telem-btn-group { display: flex; gap: 6px; align-items: center; }
+        .badge-connected {
+            font-family: inherit; font-size: 0.65rem; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.4px;
+            padding: 4px 8px; border-radius: 2px;
+            background: rgba(22, 163, 74, 0.1); color: #166534;
+            border: 1.5px solid rgba(22, 163, 74, 0.4);
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .btn-telem {
+            font-family: inherit; font-size: 0.65rem; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.4px;
+            padding: 4px 8px; border-radius: 2px;
+            background: var(--surface); color: var(--ink);
+            border: 1.5px solid var(--border-strong); cursor: pointer;
+            display: inline-flex; align-items: center;
+            transition: all 0.15s;
+        }
+        .btn-telem-disconnect:hover, .btn-telem-disconnect:active {
+            background: rgba(185, 28, 28, 0.08); color: #991b1b;
+            border-color: #991b1b;
+        }
+
         /* ---------- the board ---------- */
         .board { background: var(--ink); color: #fff; }
         .chan {
@@ -326,7 +359,6 @@
             font-size: 0.62rem; font-weight: 800; letter-spacing: 1px;
             text-transform: uppercase; color: var(--call-muted);
         }
-        .chan-lim { font-size: 0.58rem; font-weight: 700; color: #6c7c93; letter-spacing: 0.4px; }
         .chan-v { display: flex; align-items: baseline; gap: 5px; grid-column: 1; }
         .chan-n {
             font-family: 'Fraunces', Georgia, serif; font-size: 2.3rem; font-weight: 700;
@@ -341,17 +373,8 @@
             font-size: 0.58rem; font-weight: 700; color: #6c7c93;
             letter-spacing: 0.5px; text-transform: uppercase;
         }
-        .chan-flag {
-            display: none;
-            font-size: 0.55rem; font-weight: 800; letter-spacing: 0.9px;
-            text-transform: uppercase; background: var(--alert-text); color: #fff;
-            padding: 2px 7px; border-radius: 4px;
-        }
         .chan.empty .chan-n { color: #4a5a72; }
         .chan.stale .chan-age { color: #e0a34a; }
-        .chan.alarm { background: #3a1113; }
-        .chan.alarm .chan-n, .chan.alarm .chan-name { color: #fca5a5; }
-        .chan.alarm .chan-flag { display: inline-block; }
 
         .chan-trio { display: grid; grid-template-columns: 1fr 1fr 1fr; }
         .chan-trio .chan {
@@ -379,25 +402,15 @@
         }
 
         /* ---------- actions ----------
-           Capture is routine and filled; escalation is a different species and
-           only takes the alert treatment once a reading has earned it. */
+           Capture is the routine, filled action; telehealth is deliberately a
+           different weight so the two never read as interchangeable. */
         .act { padding: 13px 16px 14px; display: flex; flex-direction: column; gap: 8px; }
         .act-row { display: flex; gap: 8px; }
         .act-capture { flex: 1; margin: 0; }
         .act-manual { flex: 0 0 124px; margin: 0; border: 1px solid var(--border-soft); }
-        .act-reason {
-            margin: 2px 0 0; text-align: center;
-            font-size: 0.6rem; font-weight: 800; letter-spacing: 0.7px;
-            text-transform: uppercase; color: var(--text-muted);
-        }
-        .act-reason[hidden] { display: none; }
         .btn-escalate {
-            margin: 0; background: var(--surface); color: var(--ink-2);
-            border: 1px solid var(--border-soft);
-        }
-        .btn-escalate.urgent {
-            background: var(--alert-bg); color: var(--alert-text);
-            border: 1.5px solid var(--alert-border);
+            margin: 0; background: var(--surface); color: var(--ink);
+            border: 1.5px solid var(--border-strong);
         }
 
         /* ---------- the record ---------- */
@@ -420,4 +433,3 @@
         .log-row:last-child { border-bottom: 0; }
         .log-t { font-size: 0.66rem; font-weight: 800; color: var(--text-muted); }
         .log-d { font-weight: 600; color: var(--ink-2); }
-        .log-row.flag .log-d { color: var(--warning-text); font-weight: 700; }

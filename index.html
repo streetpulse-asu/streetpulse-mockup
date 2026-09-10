@@ -20,11 +20,11 @@
     <!-- Design tokens first, then base/shell, then shared components, then
          per-screen styles. Change a color or spacing value once in tokens.css
          and it updates everywhere. -->
-    <link rel="stylesheet" href="css/tokens.css?v=v30">
-    <link rel="stylesheet" href="css/base.css?v=v30">
-    <link rel="stylesheet" href="css/components.css?v=v30">
-    <link rel="stylesheet" href="css/map.css?v=v30">
-    <link rel="stylesheet" href="css/scanner.css?v=v30">
+    <link rel="stylesheet" href="css/tokens.css?v=v31">
+    <link rel="stylesheet" href="css/base.css?v=v31">
+    <link rel="stylesheet" href="css/components.css?v=v31">
+    <link rel="stylesheet" href="css/map.css?v=v31">
+    <link rel="stylesheet" href="css/scanner.css?v=v31">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
@@ -150,21 +150,31 @@
                 </button>
             </div>
 
-            <!-- Live channels. Alarm limits are printed beside each label, the
-                 way a monitor shows them — a reading means nothing without the
-                 threshold it is being judged against. -->
+            <!-- Live telemetry header with connected indicator and disconnect button -->
+            <div class="telem-header-row">
+                <span class="telem-status-label">Live telemetry</span>
+                <div class="telem-btn-group">
+                    <span class="badge-connected" id="telem-connected-badge" title="Sensor probe connected">
+                        <span class="connected-dot"></span> Connected
+                    </span>
+                    <button class="btn-telem btn-telem-disconnect" onclick="disconnectDevice()" title="Disconnect sensor probe">
+                        Disconnect
+                    </button>
+                </div>
+            </div>
+
+            <!-- Live channels. The board records and displays; it does not
+                 interpret. No thresholds, no flags, no verdict on a reading. -->
             <div class="board">
                 <div class="chan" id="chan-hr">
                     <div class="chan-k">
                         <span class="chan-name">Heart rate</span>
-                        <span class="chan-lim num">50&ndash;140</span>
                     </div>
                     <div class="chan-v">
                         <span class="chan-n num" id="hr-val">&mdash;</span>
                         <span class="chan-u">bpm</span>
                     </div>
                     <div class="chan-meta">
-                        <span class="chan-flag">Out of range</span>
                         <span class="chan-age num" id="hr-age">Not taken</span>
                     </div>
                 </div>
@@ -172,14 +182,12 @@
                 <div class="chan" id="chan-spo2">
                     <div class="chan-k">
                         <span class="chan-name">SpO&#8322;</span>
-                        <span class="chan-lim num">&ge; 93</span>
                     </div>
                     <div class="chan-v">
                         <span class="chan-n num" id="spo2-val">&mdash;</span>
                         <span class="chan-u">%</span>
                     </div>
                     <div class="chan-meta">
-                        <span class="chan-flag">Below limit</span>
                         <span class="chan-age num" id="spo2-age">Not taken</span>
                     </div>
                 </div>
@@ -221,10 +229,9 @@
                         Manual
                     </button>
                 </div>
-                <p class="act-reason" id="act-reason" hidden></p>
                 <button class="btn btn-escalate" id="btn-call-telehealth" onclick="openTelehealthPrompt()">
                     <span class="icon" data-icon="phone" data-size="19"></span>
-                    <span>Escalate to telehealth</span>
+                    <span>Call telehealth</span>
                 </button>
             </div>
 
@@ -259,7 +266,7 @@
             <div class="settings-row">
                 <div>
                     <div class="sr-label">App Shell Offline Cache</div>
-                    <div class="sr-desc">Service worker active · Version v30</div>
+                    <div class="sr-desc">Service worker active · Version v31</div>
                 </div>
                 <span class="status-pill-subtle">Ready</span>
             </div>
@@ -763,11 +770,11 @@
     <!-- Site data + HRN-feed mapping helpers first, then the screens that
          consume them. Order matters here: each file expects the one before
          it to already be loaded. -->
-    <script src="js/icons.js?v=v30"></script>
-    <script src="js/data.js?v=v30"></script>
-    <script src="js/map.js?v=v30"></script>
-    <script src="js/ui.js?v=v30"></script>
-    <script src="js/scanner.js?v=v30"></script>
+    <script src="js/icons.js?v=v31"></script>
+    <script src="js/data.js?v=v31"></script>
+    <script src="js/map.js?v=v31"></script>
+    <script src="js/ui.js?v=v31"></script>
+    <script src="js/scanner.js?v=v31"></script>
 
     <script>
       if ('serviceWorker' in navigator) {

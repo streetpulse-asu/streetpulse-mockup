@@ -23,15 +23,6 @@ const ENCOUNTER = {
   online: false
 };
 
-/* Alarm limits, printed next to each channel. These are the field-guide
-   thresholds the app already triages against, stated openly rather than
-   applied invisibly. */
-const LIMITS = {
-  hr:   { min: 50,  max: 140,   topic: 'pulse', flag: 'Out of range' },
-  spo2: { min: 93,  max: 100,   topic: 'spo2',  flag: 'Below limit'  },
-  temp: { min: 95,  max: 100.4, topic: 'hyper', flag: 'Out of range' }
-};
-
 /* value, when it was taken, and where it came from */
 const VITALS = {
   hr:   { v: null, at: null, src: null },
@@ -63,15 +54,8 @@ function ageLabel(entry) {
 
 function isStale(entry) { return entry.at !== null && minutesSince(entry.at) >= 3; }
 
-function outOfRange(key) {
-  const lim = LIMITS[key], entry = VITALS[key];
-  if (!lim || entry.v === null) return false;
-  const n = parseFloat(entry.v);
-  return !isNaN(n) && (n < lim.min || n > lim.max);
-}
-
-function logEvent(text, flagged) {
-  LOG.unshift({ at: Date.now(), text: text, flag: !!flagged });
+function logEvent(text) {
+  LOG.unshift({ at: Date.now(), text: text });
   renderLog();
 }
 
@@ -79,7 +63,7 @@ function renderLog() {
   const box = document.getElementById('log-rows');
   if (!box) return;
   box.innerHTML = LOG.slice(0, 6).map(e =>
-    '<div class="log-row' + (e.flag ? ' flag' : '') + '">' +
+    '<div class="log-row">' +
       '<span class="log-t num">' + clockOf(e.at) + '</span>' +
       '<span class="log-d">' + e.text + '</span>' +
     '</div>').join('');
@@ -114,31 +98,9 @@ function renderVitals() {
     if (chanEl) {
       chanEl.classList.toggle('empty', entry.v === null);
       chanEl.classList.toggle('stale', isStale(entry));
-      chanEl.classList.toggle('alarm', outOfRange(key));
-      const flagEl = chanEl.querySelector('.chan-flag');
-      if (flagEl && LIMITS[key]) flagEl.innerText = LIMITS[key].flag;
     }
   });
-  renderEscalation();
   renderSync();
-}
-
-/* Escalation only takes the alert treatment once a reading has earned it, and
-   says which one — a permanently red button stops meaning anything. */
-function renderEscalation() {
-  const btn = document.getElementById('btn-call-telehealth');
-  const reason = document.getElementById('act-reason');
-  if (!btn || !reason) return;
-
-  const breached = Object.keys(LIMITS).filter(outOfRange);
-  btn.classList.toggle('urgent', breached.length > 0);
-  if (!breached.length) { reason.hidden = true; return; }
-
-  const NAMES = { hr: 'HR', spo2: 'SpO₂', temp: 'Temp' };
-  reason.hidden = false;
-  reason.innerText = breached.map(k => NAMES[k] + ' ' + VITALS[k].v).join(' · ') +
-    (breached.length > 1 ? ' — out of range' : ' — out of range');
-  if (breached.length) currentAlertTopic = LIMITS[breached[0]].topic;
 }
 
 function renderSync() {
@@ -179,8 +141,6 @@ function startEncounter() {
 /* ==========================================================
    CLINICAL FIELD GUIDE CONTROLLER & DEEP-LINKING
    ========================================================== */
-let currentAlertTopic = 'spo2';
-
 function openFieldGuide(topic) {
   const modal = document.getElementById('guide-modal');
   if (!modal) return;
@@ -250,18 +210,9 @@ function triggerSilentHaptic() {
   } catch (e) {}
 }
 
-function evaluateVitals(temp, spo2, hr) {
-  const t = parseFloat(temp), s = parseInt(spo2), h = parseInt(hr);
-
-  if (!isNaN(t) && (t >= 104.0 || t >= 100.4)) currentAlertTopic = 'hyper';
-  else if (!isNaN(t) && t < 95.0 && t > 0)     currentAlertTopic = 'hypo';
-  else if (!isNaN(s) && s < 93)                currentAlertTopic = 'spo2';
-  else if (!isNaN(h) && (h > 140 || h < 50))   currentAlertTopic = 'pulse';
-  else if (!isNaN(s) && s < 95)                currentAlertTopic = 'spo2';
-
-  triggerSilentHaptic();
-}
-
+/* Readings are simulated for the mockup. The app records and displays them —
+   it does not interpret them, flag them, or decide what they mean. Judgement
+   about a reading belongs to the worker on scene and the physician. */
 function simulateNewReading() {
   const hr = Math.floor(Math.random() * (115 - 72 + 1)) + 72;
   const spo2 = Math.floor(Math.random() * (100 - 88 + 1)) + 88;
@@ -269,17 +220,9 @@ function simulateNewReading() {
   recordVital('hr', hr, 'probe');
   recordVital('spo2', spo2, 'probe');
   renderVitals();
-
-  const breached = ['hr', 'spo2'].filter(outOfRange);
   logEvent('HR ' + hr + ', SpO₂ ' + spo2 + ' captured from probe');
-  breached.forEach(k => {
-    const lim = LIMITS[k];
-    logEvent((k === 'spo2' ? 'SpO₂' : 'HR') + ' ' + VITALS[k].v + ' crossed ' +
-             (parseFloat(VITALS[k].v) < lim.min ? 'below ' + lim.min : 'above ' + lim.max) +
-             ' — flagged', true);
-  });
 
-  evaluateVitals(VITALS.temp.v, spo2, hr);
+  triggerSilentHaptic();
   syncTelehealthVitals();
 }
 
@@ -300,8 +243,8 @@ function closeManualEntry() { document.getElementById('manual-modal').classList.
 /* ---------- Manual entry validation ----------
    Physiologic bounds, not clinical thresholds: they only reject values a
    worker could not have measured (a typo'd SpO2 of 900, a transposed HR).
-   Judgement about whether a real reading is concerning stays in
-   evaluateVitals(). Mirrors the min/max on the inputs so keyboard entry and
+   Nothing here interprets a reading: a value inside these bounds is recorded
+   exactly as given. Mirrors the min/max on the inputs so keyboard entry and
    paste are both covered. */
 const MANUAL_FIELDS = [
   { id: 'manual-bp-sys', label: 'Systolic BP', min: 40,  max: 300, required: false, pairs: 'manual-bp-dia' },
@@ -377,7 +320,6 @@ function saveManualEntry() {
   renderVitals();
   if (entered.length) logEvent(entered.join(', ') + ' entered manually by ' + ENCOUNTER.worker);
 
-  evaluateVitals(VITALS.temp.v, VITALS.spo2.v, VITALS.hr.v);
   syncTelehealthVitals();
   closeManualEntry();
 
