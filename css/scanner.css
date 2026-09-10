@@ -3,59 +3,36 @@
             font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px;
             margin-top: 6px; color: var(--accent-deep); display: inline-flex; align-items: center; gap: 4px;
         }
-        .status-panel.warning .status-tap-cta { color: var(--warning-text); }
-        .status-panel.alert .status-tap-cta { color: var(--alert-text); font-weight: 800; }
 
         /* ---------- PROMINENT TAP FOR MORE INFORMATION BUTTON ---------- */
         .btn-more-info {
             display: none;
             width: 100%;
-            background: linear-gradient(135deg, #b5502f 0%, #8c2e11 100%);
+            background: var(--accent);
             color: #ffffff;
-            border: none;
-            border-radius: 20px;
-            padding: 22px 24px;
+            border: 1px solid rgba(15, 110, 106, 0.3);
+            border-radius: 16px;
+            padding: 16px 20px;
             align-items: center;
             justify-content: space-between;
             cursor: pointer;
-            box-shadow: 0 8px 24px -4px rgba(181, 80, 47, 0.35), 0 2px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 14px rgba(15, 110, 106, 0.2);
             transition: all 0.2s ease;
             box-sizing: border-box;
             margin-top: 4px;
-            transform-origin: center center;
         }
         .btn-more-info:active {
             transform: scale(0.985);
-            box-shadow: 0 4px 12px -2px rgba(181, 80, 47, 0.25);
         }
         .more-info-title {
-            font-size: 1.15rem;
+            font-size: 0.92rem;
             font-weight: 800;
-            letter-spacing: 0.8px;
+            letter-spacing: 0.6px;
             text-transform: uppercase;
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
-        .btn-more-info.alert-mode,
-        .btn-more-info.warning-mode {
+        .btn-more-info.show {
             display: flex;
-            animation: ctaPulsePop 1.2s cubic-bezier(0.25, 1, 0.5, 1) 3 forwards;
-        }
-        @keyframes ctaPulsePop {
-            0% {
-                transform: scale(1.0);
-                box-shadow: 0 8px 24px -4px rgba(181, 80, 47, 0.4);
-            }
-            40% {
-                transform: scale(1.045) translateY(-2px);
-                box-shadow: 0 20px 42px 6px rgba(181, 80, 47, 0.65), 0 0 24px rgba(220, 38, 38, 0.35);
-            }
-            70% {
-                transform: scale(0.995);
-            }
-            100% {
-                transform: scale(1.0);
-                box-shadow: 0 8px 24px -4px rgba(181, 80, 47, 0.4);
-            }
         }
 
         .guide-modal-card {
@@ -198,24 +175,37 @@
         .vital-card { background-color: var(--surface); border-radius: 14px; padding: 12px; border: 1px solid var(--border-soft); box-shadow: var(--shadow-soft); display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
         .vital-card::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--accent); opacity: 0.55; }
         .vital-card.full-width { grid-column: span 2; }
-        .vital-card.full-width::before { background: var(--alert-text); }
+        .vital-card.full-width::before { background: var(--accent); }
         .vital-label { font-size: 0.66rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; }
         .vital-value-container { display: flex; align-items: baseline; margin-top: 7px; }
         .vital-value { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -0.5px; }
         .vital-unit { font-size: 0.78rem; color: var(--text-muted); margin-left: 5px; font-weight: 600; }
         .vital-bp { font-size: 1.6rem; }
-        .status-panel { background-color: var(--success-bg); border: 1px solid var(--success-border); border-radius: 20px; padding: 20px; display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-soft); transition: all 0.3s ease; }
-        .status-panel.warning { background-color: var(--warning-bg); border-color: var(--warning-border); }
-        .status-panel.alert { background-color: var(--alert-bg); border-color: var(--alert-border); }
-        .status-icon { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; }
-        .status-panel.normal .status-icon { background-color: rgba(63, 107, 58, 0.14); color: var(--success-text); }
-        .status-panel.warning .status-icon { background-color: rgba(168, 100, 28, 0.14); color: var(--warning-text); }
-        .status-panel.alert .status-icon { background-color: rgba(161, 60, 34, 0.14); color: var(--alert-text); }
+        .status-panel {
+            background-color: var(--surface);
+            border: 1px solid var(--border-soft);
+            border-radius: 18px;
+            padding: 16px 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: var(--shadow-soft);
+            transition: all 0.2s ease;
+        }
+        .status-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background-color: #f1f5f9;
+            color: var(--ink);
+        }
         .status-text-group { display: flex; flex-direction: column; }
         .status-label { font-size: 0.66rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.6px; color: var(--text-muted); margin-bottom: 2px; }
-        .status-value { font-size: 0.88rem; font-weight: 700; color: var(--success-text); }
-        .status-panel.warning .status-value { color: var(--warning-text); }
-        .status-panel.alert .status-value { color: var(--alert-text); }
+        .status-value { font-size: 0.88rem; font-weight: 700; color: var(--ink); }
         .controls-container { display: flex; flex-direction: column; gap: 16px; margin-top: auto; padding-top: 16px; }
 
         /* ---------- TELEHEALTH INTERFACE & CONTROLS ---------- */

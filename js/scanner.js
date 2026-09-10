@@ -1,9 +1,8 @@
 /* ==========================================================
    APP LOGIC (mode, tabs, vitals)
    ========================================================== */
-const iconCheck = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
-const iconWarning = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
-const iconAlert = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+const iconCheck = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+const iconTelemetry = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>';
 
 
 /* ==========================================================
@@ -80,15 +79,9 @@ function triggerSilentHaptic() {
   } catch (e) {}
 }
 
-function triggerButtonPulse(btn, modeClass) {
+function triggerButtonPulse(btn) {
   btn.style.display = 'flex';
-  btn.className = 'btn-more-info ' + modeClass;
-  // Trigger animation replay by forcing a browser reflow
-  btn.style.animation = 'none';
-  btn.offsetHeight;
-  btn.style.animation = '';
-
-  // Trigger silent haptic feedback
+  btn.className = 'btn-more-info show';
   triggerSilentHaptic();
 }
 
@@ -106,37 +99,37 @@ function evaluateVitals(temp, spo2, hr) {
   
   if (tempNum !== null && tempNum >= 104.0) {
     currentAlertTopic = 'hyper';
-    panel.className = 'status-panel alert'; iconContainer.innerHTML = iconAlert;
-    textEl.innerText = 'Critical: High body temperature';
-    if (infoBtn) triggerButtonPulse(infoBtn, 'alert-mode');
+    if (iconContainer) iconContainer.innerHTML = iconTelemetry;
+    textEl.innerText = 'High body temperature';
+    if (infoBtn) triggerButtonPulse(infoBtn);
   } else if (tempNum !== null && tempNum < 95.0 && tempNum > 0) {
     currentAlertTopic = 'hypo';
-    panel.className = 'status-panel alert'; iconContainer.innerHTML = iconAlert;
-    textEl.innerText = 'Critical: Low body temperature';
-    if (infoBtn) triggerButtonPulse(infoBtn, 'alert-mode');
+    if (iconContainer) iconContainer.innerHTML = iconTelemetry;
+    textEl.innerText = 'Low body temperature';
+    if (infoBtn) triggerButtonPulse(infoBtn);
   } else if (spo2 < 93) {
     currentAlertTopic = 'spo2';
-    panel.className = 'status-panel alert'; iconContainer.innerHTML = iconAlert;
-    textEl.innerText = 'Critical: Low oxygen level (SpO2)';
-    if (infoBtn) triggerButtonPulse(infoBtn, 'alert-mode');
+    if (iconContainer) iconContainer.innerHTML = iconTelemetry;
+    textEl.innerText = 'Low oxygen level (SpO2)';
+    if (infoBtn) triggerButtonPulse(infoBtn);
   } else if (hr > 140 || hr < 50) {
     currentAlertTopic = 'pulse';
-    panel.className = 'status-panel alert'; iconContainer.innerHTML = iconAlert;
-    textEl.innerText = 'Critical: Abnormal heart rate';
-    if (infoBtn) triggerButtonPulse(infoBtn, 'alert-mode');
+    if (iconContainer) iconContainer.innerHTML = iconTelemetry;
+    textEl.innerText = 'Abnormal heart rate';
+    if (infoBtn) triggerButtonPulse(infoBtn);
   } else if (tempNum !== null && tempNum >= 100.4) {
     currentAlertTopic = 'hyper';
-    panel.className = 'status-panel warning'; iconContainer.innerHTML = iconWarning;
-    textEl.innerText = 'Warning: Elevated body temperature';
-    if (infoBtn) triggerButtonPulse(infoBtn, 'warning-mode');
+    if (iconContainer) iconContainer.innerHTML = iconTelemetry;
+    textEl.innerText = 'Elevated body temperature';
+    if (infoBtn) triggerButtonPulse(infoBtn);
   } else if (spo2 < 95) {
     currentAlertTopic = 'spo2';
-    panel.className = 'status-panel warning'; iconContainer.innerHTML = iconWarning;
-    textEl.innerText = 'Warning: Mildly decreased oxygen (SpO2)';
-    if (infoBtn) triggerButtonPulse(infoBtn, 'warning-mode');
+    if (iconContainer) iconContainer.innerHTML = iconTelemetry;
+    textEl.innerText = 'Mildly decreased oxygen (SpO2)';
+    if (infoBtn) triggerButtonPulse(infoBtn);
   } else {
     currentAlertTopic = 'spo2';
-    panel.className = 'status-panel normal'; iconContainer.innerHTML = iconCheck;
+    if (iconContainer) iconContainer.innerHTML = iconCheck;
     textEl.innerText = 'All readings in normal range';
     if (infoBtn) {
       infoBtn.style.display = 'none';
