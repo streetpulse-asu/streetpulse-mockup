@@ -294,7 +294,7 @@
            it never interprets a reading or renders a verdict on one.
            ========================================================== */
 
-        .scanner-active-container { gap: 0; flex: 1; min-height: 0; }
+        .scanner-active-container { gap: 0; flex: 1; min-height: 0; background: var(--surface); }
 
         .enc-bar {
             display: flex; align-items: baseline; gap: 9px;
@@ -409,13 +409,24 @@
         /* ---------- actions ----------
            Capture is the routine, filled action; telehealth is deliberately a
            different weight so the two never read as interchangeable. */
-        .act { padding: 13px 16px 14px; display: flex; flex-direction: column; gap: 8px; }
+        .act {
+            background: var(--surface);
+            padding: 13px 16px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
         .act-row { display: flex; gap: 8px; }
         .act-capture { flex: 1; margin: 0; }
         .act-manual { flex: 0 0 124px; margin: 0; border: 1px solid var(--border-soft); }
         .btn-escalate {
             margin: 0; background: var(--surface); color: var(--ink);
             border: 1.5px solid var(--border-strong);
+            transition: background 0.15s ease, transform 0.15s ease;
+        }
+        .btn-escalate:active {
+            background: var(--surface-sunken);
+            transform: scale(0.99);
         }
 
         /* ---------- the record ---------- */
