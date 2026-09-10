@@ -395,3 +395,28 @@
         }
         .btn-apply-filters:active { transform: scale(0.99); }
 
+
+        /* ---------- Locator feedback ----------
+           The FAB carried a .busy class that was only ever styled for
+           .map-btn, so a tap produced no visible change at all while the fix
+           was being fetched. */
+        .btn-locate-fab.busy {
+            opacity: 0.55; cursor: progress;
+        }
+        .btn-locate-fab.busy svg { animation: locatePulse 1s ease-in-out infinite; }
+        @keyframes locatePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+        .map-toast {
+            position: absolute; left: 50%; transform: translateX(-50%) translateY(-8px);
+            top: 74px; z-index: 1200; max-width: calc(100% - 32px);
+            background: var(--ink); color: #fff;
+            font-size: 0.76rem; font-weight: 600; line-height: 1.35;
+            padding: 9px 14px; border-radius: 12px;
+            box-shadow: var(--shadow-3);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            text-align: center;
+        }
+        .map-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .map-toast.ok   { background: var(--success-text); }
+        .map-toast.warn { background: var(--warning-text); }

@@ -248,7 +248,7 @@ function initMap() {
   MAP = L.map('leaf-map', {
     center: PHX, zoom: 13, zoomControl: false, attributionControl: false,
     zoomSnap: 0.5, wheelPxPerZoomLevel: 110, tap: true,
-    maxBounds: [[32.6, -113.7], [34.3, -111.0]], maxBoundsViscosity: 0.6
+    maxBounds: [[31.2, -115.0], [37.1, -108.9]], maxBoundsViscosity: 0.6
   });
 
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
@@ -616,30 +616,103 @@ function openDirections(i, mode) {
 }
 
 /* ---------- Where am I ---------- */
-function locateMe() {
+/* Arizona, and the slice of it this dataset actually covers. The Heat Relief
+   Network is a Maricopa County program, so a fix in Flagstaff is legitimate
+   but has nothing near it — worth saying out loud rather than dropping a pin
+   in an empty desert. */
+const AZ_BOUNDS      = { minLat: 31.33, maxLat: 37.01, minLon: -114.82, maxLon: -109.04 };
+const SERVICE_BOUNDS = { minLat: 32.50, maxLat: 34.40, minLon: -113.80, maxLon: -110.90 };
+
+function within(ll, b) {
+  return ll[0] >= b.minLat && ll[0] <= b.maxLat && ll[1] >= b.minLon && ll[1] <= b.maxLon;
+}
+
+/* A one-line message over the map. The locator used to fail silently — a
+   denied permission just flew the map to Phoenix, which is where it already
+   was, so the button looked dead. Every outcome now says something. */
+let mapToastTimer = null;
+function mapToast(text, tone) {
+  let el = document.getElementById('map-toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'map-toast';
+    el.className = 'map-toast';
+    el.setAttribute('role', 'status');
+    const host = document.getElementById('tab-map') || document.body;
+    host.appendChild(el);
+  }
+  el.textContent = text;
+  el.className = 'map-toast show' + (tone ? ' ' + tone : '');
+  clearTimeout(mapToastTimer);
+  mapToastTimer = setTimeout(() => { el.className = 'map-toast'; }, 4200);
+}
+
+function setLocateBusy(busy) {
   const btn = document.getElementById('btn-locate');
+  if (!btn) return;
+  btn.classList.toggle('busy', busy);
+  btn.disabled = busy;
+  btn.setAttribute('aria-busy', String(busy));
+}
+
+function dropUserPin(ll, accuracy) {
+  if (meMarker) MAP.removeLayer(meMarker);
+  if (meCircle) MAP.removeLayer(meCircle);
+  meCircle = L.circle(ll, { radius: Math.min(accuracy || 60, 400),
+    color: '#2563eb', weight: 1.5, fillColor: '#2563eb', fillOpacity: 0.12 }).addTo(MAP);
+  meMarker = L.circleMarker(ll, { radius: 7, color: '#fff', weight: 2.5,
+    fillColor: '#2563eb', fillOpacity: 1 }).addTo(MAP);
+}
+
+function locateMe() {
   if (!navigator.geolocation) {
-    alert('Geolocation is not supported by your browser.');
+    mapToast('This browser cannot share a location.', 'warn');
     return;
   }
-  if (btn) btn.classList.add('busy');
-  navigator.geolocation.getCurrentPosition(pos => {
-    if (btn) btn.classList.remove('busy');
-    userLL = [pos.coords.latitude, pos.coords.longitude];
-    enrichAllSitesWithOSRM(userLL);
-    if (meMarker) MAP.removeLayer(meMarker);
-    if (meCircle) MAP.removeLayer(meCircle);
-    meCircle = L.circle(userLL, { radius: Math.min(pos.coords.accuracy || 60, 400),
-      color: '#2563eb', weight: 1.5, fillColor: '#2563eb', fillOpacity: 0.12 }).addTo(MAP);
-    meMarker = L.circleMarker(userLL, { radius: 7, color: '#fff', weight: 2.5,
-      fillColor: '#2563eb', fillOpacity: 1 }).addTo(MAP);
-    MAP.flyTo(userLL, 15, { duration: 0.7 });
-    renderCarousel();
-    if (activePoi != null) openPoi(activePoi);
-  }, () => {
-    if (btn) btn.classList.remove('busy');
-    MAP.flyTo(PHX, 13, { duration: 0.6 });
-  }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 });
+
+  setLocateBusy(true);
+  mapToast('Finding your location…');
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      setLocateBusy(false);
+      const ll = [pos.coords.latitude, pos.coords.longitude];
+
+      // Guard before anything downstream uses the fix: walk times, routing and
+      // the "nearby" sort all assume a point somewhere near the sites.
+      if (!within(ll, AZ_BOUNDS)) {
+        MAP.flyTo(PHX, 12, { duration: 0.6 });
+        mapToast('You are outside Arizona — showing Phoenix instead.', 'warn');
+        return;
+      }
+
+      userLL = ll;
+      dropUserPin(ll, pos.coords.accuracy);
+      MAP.flyTo(ll, 15, { duration: 0.7 });
+      enrichAllSitesWithOSRM(userLL);
+      renderCarousel();
+      if (activePoi != null) openPoi(activePoi);
+
+      if (!within(ll, SERVICE_BOUNDS)) {
+        mapToast('Found you. The nearest relief sites are in Maricopa County.', 'warn');
+      } else {
+        mapToast('Showing sites near you.', 'ok');
+      }
+    },
+    (err) => {
+      setLocateBusy(false);
+      if (err && err.code === 1) {
+        mapToast('Location permission is off. Turn it on for this site, then tap again.', 'warn');
+      } else if (err && err.code === 3) {
+        mapToast('Location is taking too long — tap to try again.', 'warn');
+      } else {
+        mapToast('Location unavailable right now.', 'warn');
+      }
+    },
+    // maximumAge 0 so every tap asks for a fresh fix rather than replaying a
+    // stale one the browser happens to be holding
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
 }
 
 
