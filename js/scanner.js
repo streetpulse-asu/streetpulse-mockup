@@ -1,8 +1,8 @@
 /* ==========================================================
    APP LOGIC (mode, tabs, vitals)
    ========================================================== */
-const iconCheck = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
-const iconTelemetry = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>';
+const iconCheck = icon('circle-check', 20);
+const iconTelemetry = icon('activity', 20);
 
 
 /* ==========================================================
@@ -395,7 +395,7 @@ function sendVitalsSnapshot() {
   const hudHeader = document.querySelector('.th-hud-header span');
   if (hudHeader) {
     const originalText = hudHeader.innerText;
-    hudHeader.innerText = '✓ Vitals Snapshot Transmitted to Dr. Rivera';
+    hudHeader.innerHTML = icon('check', 13) + ' <span>Vitals Snapshot Transmitted to Dr. Rivera</span>';
     hudHeader.style.color = '#4ade80';
     setTimeout(() => {
       hudHeader.innerText = originalText;

@@ -44,11 +44,14 @@ const SERVICES = {
   utility:  { label: 'Utility help' }
 };
 
+/* Category glyphs, by name from the shared icon set (js/icons.js). pinIcon()
+   draws them inside the teardrop; the 24x24 geometry is scaled as a whole, so
+   a pin glyph carries the same stroke ratio as every other icon in the app. */
 const ICONS = {
-  cool: '<path d="M0 -5.6V5.6M-4.8 -2.8L4.8 2.8M-4.8 2.8L4.8 -2.8" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>',
-  hydr: '<path d="M0 -5.4C3.6 -1.5 4.7 0.7 4.7 2.4A4.7 4.7 0 0 1 -4.7 2.4C-4.7 0.7 -3.6 -1.5 0 -5.4Z" fill="none" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/>',
-  resp: '<path d="M-5.2 2.4V-1.4A1.8 1.8 0 0 1 -3.4 -3.2H3.4A1.8 1.8 0 0 1 5.2 -1.4V2.4M-5.2 2.4H5.2M-5.2 2.4V4M5.2 2.4V4M-2.6 -3.2V-0.4" fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>',
-  coll: '<path d="M-4.6 -2.2H4.6V4.4H-4.6ZM-4.6 -2.2L-3 -4.6H3L4.6 -2.2M0 -2.2V4.4" fill="none" stroke="#fff" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>'
+  cool: 'snowflake',
+  hydr: 'droplet',
+  resp: 'house',
+  coll: 'package'
 };
 
 const _DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];

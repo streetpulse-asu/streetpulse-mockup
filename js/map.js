@@ -206,13 +206,17 @@ function haversine(a, b) {
 
 function pinIcon(cat, dimmed) {
   const col = CATEGORIES[cat].raw;
-  const icon = (ICONS[cat] || '').replace(/stroke="#fff"/g, `stroke="${col}"`).replace(/fill="#fff"/g, `fill="${col}"`);
+  // The glyph is a 24x24 icon scaled to ~14px and centred on the pin's white
+  // disc; scaling the whole box keeps its stroke ratio identical to every
+  // other icon rather than being redrawn by hand at pin size.
+  const glyph = `<g transform="scale(0.6) translate(-12,-12)" fill="none" stroke="${col}"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${iconGlyph(ICONS[cat])}</g>`;
   // Teardrop outer shape (colored), white inner circle, colored icon on white
   const shape = `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 36 44">
     <path d="M18 1 C9.163 1 2 8.163 2 17 C2 26.5 10 35 18 43 C26 35 34 26.5 34 17 C34 8.163 26.837 1 18 1Z"
           fill="${col}" stroke="rgba(0,0,0,0.12)" stroke-width="0.8"/>
     <circle cx="18" cy="16" r="10" fill="white"/>
-    <g transform="translate(18,16)">${icon}</g>
+    <g transform="translate(18,16)">${glyph}</g>
   </svg>`;
   return L.divIcon({
     className: 'hrn-pin' + (dimmed ? ' dim' : ''),
@@ -262,7 +266,10 @@ function initMap() {
 
 
   clusterGroup = L.markerClusterGroup({
-    maxClusterRadius: 65, showCoverageOnHover: false, spiderfyDistanceMultiplier: 1.5,
+    maxClusterRadius: 65,
+    showCoverageOnHover: false,
+    zoomToBoundsOnClick: false,
+    spiderfyOnMaxZoom: false,
     disableClusteringAtZoom: 14,
     iconCreateFunction: function (cluster) {
       const n = cluster.getChildCount();
@@ -271,6 +278,12 @@ function initMap() {
         className: 'hrn-cluster', iconSize: [size, size],
         html: '<div style="width:' + size + 'px;height:' + size + 'px;line-height:' + size + 'px">' + n + '</div>'
       });
+    }
+  });
+  clusterGroup.on('clusterclick', function (c) {
+    const targetLL = (c.layer && typeof c.layer.getLatLng === 'function') ? c.layer.getLatLng() : c.latlng;
+    if (targetLL) {
+      MAP.flyTo(targetLL, Math.min(MAP.getZoom() + 1, 16), { duration: 0.35 });
     }
   });
   MAP.addLayer(clusterGroup);
@@ -365,7 +378,7 @@ function renderFilterModalContent() {
       const isSel = activeSvcs.has(key) ? ' selected' : '';
       return `
         <div class="filter-service-chip${isSel}" onclick="toggleServiceFilter('${key}')">
-          ${isSel ? '✓ ' : ''}${esc(SERVICES[key].label)}
+          ${isSel ? icon('check', 13) + ' ' : ''}${esc(SERVICES[key].label)}
         </div>
       `;
     }).join('');
@@ -456,7 +469,7 @@ function renderCarousel() {
         <div class="card-top">
           <span class="card-cat-badge" style="background:${catObj.raw};">${esc(catObj.short || catObj.label)}</span>
           <div class="card-walk">
-            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="13" cy="4" r="2"/><path d="m9 21 1.5-6.5L8 12l1-5 3.5 2 3 1.5"/><path d="M14.5 14.5 17 21"/></svg>
+            ${icon('footprints', 13)}
             ${r.walk ? esc(r.walk.distText) : esc(r.d.toFixed(1) + ' mi')}
           </div>
         </div>
@@ -512,7 +525,7 @@ function openPoi(i) {
   document.getElementById('poi-badges').innerHTML = badgesHtml;
   
   const walkInfo = getWalkInfo(userLL || PHX, s, i);
-  document.getElementById('poi-walk-badge').innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" aria-hidden="true"><circle cx="13" cy="4" r="2"/><path d="m9 21 1.5-6.5L8 12l1-5 3.5 2 3 1.5"/><path d="M14.5 14.5 17 21"/></svg> ${walkInfo.distText}`;
+  document.getElementById('poi-walk-badge').innerHTML = `${icon('footprints', 13)} ${walkInfo.distText}`;
 
   document.getElementById('poi-title').innerText = s.n;
   document.getElementById('poi-org').innerText = (s.o && s.o !== s.n) ? s.o : '';
@@ -537,14 +550,14 @@ function openPoi(i) {
   // Action buttons
   const callBtn = s.ph ? `
     <button class="btn-fsc-call" onclick="window.location.href='tel:${s.ph.replace(/[^0-9+]/g, '')}'">
-      <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>
+      ${icon('phone', 15)}
       Call
     </button>
   ` : '';
 
   document.getElementById('poi-actions').innerHTML = `
     <button class="btn-fsc-walk" onclick="openDirections(${i},'walking')">
-      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="13" cy="4" r="2"/><path d="m9 21 1.5-6.5L8 12l1-5 3.5 2 3 1.5"/><path d="M14.5 14.5 17 21"/></svg>
+      ${icon('footprints', 16)}
       Walk There
     </button>
     ${callBtn}
@@ -660,7 +673,10 @@ function positionOverlays() {
 
 function resizeAll() {
   positionOverlays();
-  if (MAP) MAP.invalidateSize();
+  const mapEl = document.getElementById('leaf-map');
+  if (MAP && mapEl && mapEl.offsetWidth > 0 && mapEl.offsetHeight > 0) {
+    MAP.invalidateSize();
+  }
 }
 window.addEventListener('resize', resizeAll);
 window.addEventListener('orientationchange', () => setTimeout(resizeAll, 220));

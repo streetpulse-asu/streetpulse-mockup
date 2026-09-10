@@ -99,7 +99,7 @@
             text-transform: uppercase; letter-spacing: 0.4px; padding: 5px 0;
         }
         .nav-item.active { color: var(--accent); }
-        .nav-item svg { width: 21px; height: 21px; stroke-width: 2.3; }
+        .nav-item svg { width: 21px; height: 21px; }
 
         /* ---------- SCANNER LOCKOUT & CONTROLS ---------- */
         .scanner-locked-container {
@@ -248,3 +248,13 @@
             border-radius: 6px;
         }
         .modal-overlay:not(.show) { pointer-events: none; }
+
+        /* ---------- Icons ----------
+           Every glyph is injected by renderIcons() from js/icons.js. The span
+           is the layout box so the icon occupies its space before the svg
+           lands; sizing is either data-size in the markup or a rule here. */
+        .icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            flex-shrink: 0; line-height: 0;
+        }
+        .icon > svg { display: block; }
