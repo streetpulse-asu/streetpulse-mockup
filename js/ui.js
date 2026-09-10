@@ -130,6 +130,19 @@ document.addEventListener('DOMContentLoaded', renderAppVersion);
    the drawer currently is, so they rise and fall as it opens and collapses.
    ========================================================== */
 
+/* The real visible area, which is not the same as the screen and not the same
+   between two iPhones. Safari's URL bar collapses as you scroll, standalone
+   has no URL bar at all, and every model has a different inset for its notch
+   or island. visualViewport reports what is actually visible right now, so
+   the layout is measured rather than guessed from a device list. */
+function measureViewport() {
+  const shell = document.querySelector('.phone-container');
+  if (!shell) return;
+  const vv = window.visualViewport;
+  const h = Math.round(vv ? vv.height : window.innerHeight);
+  if (h > 0) shell.style.setProperty('--app-h', h + 'px');
+}
+
 function measureChrome() {
   const shell = document.querySelector('.phone-container');
   const nav = document.querySelector('.bottom-nav');
@@ -151,6 +164,7 @@ function measureChrome() {
 
 (function watchChrome() {
   const start = () => {
+    measureViewport();
     measureChrome();
     const targets = [document.querySelector('.bottom-nav'),
                      document.getElementById('bottom-carousel-drawer')].filter(Boolean);
@@ -167,10 +181,32 @@ function measureChrome() {
           .observe(drawer, { attributes: true, attributeFilter: ['class'] });
       }
     }
-    window.addEventListener('resize', measureChrome);
-    window.addEventListener('orientationchange', () => setTimeout(measureChrome, 250));
+    const remeasure = () => { measureViewport(); measureChrome(); };
+    window.addEventListener('resize', remeasure);
+    window.addEventListener('orientationchange', () => setTimeout(remeasure, 250));
+    if (window.visualViewport) {
+      // fires as Safari's URL bar collapses and expands
+      window.visualViewport.addEventListener('resize', remeasure);
+      window.visualViewport.addEventListener('scroll', remeasure);
+    }
     // iOS settles safe-area insets a beat after first paint in standalone
-    [150, 500, 1200].forEach(ms => setTimeout(measureChrome, ms));
+    [150, 500, 1200].forEach(ms => setTimeout(remeasure, ms));
+
+    /* Coming back from Maps or a phone call, iOS restores the web view
+       without repainting it. Leaflet in particular renders nothing until it
+       is told its size again, which is the blank screen on return. Re-measure
+       and revive the map whenever the app becomes visible. */
+    const revive = () => {
+      if (document.visibilityState === 'hidden') return;
+      remeasure();
+      if (typeof MAP !== 'undefined' && MAP && typeof MAP.invalidateSize === 'function') {
+        try { MAP.invalidateSize(true); } catch (e) { /* map not up yet */ }
+      }
+      if (typeof renderIcons === 'function') renderIcons();
+    };
+    document.addEventListener('visibilitychange', revive);
+    window.addEventListener('pageshow', revive);
+    window.addEventListener('focus', revive);
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();

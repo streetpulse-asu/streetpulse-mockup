@@ -20,6 +20,10 @@
             height: 100vh;
             height: -webkit-fill-available;
             height: 100dvh;
+            /* --app-h is the measured visible viewport (see js/ui.js). It wins
+               where it exists, which is what makes the bottom bar sit on the
+               real bottom edge rather than under Safari's toolbar. */
+            height: var(--app-h, 100dvh);
             background-color: var(--bg-app);
             position: relative; overflow: hidden; display: flex; flex-direction: column;
         }

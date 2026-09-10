@@ -549,7 +549,7 @@ function openPoi(i) {
 
   // Action buttons
   const callBtn = s.ph ? `
-    <button class="btn-fsc-call" onclick="window.location.href='tel:${s.ph.replace(/[^0-9+]/g, '')}'">
+    <button class="btn-fsc-call" onclick="openExternal('tel:${s.ph.replace(/[^0-9+]/g, '')}')">
       ${icon('phone', 15)}
       Call
     </button>
@@ -606,13 +606,45 @@ function flyTo(i) {
    live location — more accurate than anything we'd pass, and one
    fewer permission prompt in front of someone standing in the sun.
    ========================================================== */
+/* Handing off to a maps app from a home-screen web app is where this used to
+   break. A standalone window has no tabs, so window.open('_blank') navigates
+   the app itself to the maps URL; that page then bounces to the native app
+   and the web view is left sitting on the interstitial, which is the blank
+   screen you come back to.
+
+   Two changes: on iOS we hand off to Apple Maps directly, so no web page is
+   ever rendered to be left behind, and the link is opened by clicking a real
+   anchor rather than through window.open, which iOS honours by handing the
+   URL to the system instead of navigating the app. */
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+function openExternal(url) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => a.remove(), 0);
+}
+
 function openDirections(i, mode) {
   const s = SITES[i];
   if (!s) return;
   const dest = s.ll ? s.ll[0] + ',' + s.ll[1] : (s.a || s.n);
-  const url = 'https://www.google.com/maps/dir/?api=1&destination=' +
-              encodeURIComponent(dest) + '&travelmode=' + (mode || 'walking');
-  window.open(url, '_blank', 'noopener,noreferrer');
+  const walking = (mode || 'walking') === 'walking';
+
+  const url = isIOS()
+    // dirflg=w is walking; Apple Maps opens straight from this, no web page
+    ? 'maps://?daddr=' + encodeURIComponent(dest) + (walking ? '&dirflg=w' : '&dirflg=d')
+    : 'https://www.google.com/maps/dir/?api=1&destination=' +
+      encodeURIComponent(dest) + '&travelmode=' + (mode || 'walking');
+
+  openExternal(url);
 }
 
 /* ---------- Where am I ---------- */
