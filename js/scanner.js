@@ -360,6 +360,18 @@ async function startTelehealthCall() {
 
   document.getElementById('telehealth-call-modal').classList.add('show');
 
+  // The clock starts with the screen, before the microphone is requested.
+  // getUserMedia puts up an OS permission sheet that can sit there for as long
+  // as the worker takes to answer it, and a call screen frozen at 00:00 behind
+  // that sheet reads as a dead button.
+  thTimerSeconds = 0;
+  updateCallTimerDisplay();
+  clearInterval(thTimerInterval);
+  thTimerInterval = setInterval(() => {
+    thTimerSeconds++;
+    updateCallTimerDisplay();
+  }, 1000);
+
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     try {
       thStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -368,14 +380,6 @@ async function startTelehealthCall() {
       thStream = null;
     }
   }
-
-  thTimerSeconds = 0;
-  updateCallTimerDisplay();
-  clearInterval(thTimerInterval);
-  thTimerInterval = setInterval(() => {
-    thTimerSeconds++;
-    updateCallTimerDisplay();
-  }, 1000);
 }
 
 function updateCallTimerDisplay() {

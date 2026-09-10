@@ -20,11 +20,11 @@
     <!-- Design tokens first, then base/shell, then shared components, then
          per-screen styles. Change a color or spacing value once in tokens.css
          and it updates everywhere. -->
-    <link rel="stylesheet" href="css/tokens.css?v=v32">
-    <link rel="stylesheet" href="css/base.css?v=v32">
-    <link rel="stylesheet" href="css/components.css?v=v32">
-    <link rel="stylesheet" href="css/map.css?v=v32">
-    <link rel="stylesheet" href="css/scanner.css?v=v32">
+    <link rel="stylesheet" href="css/tokens.css?v=v33">
+    <link rel="stylesheet" href="css/base.css?v=v33">
+    <link rel="stylesheet" href="css/components.css?v=v33">
+    <link rel="stylesheet" href="css/map.css?v=v33">
+    <link rel="stylesheet" href="css/scanner.css?v=v33">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
@@ -93,7 +93,9 @@
 
         <!-- Bottom Carousel Drawer (Mockup 2) -->
         <div class="bottom-carousel-drawer" id="bottom-carousel-drawer">
-          <div class="drawer-grip"></div>
+          <button class="drawer-grip" type="button" onclick="toggleDrawer()"
+                  aria-controls="bottom-carousel-drawer" aria-expanded="true"
+                  aria-label="Collapse nearby sites"></button>
           <div class="drawer-header">
             <div class="drawer-title-group">
               <div class="drawer-title">Heat Relief Nearby</div>
@@ -265,10 +267,10 @@
             </div>
             <div class="settings-row">
                 <div>
-                    <div class="sr-label">App Shell Offline Cache</div>
-                    <div class="sr-desc">Service worker active · Version v32</div>
+                    <div class="sr-label">App version</div>
+                    <div class="sr-desc" id="settings-build">StreetPulse field companion</div>
                 </div>
-                <span class="status-pill-subtle">Ready</span>
+                <span class="status-pill-subtle num" id="settings-version">v32</span>
             </div>
         </div>
 
@@ -770,11 +772,11 @@
     <!-- Site data + HRN-feed mapping helpers first, then the screens that
          consume them. Order matters here: each file expects the one before
          it to already be loaded. -->
-    <script src="js/icons.js?v=v32"></script>
-    <script src="js/data.js?v=v32"></script>
-    <script src="js/map.js?v=v32"></script>
-    <script src="js/ui.js?v=v32"></script>
-    <script src="js/scanner.js?v=v32"></script>
+    <script src="js/icons.js?v=v33"></script>
+    <script src="js/data.js?v=v33"></script>
+    <script src="js/map.js?v=v33"></script>
+    <script src="js/ui.js?v=v33"></script>
+    <script src="js/scanner.js?v=v33"></script>
 
     <script>
       if ('serviceWorker' in navigator) {

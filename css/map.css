@@ -107,10 +107,35 @@
         .bottom-carousel-drawer.hidden {
             transform: translateY(120%); opacity: 0; pointer-events: none;
         }
+        /* The grip is a real handle: tap it to collapse the drawer to its
+           header, or drag it down. It used to be a decorative bar with no
+           listener and cursor:auto, which is why it looked draggable and
+           wasn't. The hit area is padded well past the visible 36x4 pill. */
         .drawer-grip {
-            width: 36px; height: 4px; border-radius: 2px;
-            background: var(--border-strong); margin: 10px auto 8px auto; flex-shrink: 0;
+            padding: 9px 0 7px; margin: 0; flex-shrink: 0; cursor: grab;
+            display: flex; justify-content: center; align-items: center;
+            touch-action: none; -webkit-tap-highlight-color: transparent;
+            background: none; border: 0; width: 100%;
         }
+        .drawer-grip::before {
+            content: ''; display: block; width: 36px; height: 4px; border-radius: 2px;
+            background: var(--border-strong); transition: background 0.15s ease, width 0.15s ease;
+        }
+        .drawer-grip:active { cursor: grabbing; }
+        .drawer-grip:active::before, .drawer-grip:hover::before {
+            background: var(--text-muted); width: 44px;
+        }
+        .drawer-grip:focus-visible::before { background: var(--amber); }
+
+        /* Collapsed leaves the header on screen so the site count and the
+           handle stay reachable; the carousel itself slides out of the way. */
+        .bottom-carousel-drawer.collapsed .carousel-track {
+            max-height: 0; opacity: 0; margin: 0; pointer-events: none;
+            /* the track's own padding survives max-height:0, so it has to go
+               too or the drawer only half-collapses */
+            padding-top: 0; padding-bottom: 0; overflow: hidden;
+        }
+        .bottom-carousel-drawer.dragging { transition: none; }
         .drawer-header {
             padding: 0 16px 8px 16px;
             display: flex; justify-content: space-between; align-items: center;
@@ -138,6 +163,9 @@
             padding: 4px 16px 14px 16px;
             scrollbar-width: none; scroll-snap-type: x mandatory;
             -webkit-overflow-scrolling: touch;
+            max-height: 320px; opacity: 1;
+            transition: max-height 0.26s cubic-bezier(0.32, 0.72, 0, 1),
+                        padding 0.26s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.18s ease;
         }
         .carousel-track::-webkit-scrollbar { display: none; }
 

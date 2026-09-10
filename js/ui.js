@@ -28,6 +28,11 @@ function simulatePairing() {
 }
 
 function setDeviceConnected(connected) {
+  // switchTab() calls this on every visit to the scanner to sync the view, so
+  // it runs far more often than the state changes. Showing the right view is
+  // idempotent; opening an encounter and writing to the log is not, which is
+  // why the probe used to appear in the log twice after pairing.
+  const changed = isDeviceConnected !== connected;
   isDeviceConnected = connected;
   const lockedView = document.getElementById('scanner-locked-view');
   const activeView = document.getElementById('scanner-active-view');
@@ -38,13 +43,15 @@ function setDeviceConnected(connected) {
   if (connected) {
     if (lockedView) lockedView.style.display = 'none';
     if (activeView) activeView.style.display = 'flex';
-    // linking the probe is what opens the encounter record
-    if (typeof startEncounter === 'function' && !startEncounter._tick) startEncounter();
-    if (typeof logEvent === 'function') logEvent('Probe SP-4471 linked');
+    if (changed) {
+      // linking the probe is what opens the encounter record
+      if (typeof startEncounter === 'function') startEncounter();
+      if (typeof logEvent === 'function') logEvent('Probe SP-4471 linked');
+    }
   } else {
     if (lockedView) lockedView.style.display = 'flex';
     if (activeView) activeView.style.display = 'none';
-    if (typeof startEncounter === 'function') {
+    if (changed && typeof startEncounter === 'function') {
       clearInterval(startEncounter._tick);
       startEncounter._tick = null;
     }
@@ -93,3 +100,17 @@ function switchTab(tabId, element) {
 }
 
 
+
+
+/* The version shown in Settings is read from the cache-busting query on the
+   script tag rather than typed into the markup, so it can never disagree with
+   the bundle actually running. */
+function renderAppVersion() {
+  const el = document.getElementById('settings-version');
+  if (!el) return;
+  const src = document.querySelector('script[src*="js/ui.js"]');
+  const m = src && (src.getAttribute('src') || '').match(/[?&]v=(v?[\w.]+)/);
+  el.innerText = m ? m[1] : '—';
+}
+
+document.addEventListener('DOMContentLoaded', renderAppVersion);

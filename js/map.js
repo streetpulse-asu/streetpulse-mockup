@@ -685,3 +685,82 @@ initMap();
 resizeAll();
 setTimeout(resizeAll, 300);
 setTimeout(locateMe, 400);
+
+
+/* ---------- Bottom drawer handle ----------
+   The grip used to be a decorative bar: it looked like a drag handle, had no
+   listener, and nothing happened when you pulled it. It now collapses the
+   carousel to the drawer header on tap, and follows a vertical drag with a
+   distance threshold so a stray finger movement while scrolling the cards
+   horizontally does not toggle it. */
+
+function setDrawerCollapsed(collapsed) {
+  const drawer = document.getElementById('bottom-carousel-drawer');
+  const grip = drawer && drawer.querySelector('.drawer-grip');
+  if (!drawer) return;
+  drawer.classList.toggle('collapsed', collapsed);
+  if (grip) {
+    grip.setAttribute('aria-expanded', String(!collapsed));
+    grip.setAttribute('aria-label', collapsed ? 'Expand nearby sites' : 'Collapse nearby sites');
+  }
+}
+
+function toggleDrawer() {
+  const drawer = document.getElementById('bottom-carousel-drawer');
+  if (drawer) setDrawerCollapsed(!drawer.classList.contains('collapsed'));
+}
+
+(function wireDrawerGrip() {
+  const start = () => {
+    const drawer = document.getElementById('bottom-carousel-drawer');
+    const grip = drawer && drawer.querySelector('.drawer-grip');
+    if (!drawer || !grip) return;
+
+    let originY = null, moved = 0, wasDrag = false;
+    const THRESHOLD = 28;  // px of vertical travel before a drag counts
+
+    const onDown = (e) => {
+      originY = (e.touches ? e.touches[0].clientY : e.clientY);
+      moved = 0;
+      drawer.classList.add('dragging');
+    };
+    const onMove = (e) => {
+      if (originY === null) return;
+      const y = (e.touches ? e.touches[0].clientY : e.clientY);
+      moved = y - originY;
+      // follow the finger a little so the handle feels attached
+      const give = Math.max(-14, Math.min(48, moved));
+      drawer.style.transform = 'translateY(' + (give > 0 ? give : give / 3) + 'px)';
+      if (e.cancelable) e.preventDefault();
+    };
+    const onUp = () => {
+      if (originY === null) return;
+      drawer.classList.remove('dragging');
+      drawer.style.transform = '';
+      // Latch the verdict before clearing state: the click event fires after
+      // pointerup, and reading `moved` there would always see zero — which
+      // let the click toggle straight back and made a drag look inert.
+      wasDrag = Math.abs(moved) >= THRESHOLD;
+      if (wasDrag) setDrawerCollapsed(moved > 0);
+      originY = null;
+      moved = 0;
+    };
+
+    grip.addEventListener('pointerdown', onDown);
+    window.addEventListener('pointermove', onMove, { passive: false });
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
+
+    // a drag that crosses the threshold should not also fire the click
+    grip.addEventListener('click', (e) => {
+      if (wasDrag) { wasDrag = false; e.preventDefault(); e.stopImmediatePropagation(); }
+    }, true);
+
+    grip.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') { setDrawerCollapsed(true); e.preventDefault(); }
+      if (e.key === 'ArrowUp') { setDrawerCollapsed(false); e.preventDefault(); }
+    });
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
+})();
