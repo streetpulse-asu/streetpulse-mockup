@@ -330,23 +330,20 @@ function closeManualEntry() {
   document.getElementById('manual-modal').classList.remove('show');
 }
 
-/* ---------- Manual entry validation ----------
-   Physiologic bounds, not clinical thresholds: they only reject values a
-   worker could not have measured (a typo'd SpO2 of 900, a transposed HR).
-   Nothing here interprets a reading: a value inside these bounds is recorded
-   exactly as given. Mirrors the min/max on the inputs so keyboard entry and
-   paste are both covered. */
-const MANUAL_FIELDS = [
-  { id: 'manual-bp-sys', label: 'Systolic BP', min: 40,  max: 300, required: false, pairs: 'manual-bp-dia' },
-  { id: 'manual-bp-dia', label: 'Diastolic BP', min: 20, max: 200, required: false, pairs: 'manual-bp-sys' },
-  { id: 'manual-rr',     label: 'Respiratory rate', min: 4,  max: 80,  required: false },
-  { id: 'manual-hr',     label: 'Heart rate', min: 20, max: 300, required: true },
-  { id: 'manual-spo2',   label: 'SpO\u2082', min: 50, max: 100, required: true },
-  { id: 'manual-temp',   label: 'Temperature', min: 80, max: 115, required: false }
-];
+/* ---------- Manual entry ----------
+   Nothing is required and no range is enforced. This is a field record, not
+   a form that argues with the person filling it in: whatever the worker
+   measured is what gets written down, and every field is optional because a
+   partial set of vitals is the normal case in a street encounter.
+
+   The one rule left is structural rather than clinical - a blood pressure is
+   two numbers, so half of one cannot be recorded. */
+const MANUAL_FIELDS = ['manual-bp-sys', 'manual-bp-dia', 'manual-rr',
+                       'manual-hr', 'manual-spo2', 'manual-temp'];
 
 function showManualError(msg, focusId) {
   const box = document.getElementById('manual-error');
+  if (!box) return;
   box.textContent = msg;
   box.hidden = false;
   const el = focusId && document.getElementById(focusId);
@@ -355,34 +352,20 @@ function showManualError(msg, focusId) {
 
 function clearManualErrors() {
   const box = document.getElementById('manual-error');
-  box.hidden = true;
-  box.textContent = '';
-  MANUAL_FIELDS.forEach(f => document.getElementById(f.id).removeAttribute('aria-invalid'));
+  if (box) { box.hidden = true; box.textContent = ''; }
+  MANUAL_FIELDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.removeAttribute('aria-invalid');
+  });
 }
 
 function validateManualEntry() {
   clearManualErrors();
-  for (const f of MANUAL_FIELDS) {
-    const raw = document.getElementById(f.id).value.trim();
-    if (raw === '') {
-      if (f.required) { showManualError(f.label + ' is required.', f.id); return false; }
-      continue;
-    }
-    const n = Number(raw);
-    if (!Number.isFinite(n)) { showManualError(f.label + ' must be a number.', f.id); return false; }
-    if (n < f.min || n > f.max) {
-      showManualError(f.label + ' must be between ' + f.min + ' and ' + f.max + '.', f.id);
-      return false;
-    }
-  }
   const sys = document.getElementById('manual-bp-sys').value.trim();
   const dia = document.getElementById('manual-bp-dia').value.trim();
   if ((sys === '') !== (dia === '')) {
-    showManualError('Enter both systolic and diastolic, or neither.', sys === '' ? 'manual-bp-sys' : 'manual-bp-dia');
-    return false;
-  }
-  if (sys !== '' && dia !== '' && Number(dia) >= Number(sys)) {
-    showManualError('Diastolic must be lower than systolic.', 'manual-bp-dia');
+    showManualError('Enter both halves of the blood pressure, or neither.',
+                    sys === '' ? 'manual-bp-sys' : 'manual-bp-dia');
     return false;
   }
   return true;
@@ -491,13 +474,37 @@ function updateCallTimerDisplay() {
 /* Placeholders match the board's em dash rather than the old double hyphen,
    so an untaken vital reads the same in the call as it does on the screen the
    worker just came from. */
+/* The panel is built from what the encounter actually holds. A vital nobody
+   measured is left out rather than shown as a dash, Narcan appears once a dose
+   has been given, and a call placed before any reading shows no panel at all -
+   which is a legitimate thing to do, and clearer than a row of placeholders
+   implying the physician is being sent something. */
 function syncTelehealthVitals() {
-  const show = key => VITALS[key].v === null ? '\u2014' : VITALS[key].v;
-  const put = (id, text) => { const el = document.getElementById(id); if (el) el.innerText = text; };
-  put('th-val-hr', show('hr'));
-  put('th-val-spo2', show('spo2'));
-  put('th-val-temp', show('temp'));
-  put('th-val-bp', VITALS.bp.v === null ? '\u2014/\u2014' : VITALS.bp.v);
+  const box = document.getElementById('th-hud-metrics');
+  const panel = document.getElementById('th-vitals-hud');
+  if (!box || !panel) return;
+
+  const items = [];
+  const push = (label, value, unit) => {
+    if (value === null || value === undefined || value === '') return;
+    items.push('<div class="th-metric">' +
+      '<span class="th-m-label">' + label + '</span>' +
+      '<span class="th-m-val num">' + value + '</span>' +
+      (unit ? '<span class="th-m-unit">' + unit + '</span>' : '') +
+      '</div>');
+  };
+
+  push('HR', VITALS.hr.v, 'bpm');
+  push('SpO\u2082', VITALS.spo2.v, '%');
+  push('Temp', VITALS.temp.v, '\u00b0F');
+  push('BP', VITALS.bp.v, '');
+  push('Resp', VITALS.rr.v, 'rpm');
+  if (NARCAN.doses > 0) {
+    push('Narcan', NARCAN.doses, NARCAN.doses === 1 ? 'dose' : 'doses');
+  }
+
+  box.innerHTML = items.join('');
+  panel.hidden = items.length === 0;
 }
 
 function toggleTelehealthMic() {

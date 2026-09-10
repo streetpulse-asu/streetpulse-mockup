@@ -253,7 +253,13 @@
             font-size: 0.62rem; font-weight: 700; color: var(--call-muted);
             text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 8px;
         }
-        .th-hud-metrics { display: flex; justify-content: space-between; align-items: baseline; }
+        /* Between zero and six items depending on the encounter, so it wraps
+           rather than squeezing everything onto one line. */
+        .th-hud-metrics {
+            display: flex; flex-wrap: wrap; align-items: baseline;
+            gap: 6px 16px;
+        }
+        .th-vitals-hud[hidden] { display: none; }
         .th-metric { display: flex; align-items: baseline; gap: 3px; }
         .th-m-label { font-size: 0.6rem; color: var(--call-muted); font-weight: 700; text-transform: uppercase; margin-right: 2px; }
         .th-m-val {

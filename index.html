@@ -21,11 +21,11 @@
     <!-- Design tokens first, then base/shell, then shared components, then
          per-screen styles. Change a color or spacing value once in tokens.css
          and it updates everywhere. -->
-    <link rel="stylesheet" href="css/tokens.css?v=v45">
-    <link rel="stylesheet" href="css/base.css?v=v45">
-    <link rel="stylesheet" href="css/components.css?v=v45">
-    <link rel="stylesheet" href="css/map.css?v=v45">
-    <link rel="stylesheet" href="css/scanner.css?v=v45">
+    <link rel="stylesheet" href="css/tokens.css?v=v46">
+    <link rel="stylesheet" href="css/base.css?v=v46">
+    <link rel="stylesheet" href="css/components.css?v=v46">
+    <link rel="stylesheet" href="css/map.css?v=v46">
+    <link rel="stylesheet" href="css/scanner.css?v=v46">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
@@ -624,45 +624,35 @@
     <div class="modal-overlay" id="manual-modal" role="dialog" aria-modal="true" aria-labelledby="manual-modal-title">
         <div class="modal-card" style="padding: 24px 20px;">
             <h3 class="modal-title" id="manual-modal-title" style="margin-bottom: 20px; text-align: left;">Manual vitals entry</h3>
-            <p class="form-hint" style="margin-bottom: 16px;">Fields marked <span class="req" aria-hidden="true">*</span> are required. Values outside the plausible range are rejected on save.</p>
             <div class="input-group">
                 <label id="lbl-bp">Blood pressure (mmHg)</label>
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <input type="number" id="manual-bp-sys" placeholder="Sys" inputmode="numeric"
-                           min="40" max="300" step="1" aria-labelledby="lbl-bp" aria-label="Systolic blood pressure"
-                           aria-describedby="hint-bp" style="flex: 1; text-align: center;">
+                           step="1" aria-labelledby="lbl-bp" aria-label="Systolic blood pressure"
+                           style="flex: 1; text-align: center;">
                     <span style="font-size: 1.2rem; color: var(--text-muted); font-weight: 700;" aria-hidden="true">/</span>
                     <input type="number" id="manual-bp-dia" placeholder="Dia" inputmode="numeric"
-                           min="20" max="200" step="1" aria-label="Diastolic blood pressure"
-                           aria-describedby="hint-bp" style="flex: 1; text-align: center;">
+                           step="1" aria-label="Diastolic blood pressure"
+                           style="flex: 1; text-align: center;">
                 </div>
-                <p class="form-hint" id="hint-bp">40&ndash;300 over 20&ndash;200</p>
             </div>
             <div class="input-group">
                 <label for="manual-rr">Respiratory rate (rpm)</label>
-                <input type="number" id="manual-rr" placeholder="e.g. 16" inputmode="numeric"
-                       min="4" max="80" step="1" aria-describedby="hint-rr">
-                <p class="form-hint" id="hint-rr">4&ndash;80 breaths per minute</p>
+                <input type="number" id="manual-rr" placeholder="e.g. 16" inputmode="numeric" step="1">
             </div>
             <div style="display: flex; gap: 12px; margin-bottom: 12px;">
                 <div class="input-group" style="flex: 1; margin-bottom: 0;">
-                    <label for="manual-hr">Heart rate <span class="req" aria-hidden="true">*</span></label>
-                    <input type="number" id="manual-hr" placeholder="e.g. 85" inputmode="numeric"
-                           min="20" max="300" step="1" required aria-required="true" aria-describedby="hint-hr">
-                    <p class="form-hint" id="hint-hr">20&ndash;300 bpm</p>
+                    <label for="manual-hr">Heart rate</label>
+                    <input type="number" id="manual-hr" placeholder="e.g. 85" inputmode="numeric" step="1">
                 </div>
                 <div class="input-group" style="flex: 1; margin-bottom: 0;">
-                    <label for="manual-spo2">SpO&#8322; (%) <span class="req" aria-hidden="true">*</span></label>
-                    <input type="number" id="manual-spo2" placeholder="e.g. 98" inputmode="numeric"
-                           min="50" max="100" step="1" required aria-required="true" aria-describedby="hint-spo2">
-                    <p class="form-hint" id="hint-spo2">50&ndash;100 %</p>
+                    <label for="manual-spo2">SpO&#8322; (%)</label>
+                    <input type="number" id="manual-spo2" placeholder="e.g. 98" inputmode="numeric" step="1">
                 </div>
             </div>
             <div class="input-group" style="margin-bottom: 20px;">
                 <label for="manual-temp">Temperature (&deg;F)</label>
-                <input type="number" step="0.1" id="manual-temp" placeholder="e.g. 98.6" inputmode="decimal"
-                       min="80" max="115" aria-describedby="hint-temp">
-                <p class="form-hint" id="hint-temp">80.0&ndash;115.0 &deg;F</p>
+                <input type="number" step="0.1" id="manual-temp" placeholder="e.g. 98.6" inputmode="decimal">
             </div>
             <fieldset class="intervention-group">
                 <legend>
@@ -749,32 +739,16 @@
                 </span>
             </div>
 
-            <div class="th-vitals-hud">
+            <!-- What is actually on the record for this encounter, and only
+                 that. An unmeasured vital is absent rather than shown as a
+                 dash, so the panel grows and shrinks with the encounter and
+                 disappears entirely on a call placed before any reading. -->
+            <div class="th-vitals-hud" id="th-vitals-hud" hidden>
                 <div class="th-hud-header">
                     <span class="icon" data-icon="activity" data-size="13"></span>
                     <span class="th-hud-title">Live telemetry shared</span>
                 </div>
-                <div class="th-hud-metrics">
-                    <div class="th-metric">
-                        <span class="th-m-label">HR</span>
-                        <span class="th-m-val" id="th-val-hr">&mdash;</span>
-                        <span class="th-m-unit">bpm</span>
-                    </div>
-                    <div class="th-metric">
-                        <span class="th-m-label">SpO&#8322;</span>
-                        <span class="th-m-val" id="th-val-spo2">&mdash;</span>
-                        <span class="th-m-unit">%</span>
-                    </div>
-                    <div class="th-metric">
-                        <span class="th-m-label">Temp</span>
-                        <span class="th-m-val" id="th-val-temp">&mdash;</span>
-                        <span class="th-m-unit">&deg;F</span>
-                    </div>
-                    <div class="th-metric">
-                        <span class="th-m-label">BP</span>
-                        <span class="th-m-val" id="th-val-bp">&mdash;/&mdash;</span>
-                    </div>
-                </div>
+                <div class="th-hud-metrics" id="th-hud-metrics"></div>
             </div>
 
             <!-- Photo capture. A still, taken deliberately and reviewed before
@@ -858,11 +832,11 @@
     <!-- Site data + HRN-feed mapping helpers first, then the screens that
          consume them. Order matters here: each file expects the one before
          it to already be loaded. -->
-    <script src="js/icons.js?v=v45"></script>
-    <script src="js/data.js?v=v45"></script>
-    <script src="js/map.js?v=v45"></script>
-    <script src="js/ui.js?v=v45"></script>
-    <script src="js/scanner.js?v=v45"></script>
+    <script src="js/icons.js?v=v46"></script>
+    <script src="js/data.js?v=v46"></script>
+    <script src="js/map.js?v=v46"></script>
+    <script src="js/ui.js?v=v46"></script>
+    <script src="js/scanner.js?v=v46"></script>
 
     <script>
       if ('serviceWorker' in navigator) {
