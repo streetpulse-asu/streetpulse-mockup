@@ -188,17 +188,38 @@ function renderEncounter() {
 
 /* Ages and the elapsed clock have to keep moving; a frozen "3 min ago" is
    worse than no timestamp at all. */
-function startEncounter() {
-  ENCOUNTER.startedAt = Date.now();
+/* Everything an encounter accumulated. Readings used to survive a disconnect
+   while the log was wiped, so the next encounter opened with the previous
+   patient's vitals sitting on the board under a fresh, empty log - and the
+   telehealth panel would have shared them. A reading belongs to the encounter
+   it was taken in. */
+function clearEncounterData() {
+  Object.keys(VITALS).forEach(k => { VITALS[k].v = null; VITALS[k].at = null; VITALS[k].src = null; });
   NARCAN.doses = 0;
   NARCAN.at = null;
   NARCAN.pending = 0;
   LOG.length = 0;
+  renderVitals();
+  renderNarcan();
+  renderLog();
+  syncTelehealthVitals();
+}
+
+function startEncounter() {
+  ENCOUNTER.startedAt = Date.now();
+  clearEncounterData();
   logEvent('Verbal consent recorded · encounter opened');
   renderEncounter();
-  renderVitals();
   clearInterval(startEncounter._tick);
   startEncounter._tick = setInterval(() => { renderEncounter(); renderVitals(); }, 15000);
+}
+
+/* Unlinking the probe closes the encounter. The record does not linger on
+   screen waiting to be mistaken for the next one. */
+function endEncounter() {
+  clearInterval(startEncounter._tick);
+  startEncounter._tick = null;
+  clearEncounterData();
 }
 
 /* ==========================================================

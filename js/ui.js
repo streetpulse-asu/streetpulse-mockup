@@ -55,10 +55,7 @@ function setDeviceConnected(connected) {
   } else {
     if (lockedView) lockedView.style.display = 'flex';
     if (activeView) activeView.style.display = 'none';
-    if (changed && typeof startEncounter === 'function') {
-      clearInterval(startEncounter._tick);
-      startEncounter._tick = null;
-    }
+    if (changed && typeof endEncounter === 'function') endEncounter();
   }
   setTimeout(resizeAll, 60);
 }
