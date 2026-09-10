@@ -20,14 +20,16 @@
     <!-- Design tokens first, then base/shell, then shared components, then
          per-screen styles. Change a color or spacing value once in tokens.css
          and it updates everywhere. -->
-    <link rel="stylesheet" href="css/tokens.css?v=v21">
-    <link rel="stylesheet" href="css/base.css?v=v21">
-    <link rel="stylesheet" href="css/components.css?v=v21">
-    <link rel="stylesheet" href="css/map.css?v=v21">
-    <link rel="stylesheet" href="css/scanner.css?v=v21">
+    <link rel="stylesheet" href="css/tokens.css?v=v22">
+    <link rel="stylesheet" href="css/base.css?v=v22">
+    <link rel="stylesheet" href="css/components.css?v=v22">
+    <link rel="stylesheet" href="css/map.css?v=v22">
+    <link rel="stylesheet" href="css/scanner.css?v=v22">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 </head>
 <body>
 <div class="phone-container tab-map-active">
@@ -233,7 +235,7 @@
             <div class="settings-row">
                 <div>
                     <div class="sr-label">App Shell Offline Cache</div>
-                    <div class="sr-desc">Service worker active · Version v21</div>
+                    <div class="sr-desc">Service worker active · Version v22</div>
                 </div>
                 <span class="status-pill-subtle">Ready</span>
             </div>
@@ -757,10 +759,10 @@
     <!-- Site data + HRN-feed mapping helpers first, then the screens that
          consume them. Order matters here: each file expects the one before
          it to already be loaded. -->
-    <script src="js/data.js?v=v21"></script>
-    <script src="js/map.js?v=v21"></script>
-    <script src="js/ui.js?v=v21"></script>
-    <script src="js/scanner.js?v=v21"></script>
+    <script src="js/data.js?v=v22"></script>
+    <script src="js/map.js?v=v22"></script>
+    <script src="js/ui.js?v=v22"></script>
+    <script src="js/scanner.js?v=v22"></script>
 
     <script>
       if ('serviceWorker' in navigator) {

@@ -78,7 +78,7 @@ function nextOpenLabel(s, now) {
    MAP
    ========================================================== */
 const PHX = [33.4484, -112.0740];
-let MAP, markerLayer, meMarker, meCircle, activePoi = null;
+let MAP, clusterGroup, meMarker, meCircle, activePoi = null;
 let userLL = null;
 const markers = [];
 
@@ -261,7 +261,19 @@ function initMap() {
     'hue-rotate(195deg) saturate(0.55) brightness(0.97) contrast(1.04)';
 
 
-  markerLayer = L.layerGroup().addTo(MAP);
+  clusterGroup = L.markerClusterGroup({
+    maxClusterRadius: 65, showCoverageOnHover: false, spiderfyDistanceMultiplier: 1.5,
+    disableClusteringAtZoom: 14,
+    iconCreateFunction: function (cluster) {
+      const n = cluster.getChildCount();
+      const size = n < 10 ? 30 : n < 40 ? 36 : 42;
+      return L.divIcon({
+        className: 'hrn-cluster', iconSize: [size, size],
+        html: '<div style="width:' + size + 'px;height:' + size + 'px;line-height:' + size + 'px">' + n + '</div>'
+      });
+    }
+  });
+  MAP.addLayer(clusterGroup);
 
   MAP.on('moveend', () => { renderCarousel(); });
   MAP.on('click', closePoi);
@@ -281,13 +293,15 @@ function buildMarkers() {
 }
 
 function applyFilters() {
-  if (markerLayer) markerLayer.clearLayers();
+  clusterGroup.clearLayers();
+  const shown = [];
   SITES.forEach((s, i) => {
     if (matchesFilters(s)) {
       markers[i].setIcon(pinIcon(primaryCat(s)));
-      if (markerLayer) markerLayer.addLayer(markers[i]);
+      shown.push(markers[i]);
     }
   });
+  clusterGroup.addLayers(shown);
   updateHeaderFilterBadge();
   renderCarousel();
 }
