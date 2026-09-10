@@ -36,7 +36,7 @@ const VITALS = {
    a time given rather than a value and a source. `pending` is what the open
    manual-entry sheet is proposing: doses only become real on save, so backing
    out of the sheet does not leave a dose on the record. */
-const NARCAN = { doses: 0, at: null, pending: 0 };
+const NARCAN = { doses: 0, at: null, pending: 0, maxPerEntry: 4 };
 
 const LOG = [];
 
@@ -118,17 +118,22 @@ function renderNarcan() {
   const p = NARCAN.pending;
   if (btn) btn.setAttribute('aria-pressed', String(p > 0));
   if (count) { count.hidden = p === 0; count.innerText = String(p); }
+  const atCap = p >= NARCAN.doses + NARCAN.maxPerEntry;
   if (sub) sub.innerText = p === 0
     ? 'Tap once per dose given'
-    : p + (p === 1 ? ' dose' : ' doses') + ' \u00b7 tap to add another';
+    : p + (p === 1 ? ' dose' : ' doses') +
+      (atCap ? ' \u00b7 max reached, tap to start over' : ' \u00b7 tap to add another');
+  if (btn) btn.classList.toggle('at-cap', atCap);
 }
 
 /* Doses accumulate rather than toggling off: a second dose is its own event,
    and the 2-dose protocol in the field guide makes the count meaningful.
-   Tapping past the recorded count and back down to it is how you correct a
-   mis-tap without leaving the sheet. */
+   Four per entry is the ceiling; the next tap drops back to what is already
+   on the record, which is how a mis-tap gets corrected without leaving the
+   sheet. The cap is stated on the control rather than left to be discovered. */
 function toggleNarcanDose() {
-  NARCAN.pending = NARCAN.pending >= NARCAN.doses + 4 ? NARCAN.doses : NARCAN.pending + 1;
+  const atCap = NARCAN.pending >= NARCAN.doses + NARCAN.maxPerEntry;
+  NARCAN.pending = atCap ? NARCAN.doses : NARCAN.pending + 1;
   renderNarcan();
   triggerSilentHaptic();
 }

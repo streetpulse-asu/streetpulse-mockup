@@ -47,11 +47,10 @@ function setDeviceConnected(connected) {
       // linking the probe is what opens the encounter record
       if (typeof startEncounter === 'function') startEncounter();
       if (typeof logEvent === 'function') logEvent('Probe SP-4471 linked');
-      // A linked probe is streaming, so it takes its first reading straight
-      // away. Leaving the board on dashes after pairing made a working sensor
-      // look dead — and carried through to the telehealth call, where the
-      // shared-telemetry panel was nothing but placeholders.
-      if (typeof simulateNewReading === 'function') simulateNewReading();
+      // Linking the probe deliberately does not take a reading. Inventing one
+      // on connect would put a number on the chart that nobody measured, which
+      // is the wrong thing for a mock to teach. Capture is the only way a
+      // reading appears.
     }
   } else {
     if (lockedView) lockedView.style.display = 'flex';

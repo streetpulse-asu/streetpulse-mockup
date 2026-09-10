@@ -21,11 +21,11 @@
     <!-- Design tokens first, then base/shell, then shared components, then
          per-screen styles. Change a color or spacing value once in tokens.css
          and it updates everywhere. -->
-    <link rel="stylesheet" href="css/tokens.css?v=v43">
-    <link rel="stylesheet" href="css/base.css?v=v43">
-    <link rel="stylesheet" href="css/components.css?v=v43">
-    <link rel="stylesheet" href="css/map.css?v=v43">
-    <link rel="stylesheet" href="css/scanner.css?v=v43">
+    <link rel="stylesheet" href="css/tokens.css?v=v44">
+    <link rel="stylesheet" href="css/base.css?v=v44">
+    <link rel="stylesheet" href="css/components.css?v=v44">
+    <link rel="stylesheet" href="css/map.css?v=v44">
+    <link rel="stylesheet" href="css/scanner.css?v=v44">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
@@ -665,7 +665,10 @@
                 <p class="form-hint" id="hint-temp">80.0&ndash;115.0 &deg;F</p>
             </div>
             <fieldset class="intervention-group">
-                <legend>Interventions</legend>
+                <legend>
+                    <span>Interventions</span>
+                    <span class="legend-hint">Max 4 doses per entry</span>
+                </legend>
                 <button type="button" class="narcan-btn" id="manual-narcan"
                         onclick="toggleNarcanDose()" aria-pressed="false">
                     <span class="narcan-mark" aria-hidden="true"></span>
@@ -855,11 +858,11 @@
     <!-- Site data + HRN-feed mapping helpers first, then the screens that
          consume them. Order matters here: each file expects the one before
          it to already be loaded. -->
-    <script src="js/icons.js?v=v43"></script>
-    <script src="js/data.js?v=v43"></script>
-    <script src="js/map.js?v=v43"></script>
-    <script src="js/ui.js?v=v43"></script>
-    <script src="js/scanner.js?v=v43"></script>
+    <script src="js/icons.js?v=v44"></script>
+    <script src="js/data.js?v=v44"></script>
+    <script src="js/map.js?v=v44"></script>
+    <script src="js/ui.js?v=v44"></script>
+    <script src="js/scanner.js?v=v44"></script>
 
     <script>
       if ('serviceWorker' in navigator) {

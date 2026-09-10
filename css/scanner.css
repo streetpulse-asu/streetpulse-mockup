@@ -606,3 +606,14 @@
             display: flex; align-items: center; justify-content: center;
         }
         .narcan-count[hidden] { display: none; }
+
+        .intervention-group legend {
+            display: flex; justify-content: space-between; align-items: baseline;
+            width: 100%; gap: 10px;
+        }
+        .legend-hint {
+            font-weight: 700; letter-spacing: 0.4px; text-transform: none;
+            font-size: 0.62rem; color: var(--text-muted);
+        }
+        .narcan-btn.at-cap .narcan-sub { color: var(--warning-text); }
+        .narcan-btn.at-cap .narcan-count { background: var(--warning-text); }
