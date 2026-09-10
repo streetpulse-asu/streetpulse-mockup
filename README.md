@@ -19,6 +19,9 @@ css/
   scanner.css               Vitals scanner screen only (vitals cards,
                             status panel, field guide modal)
 js/
+  icons.js                Generated icon set (lucide-static, ISC). Every glyph
+                          in the app comes from here — never paste an SVG path
+                          into markup; add the name and regenerate
   data.js                 Heat Relief Network site data (public, non-PHI)
                           + the helpers that map live ArcGIS features onto it
   map.js                    All map-screen logic (Leaflet setup, filtering,
@@ -36,8 +39,9 @@ service-worker.js        Minimal offline cache for the app shell
 
 Everything here was mechanically split out of a single-file prototype with
 no visual changes — it should look and behave identically to the original.
-Load order matters for the JS files (`data.js` → `map.js` → `ui.js` →
-`scanner.js`); `index.html` already references them in that order.
+Load order matters for the JS files (`icons.js` → `data.js` → `map.js` →
+`ui.js` → `scanner.js`); `index.html` already references them in that order.
+`icons.js` must come first: `scanner.js` calls `icon()` while it is parsing.
 
 ## Editing visuals
 

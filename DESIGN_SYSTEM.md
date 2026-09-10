@@ -58,4 +58,14 @@ Never reuse a clinical status colour for a category, or vice versa.
 - **Map Surface**: Crisp Oceanic styling (`hue-rotate(195deg)`).
 - **Category Filter Rail**: Tactile floating horizontal pill rail with active state indicators (not bloated chips).
 - **Custom Map Pins**: Crisp SVG glyphs carry the category; the fill colour only separates the four apart at a glance.
+
+---
+
+## 5. Iconography
+Every icon comes from **Lucide** (ISC), baked into `js/icons.js` at build time — no CDN and no icon font, so the offline-first shell keeps working with no signal.
+
+- **One geometry, everywhere**: a 24x24 box, 2px strokes, round caps and joins, `currentColor`. Size varies; the stroke ratio never does.
+- **Markup** writes `<span class="icon" data-icon="phone" data-size="16"></span>`; code building HTML strings calls `icon(name, size)`. Map pins call `iconGlyph(name)` and supply their own centred wrapper.
+- **Never hand-draw a path.** Before this the app carried 45 hand-drawn SVGs across six stroke widths (1.6 / 2 / 2.2 / 2.3 / 2.5 / 3) plus pin glyphs at 1.3-1.5 in their own coordinate space, which is what made the walking glyph look unlike its neighbours. Add the icon's name to the generator and regenerate.
+- **No emoji, ever** — and no dingbat stand-ins either (`✕`, `✓`, `🗣️` were all replaced with real icons).
 - **Bottom Drawer / Sheet**: Clean peek sheet with drag bar, instant walk time calculation, and direct action buttons.
