@@ -242,28 +242,37 @@ function saveManualEntry() {
   const spo2 = document.getElementById('manual-spo2').value || '--';
   const temp = document.getElementById('manual-temp').value || '--';
 
-  if (sys && dia) {
-    document.getElementById('bp-val').innerText = sys + '/' + dia;
-    document.getElementById('bp-card').style.display = 'flex';
-  } else {
-    document.getElementById('bp-val').innerText = '--/--';
-    document.getElementById('bp-card').style.display = 'none';
+  const bpEl = document.getElementById('bp-val');
+  if (bpEl) {
+    if (sys && dia) {
+      bpEl.innerText = sys + '/' + dia;
+      bpEl.classList.remove('grey');
+    } else {
+      bpEl.innerText = '--';
+      bpEl.classList.add('grey');
+    }
   }
-  if (rr && rr !== '--') {
-    document.getElementById('rr-val').innerText = rr;
-    document.getElementById('rr-card').style.display = 'flex';
-  } else {
-    document.getElementById('rr-val').innerText = '--';
-    document.getElementById('rr-card').style.display = 'none';
+
+  const rrEl = document.getElementById('rr-val');
+  if (rrEl) {
+    if (rr && rr !== '--') {
+      rrEl.innerText = rr;
+      rrEl.classList.remove('grey');
+    } else {
+      rrEl.innerText = '--';
+      rrEl.classList.add('grey');
+    }
   }
-  if (temp && temp !== '--' && temp.trim() !== '') {
-    document.getElementById('temp-val').innerText = temp;
-    const tempCard = document.getElementById('temp-card');
-    if (tempCard) tempCard.style.display = 'flex';
-  } else {
-    document.getElementById('temp-val').innerText = '--';
-    const tempCard = document.getElementById('temp-card');
-    if (tempCard) tempCard.style.display = 'none';
+
+  const tempEl = document.getElementById('temp-val');
+  if (tempEl) {
+    if (temp && temp !== '--' && temp.trim() !== '') {
+      tempEl.innerText = temp;
+      tempEl.classList.remove('grey');
+    } else {
+      tempEl.innerText = '--';
+      tempEl.classList.add('grey');
+    }
   }
   document.getElementById('hr-val').innerText = hr;
   document.getElementById('spo2-val').innerText = spo2;

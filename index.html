@@ -20,11 +20,11 @@
     <!-- Design tokens first, then base/shell, then shared components, then
          per-screen styles. Change a color or spacing value once in tokens.css
          and it updates everywhere. -->
-    <link rel="stylesheet" href="css/tokens.css?v=v25">
-    <link rel="stylesheet" href="css/base.css?v=v25">
-    <link rel="stylesheet" href="css/components.css?v=v25">
-    <link rel="stylesheet" href="css/map.css?v=v25">
-    <link rel="stylesheet" href="css/scanner.css?v=v25">
+    <link rel="stylesheet" href="css/tokens.css?v=v26">
+    <link rel="stylesheet" href="css/base.css?v=v26">
+    <link rel="stylesheet" href="css/components.css?v=v26">
+    <link rel="stylesheet" href="css/map.css?v=v26">
+    <link rel="stylesheet" href="css/scanner.css?v=v26">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
@@ -138,10 +138,15 @@
 
         <!-- Active View (unlocked when sensor is connected) -->
         <div class="scanner-active-container" id="scanner-active-view" style="display: none; flex-direction: column; gap: 14px; width: 100%;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px;">Live telemetry</span>
-                    <button class="badge-disconnect" onclick="disconnectDevice()" title="Disconnect sensor probe"><span class="connected-dot"></span> Connected &bull; Disconnect</button>
+            <div class="telem-header-row">
+                <span class="telem-status-label">Live telemetry</span>
+                <div class="telem-btn-group">
+                    <button class="btn-telem btn-telem-connect" onclick="openPairModal()" title="Connect sensor probe">
+                        <span class="connected-dot"></span> Connect
+                    </button>
+                    <button class="btn-telem btn-telem-disconnect" onclick="disconnectDevice()" title="Disconnect sensor probe">
+                        Disconnect
+                    </button>
                 </div>
                 <button class="guide-kebab-btn" onclick="openFieldGuide()" aria-label="Clinical Field Guide" title="Clinical Field Guide">
                     <span class="icon" data-icon="book-open-text" data-size="18"></span>
@@ -150,7 +155,7 @@
 
             <div class="clin-telemetry-board">
                 <!-- Primary Metric: Heart Rate -->
-                <div class="clin-tile clin-primary clickable-vital" onclick="openFieldGuide('pulse')" title="Heart Rate Guidelines">
+                <div class="clin-tile clin-primary">
                     <div class="clin-cap">
                         <span class="clin-cap-title">Heart Rate</span>
                     </div>
@@ -163,7 +168,7 @@
                 </div>
 
                 <!-- Primary Metric: SpO2 -->
-                <div class="clin-tile clin-primary clickable-vital" onclick="openFieldGuide('spo2')" title="SpO2 Guidelines">
+                <div class="clin-tile clin-primary">
                     <div class="clin-cap">
                         <span class="clin-cap-title">SpO₂ Oxygen</span>
                     </div>
@@ -188,34 +193,34 @@
                 <!-- Secondary 3-Column Spot Check Grid -->
                 <div class="clin-secondary-row">
                     <!-- Blood Pressure -->
-                    <div class="clin-tile clin-sub clickable-vital" id="bp-card" onclick="openManualEntry()" title="Blood Pressure (Tap to edit)">
+                    <div class="clin-tile clin-sub" id="bp-card">
                         <div class="clin-cap">
                             <span class="clin-cap-title">Blood Press.</span>
                         </div>
                         <div class="clin-sub-body">
-                            <span class="clin-sub-val" id="bp-val">120/78</span>
+                            <span class="clin-sub-val grey" id="bp-val">--</span>
                             <span class="clin-sub-unit">mmHg</span>
                         </div>
                     </div>
 
                     <!-- Respiration -->
-                    <div class="clin-tile clin-sub clickable-vital" id="rr-card" onclick="openManualEntry()" title="Respiratory Rate (Tap to edit)">
+                    <div class="clin-tile clin-sub" id="rr-card">
                         <div class="clin-cap">
                             <span class="clin-cap-title">Respiration</span>
                         </div>
                         <div class="clin-sub-body">
-                            <span class="clin-sub-val" id="rr-val">16</span>
+                            <span class="clin-sub-val grey" id="rr-val">--</span>
                             <span class="clin-sub-unit">rpm</span>
                         </div>
                     </div>
 
                     <!-- Core Temp -->
-                    <div class="clin-tile clin-sub clickable-vital" id="temp-card" onclick="openFieldGuide('hyper')" title="Core Temperature Guidelines">
+                    <div class="clin-tile clin-sub" id="temp-card">
                         <div class="clin-cap">
                             <span class="clin-cap-title">Core Temp</span>
                         </div>
                         <div class="clin-sub-body">
-                            <span class="clin-sub-val" id="temp-val">98.8</span>
+                            <span class="clin-sub-val grey" id="temp-val">--</span>
                             <span class="clin-sub-unit">&deg;F</span>
                         </div>
                     </div>
@@ -764,11 +769,11 @@
     <!-- Site data + HRN-feed mapping helpers first, then the screens that
          consume them. Order matters here: each file expects the one before
          it to already be loaded. -->
-    <script src="js/icons.js?v=v25"></script>
-    <script src="js/data.js?v=v25"></script>
-    <script src="js/map.js?v=v25"></script>
-    <script src="js/ui.js?v=v25"></script>
-    <script src="js/scanner.js?v=v25"></script>
+    <script src="js/icons.js?v=v26"></script>
+    <script src="js/data.js?v=v26"></script>
+    <script src="js/map.js?v=v26"></script>
+    <script src="js/ui.js?v=v26"></script>
+    <script src="js/scanner.js?v=v26"></script>
 
     <script>
       if ('serviceWorker' in navigator) {

@@ -162,14 +162,41 @@
         .vital-unit { font-size: 0.78rem; color: var(--text-muted); margin-left: 5px; font-weight: 600; }
         .vital-bp { font-size: 1.6rem; }
 
-        /* ---------- CLINICAL SPOT-CHECK TELEMETRY GRID (CONCEPT 1 - BLOCKY) ---------- */
-        .clin-telemetry-board { display: flex; flex-direction: column; gap: 8px; width: 100%; }
-        .clin-tile {
-            background: var(--surface); border: 2px solid var(--ink);
-            border-radius: 2px; overflow: hidden; box-shadow: none;
-            transition: border-color 0.15s ease;
+        /* ---------- CLINICAL SPOT-CHECK TELEMETRY GRID (CONCEPT 1 - BLOCKY, NO OUTLINE ON WHITE) ---------- */
+        .telem-header-row {
+            display: flex; justify-content: space-between; align-items: center; margin-top: 2px;
         }
-        .clin-tile:hover { border-color: var(--accent-deep); }
+        .telem-status-label {
+            font-size: 0.72rem; font-weight: 700; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.6px;
+        }
+        .telem-btn-group { display: flex; gap: 6px; align-items: center; }
+        .btn-telem {
+            font-family: inherit; font-size: 0.68rem; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.4px;
+            padding: 4px 9px; border-radius: 2px;
+            background: var(--surface); color: var(--ink);
+            border: 1.5px solid var(--ink); cursor: pointer;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .btn-telem-connect {
+            background: rgba(22, 163, 74, 0.1); color: #166534;
+            border-color: rgba(22, 163, 74, 0.4);
+        }
+        .btn-telem-disconnect {
+            background: var(--surface); color: var(--ink);
+            border-color: var(--border-strong);
+        }
+        .btn-telem-disconnect:hover {
+            background: rgba(185, 28, 28, 0.08); color: #991b1b;
+            border-color: #991b1b;
+        }
+
+        .clin-telemetry-board { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        .clin-tile {
+            background: #ffffff; border: none;
+            border-radius: 2px; overflow: hidden; box-shadow: none;
+        }
         .clin-cap {
             background: var(--ink); color: #ffffff; padding: 6px 12px;
             display: flex; justify-content: space-between; align-items: center;
@@ -179,6 +206,7 @@
             font-size: 0.74rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px;
         }
         .clin-body {
+            background: #ffffff; border: none;
             padding: 14px 16px; display: flex; justify-content: space-between; align-items: flex-end;
         }
         .clin-num-wrap { display: flex; align-items: baseline; gap: 6px; }
@@ -197,11 +225,12 @@
         .clin-sig-bars .bar.on { background: var(--ink); }
 
         /* 3-Column Secondary Row */
-        .clin-secondary-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; width: 100%; }
-        .clin-sub { border-radius: 2px; border: 2px solid var(--ink); }
+        .clin-secondary-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; width: 100%; }
+        .clin-sub { border-radius: 2px; border: none; background: #ffffff; }
         .clin-sub .clin-cap { padding: 4px 6px; justify-content: center; background: var(--ink-2); border-radius: 0; }
         .clin-sub .clin-cap-title { font-size: 0.64rem; letter-spacing: 0.4px; }
         .clin-sub-body {
+            background: #ffffff; border: none;
             padding: 12px 4px; display: flex; flex-direction: column;
             align-items: center; justify-content: center; text-align: center;
         }
@@ -210,8 +239,8 @@
             font-size: 1.3rem; font-weight: 800; color: var(--ink); line-height: 1.1;
             font-variant-numeric: tabular-nums; letter-spacing: -0.5px;
         }
+        .clin-sub-val.grey { color: var(--text-muted) !important; font-weight: 700; }
         .clin-sub-unit { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); margin-top: 2px; }
-        .clin-sub.empty .clin-sub-val { color: var(--text-muted); font-weight: 600; }
 
         .btn-add-manual {
             border-radius: 2px;
