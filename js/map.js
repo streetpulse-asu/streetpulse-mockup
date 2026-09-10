@@ -673,44 +673,59 @@ function locateMe() {
   setLocateBusy(true);
   mapToast('Finding your location…');
 
+  const onLocSuccess = (pos) => {
+    setLocateBusy(false);
+    const ll = [pos.coords.latitude, pos.coords.longitude];
+
+    // Guard before anything downstream uses the fix: walk times, routing and
+    // the "nearby" sort all assume a point somewhere near the sites.
+    if (!within(ll, AZ_BOUNDS)) {
+      MAP.flyTo(PHX, 12, { duration: 0.6 });
+      mapToast('You are outside Arizona — showing Phoenix instead.', 'warn');
+      return;
+    }
+
+    userLL = ll;
+    dropUserPin(ll, pos.coords.accuracy);
+    MAP.flyTo(ll, 15, { duration: 0.7 });
+    enrichAllSitesWithOSRM(userLL);
+    renderCarousel();
+    if (activePoi != null) openPoi(activePoi);
+
+    if (!within(ll, SERVICE_BOUNDS)) {
+      mapToast('Found you. The nearest relief sites are in Maricopa County.', 'warn');
+    } else {
+      mapToast('Showing sites near you.', 'ok');
+    }
+  };
+
+  const onLocError = (err) => {
+    if (err && err.code === 3) {
+      // High-accuracy GPS hardware timed out (common indoors or on desktop);
+      // retry once with standard network/cell triangulation before reporting failure
+      navigator.geolocation.getCurrentPosition(
+        onLocSuccess,
+        () => {
+          setLocateBusy(false);
+          mapToast('Location is taking too long — tap to try again.', 'warn');
+        },
+        { enableHighAccuracy: false, timeout: 6000, maximumAge: 30000 }
+      );
+      return;
+    }
+
+    setLocateBusy(false);
+    if (err && err.code === 1) {
+      mapToast('Location permission is off. Turn it on for this site, then tap again.', 'warn');
+    } else {
+      mapToast('Location unavailable right now.', 'warn');
+    }
+  };
+
   navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      setLocateBusy(false);
-      const ll = [pos.coords.latitude, pos.coords.longitude];
-
-      // Guard before anything downstream uses the fix: walk times, routing and
-      // the "nearby" sort all assume a point somewhere near the sites.
-      if (!within(ll, AZ_BOUNDS)) {
-        MAP.flyTo(PHX, 12, { duration: 0.6 });
-        mapToast('You are outside Arizona — showing Phoenix instead.', 'warn');
-        return;
-      }
-
-      userLL = ll;
-      dropUserPin(ll, pos.coords.accuracy);
-      MAP.flyTo(ll, 15, { duration: 0.7 });
-      enrichAllSitesWithOSRM(userLL);
-      renderCarousel();
-      if (activePoi != null) openPoi(activePoi);
-
-      if (!within(ll, SERVICE_BOUNDS)) {
-        mapToast('Found you. The nearest relief sites are in Maricopa County.', 'warn');
-      } else {
-        mapToast('Showing sites near you.', 'ok');
-      }
-    },
-    (err) => {
-      setLocateBusy(false);
-      if (err && err.code === 1) {
-        mapToast('Location permission is off. Turn it on for this site, then tap again.', 'warn');
-      } else if (err && err.code === 3) {
-        mapToast('Location is taking too long — tap to try again.', 'warn');
-      } else {
-        mapToast('Location unavailable right now.', 'warn');
-      }
-    },
-    // maximumAge 0 so every tap asks for a fresh fix rather than replaying a
-    // stale one the browser happens to be holding
+    onLocSuccess,
+    onLocError,
+    // maximumAge 0 so initial tap asks for fresh fix
     { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
   );
 }
