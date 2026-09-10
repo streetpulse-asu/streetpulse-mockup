@@ -664,69 +664,103 @@ function dropUserPin(ll, accuracy) {
     fillColor: '#2563eb', fillOpacity: 1 }).addTo(MAP);
 }
 
+/* iOS is the reason this is staged rather than one call.
+
+   The previous version asked for enableHighAccuracy with a 10s timeout and
+   maximumAge 0, which is the slowest possible request: a cold GPS fix on an
+   iPhone regularly takes longer than that indoors or in a dense street, so
+   it timed out every time and the button looked broken.
+
+   So: ask for a fast coarse fix first, which iOS answers from wifi almost
+   instantly, show it, then quietly refine with GPS in the background. If the
+   coarse attempt fails for a reason other than refusal, fall back to a patient
+   high-accuracy attempt rather than giving up. */
+const GEO_FAST   = { enableHighAccuracy: false, timeout: 9000,  maximumAge: 30000 };
+const GEO_EXACT  = { enableHighAccuracy: true,  timeout: 25000, maximumAge: 0 };
+
+function geoErrorText(err) {
+  if (!err) return 'Location unavailable right now.';
+  if (err.code === 1) {
+    // On a home-screen web app the browser settings a person knows about are
+    // not where this lives, so name the actual place.
+    return isStandalone()
+      ? 'Location is off for this app. iPhone Settings > Privacy & Security > Location Services, then tap again.'
+      : 'Location permission is off. Turn it on for this site, then tap again.';
+  }
+  if (err.code === 3) return 'Could not get a fix in time - tap to try again.';
+  return 'Location unavailable right now.';
+}
+
+function isStandalone() {
+  return window.navigator.standalone === true ||
+         (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+}
+
+function acceptFix(pos, refining) {
+  const ll = [pos.coords.latitude, pos.coords.longitude];
+
+  // Guard before anything downstream uses it: walk times, OSRM routing and the
+  // nearby sort all assume a point somewhere near the sites.
+  if (!within(ll, AZ_BOUNDS)) {
+    MAP.flyTo(PHX, 12, { duration: 0.6 });
+    mapToast('You are outside Arizona - showing Phoenix instead.', 'warn');
+    return;
+  }
+
+  userLL = ll;
+  dropUserPin(ll, pos.coords.accuracy);
+  MAP.flyTo(ll, 15, { duration: refining ? 0.35 : 0.7 });
+  enrichAllSitesWithOSRM(userLL);
+  renderCarousel();
+  if (activePoi != null) openPoi(activePoi);
+
+  if (refining) return;  // the first fix already said its piece
+  if (!within(ll, SERVICE_BOUNDS)) {
+    mapToast('Found you. The nearest relief sites are in Maricopa County.', 'warn');
+  } else {
+    mapToast('Showing sites near you.', 'ok');
+  }
+}
+
 function locateMe() {
   if (!navigator.geolocation) {
     mapToast('This browser cannot share a location.', 'warn');
+    return;
+  }
+  // Safari refuses geolocation outright off HTTPS, with an error that looks
+  // identical to a refusal. Worth naming rather than blaming the user.
+  if (window.isSecureContext === false) {
+    mapToast('Location needs a secure (https) connection.', 'warn');
     return;
   }
 
   setLocateBusy(true);
   mapToast('Finding your location…');
 
-  const onLocSuccess = (pos) => {
-    setLocateBusy(false);
-    const ll = [pos.coords.latitude, pos.coords.longitude];
-
-    // Guard before anything downstream uses the fix: walk times, routing and
-    // the "nearby" sort all assume a point somewhere near the sites.
-    if (!within(ll, AZ_BOUNDS)) {
-      MAP.flyTo(PHX, 12, { duration: 0.6 });
-      mapToast('You are outside Arizona — showing Phoenix instead.', 'warn');
-      return;
-    }
-
-    userLL = ll;
-    dropUserPin(ll, pos.coords.accuracy);
-    MAP.flyTo(ll, 15, { duration: 0.7 });
-    enrichAllSitesWithOSRM(userLL);
-    renderCarousel();
-    if (activePoi != null) openPoi(activePoi);
-
-    if (!within(ll, SERVICE_BOUNDS)) {
-      mapToast('Found you. The nearest relief sites are in Maricopa County.', 'warn');
-    } else {
-      mapToast('Showing sites near you.', 'ok');
-    }
-  };
-
-  const onLocError = (err) => {
-    if (err && err.code === 3) {
-      // High-accuracy GPS hardware timed out (common indoors or on desktop);
-      // retry once with standard network/cell triangulation before reporting failure
-      navigator.geolocation.getCurrentPosition(
-        onLocSuccess,
-        () => {
-          setLocateBusy(false);
-          mapToast('Location is taking too long — tap to try again.', 'warn');
-        },
-        { enableHighAccuracy: false, timeout: 6000, maximumAge: 30000 }
-      );
-      return;
-    }
-
-    setLocateBusy(false);
-    if (err && err.code === 1) {
-      mapToast('Location permission is off. Turn it on for this site, then tap again.', 'warn');
-    } else {
-      mapToast('Location unavailable right now.', 'warn');
-    }
-  };
-
   navigator.geolocation.getCurrentPosition(
-    onLocSuccess,
-    onLocError,
-    // maximumAge 0 so initial tap asks for fresh fix
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    (pos) => {
+      setLocateBusy(false);
+      acceptFix(pos, false);
+      // Coarse fix is on screen; tighten it if GPS can do better, silently.
+      navigator.geolocation.getCurrentPosition(
+        (better) => {
+          if (better.coords.accuracy < (pos.coords.accuracy || 1e9) * 0.6) acceptFix(better, true);
+        },
+        () => {}, GEO_EXACT);
+    },
+    (err) => {
+      if (err && err.code === 1) {          // refused: retrying cannot help
+        setLocateBusy(false);
+        mapToast(geoErrorText(err), 'warn');
+        return;
+      }
+      // Coarse attempt failed for some other reason - be patient instead.
+      navigator.geolocation.getCurrentPosition(
+        (pos) => { setLocateBusy(false); acceptFix(pos, false); },
+        (err2) => { setLocateBusy(false); mapToast(geoErrorText(err2), 'warn'); },
+        GEO_EXACT);
+    },
+    GEO_FAST
   );
 }
 

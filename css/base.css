@@ -8,6 +8,10 @@
         }
 
         .phone-container {
+            /* --nav-h and --drawer-h are measured at runtime (see js/ui.js).
+               Hardcoded pixel guesses do not survive a home indicator. */
+            --nav-h: 58px;
+            --drawer-h: 212px;
             width: 100vw; height: 100dvh;
             background-color: var(--bg-app);
             position: relative; overflow: hidden; display: flex; flex-direction: column;

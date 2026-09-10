@@ -119,3 +119,59 @@ function renderAppVersion() {
 }
 
 document.addEventListener('DOMContentLoaded', renderAppVersion);
+
+/* ==========================================================
+   LAYOUT MEASUREMENT
+   The bottom nav and the carousel drawer were both positioned against
+   hardcoded pixel guesses. On a phone with a home indicator the nav is
+   roughly 95px tall, not the 58px the drawer assumed, so the bottom of the
+   drawer sat underneath it - which is what got cut off on the home screen.
+   Both are measured instead, and the map controls ride on top of whatever
+   the drawer currently is, so they rise and fall as it opens and collapses.
+   ========================================================== */
+
+function measureChrome() {
+  const shell = document.querySelector('.phone-container');
+  const nav = document.querySelector('.bottom-nav');
+  const drawer = document.getElementById('bottom-carousel-drawer');
+  if (!shell) return;
+
+  if (nav) {
+    const h = Math.round(nav.getBoundingClientRect().height);
+    if (h > 0) shell.style.setProperty('--nav-h', h + 'px');
+  }
+  if (drawer) {
+    // a hidden drawer still has a height, so the controls would float above
+    // nothing; treat it as zero so they drop to the nav
+    const hidden = drawer.classList.contains('hidden');
+    const h = hidden ? 0 : Math.round(drawer.getBoundingClientRect().height);
+    shell.style.setProperty('--drawer-h', h + 'px');
+  }
+}
+
+(function watchChrome() {
+  const start = () => {
+    measureChrome();
+    const targets = [document.querySelector('.bottom-nav'),
+                     document.getElementById('bottom-carousel-drawer')].filter(Boolean);
+    if (typeof ResizeObserver === 'function') {
+      const ro = new ResizeObserver(() => measureChrome());
+      targets.forEach(t => ro.observe(t));
+    }
+    // collapsing the drawer animates its height, so keep measuring through it
+    const drawer = document.getElementById('bottom-carousel-drawer');
+    if (drawer) {
+      drawer.addEventListener('transitionend', measureChrome);
+      if (typeof MutationObserver === 'function') {
+        new MutationObserver(measureChrome)
+          .observe(drawer, { attributes: true, attributeFilter: ['class'] });
+      }
+    }
+    window.addEventListener('resize', measureChrome);
+    window.addEventListener('orientationchange', () => setTimeout(measureChrome, 250));
+    // iOS settles safe-area insets a beat after first paint in standalone
+    [150, 500, 1200].forEach(ms => setTimeout(measureChrome, ms));
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
+})();
