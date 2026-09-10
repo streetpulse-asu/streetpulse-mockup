@@ -79,17 +79,23 @@ function triggerSilentHaptic() {
   } catch (e) {}
 }
 
-function triggerButtonPulse(btn) {
-  btn.style.display = 'flex';
-  btn.className = 'btn-more-info show';
+/* The full-width "tap for more information" banner is gone; the status panel
+   itself opens the guide, but only while a reading is actually out of range.
+   openStatusGuide() is a no-op otherwise, so a normal panel is inert. */
+function markStatusAlert(panel) {
+  if (panel) panel.classList.add('alert');
   triggerSilentHaptic();
+}
+
+function openStatusGuide() {
+  const panel = document.getElementById('status-panel');
+  if (panel && panel.classList.contains('alert')) openFieldGuide(currentAlertTopic);
 }
 
 function evaluateVitals(temp, spo2, hr) {
   const panel = document.getElementById('status-panel');
   const iconContainer = document.getElementById('status-icon');
   const textEl = document.getElementById('status-text');
-  const infoBtn = document.getElementById('btn-more-info');
   
   // Convert to numbers to prevent string comparison bugs
   const hasTemp = temp !== undefined && temp !== null && temp !== '--' && temp !== '' && !isNaN(parseFloat(temp));
@@ -101,40 +107,37 @@ function evaluateVitals(temp, spo2, hr) {
     currentAlertTopic = 'hyper';
     if (iconContainer) iconContainer.innerHTML = iconTelemetry;
     textEl.innerText = 'High body temperature';
-    if (infoBtn) triggerButtonPulse(infoBtn);
+    markStatusAlert(panel);
   } else if (tempNum !== null && tempNum < 95.0 && tempNum > 0) {
     currentAlertTopic = 'hypo';
     if (iconContainer) iconContainer.innerHTML = iconTelemetry;
     textEl.innerText = 'Low body temperature';
-    if (infoBtn) triggerButtonPulse(infoBtn);
+    markStatusAlert(panel);
   } else if (spo2 < 93) {
     currentAlertTopic = 'spo2';
     if (iconContainer) iconContainer.innerHTML = iconTelemetry;
     textEl.innerText = 'Low oxygen level (SpO2)';
-    if (infoBtn) triggerButtonPulse(infoBtn);
+    markStatusAlert(panel);
   } else if (hr > 140 || hr < 50) {
     currentAlertTopic = 'pulse';
     if (iconContainer) iconContainer.innerHTML = iconTelemetry;
     textEl.innerText = 'Abnormal heart rate';
-    if (infoBtn) triggerButtonPulse(infoBtn);
+    markStatusAlert(panel);
   } else if (tempNum !== null && tempNum >= 100.4) {
     currentAlertTopic = 'hyper';
     if (iconContainer) iconContainer.innerHTML = iconTelemetry;
     textEl.innerText = 'Elevated body temperature';
-    if (infoBtn) triggerButtonPulse(infoBtn);
+    markStatusAlert(panel);
   } else if (spo2 < 95) {
     currentAlertTopic = 'spo2';
     if (iconContainer) iconContainer.innerHTML = iconTelemetry;
     textEl.innerText = 'Mildly decreased oxygen (SpO2)';
-    if (infoBtn) triggerButtonPulse(infoBtn);
+    markStatusAlert(panel);
   } else {
     currentAlertTopic = 'spo2';
     if (iconContainer) iconContainer.innerHTML = iconCheck;
     textEl.innerText = 'All readings in normal range';
-    if (infoBtn) {
-      infoBtn.style.display = 'none';
-      infoBtn.className = 'btn-more-info';
-    }
+    if (panel) panel.classList.remove('alert');
   }
 }
 
@@ -286,7 +289,6 @@ let thStream = null;
 let thTimerInterval = null;
 let thTimerSeconds = 0;
 let thMicMuted = false;
-let thCamOff = false;
 
 function openTelehealthPrompt() {
   document.getElementById('telehealth-perm-modal').classList.add('show');
@@ -296,37 +298,25 @@ function closeTelehealthPrompt() {
   document.getElementById('telehealth-perm-modal').classList.remove('show');
 }
 
-async function grantCameraAndCall(useCamera) {
+/* Voice consultation. Requests audio only — there is no camera in this flow,
+   so there is nothing to fall back to and no simulated-video path. If the mic
+   is refused the call still connects; the physician is reading the shared
+   vitals, and Mute simply has no track to toggle. */
+async function startTelehealthCall() {
   closeTelehealthPrompt();
-  
-  // Sync current vitals to the Telehealth HUD
   syncTelehealthVitals();
 
-  const callModal = document.getElementById('telehealth-call-modal');
-  callModal.classList.add('show');
-  
-  const videoEl = document.getElementById('th-local-video');
-  const fallbackEl = document.getElementById('th-pip-fallback');
+  document.getElementById('telehealth-call-modal').classList.add('show');
 
-  if (useCamera && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     try {
-      thStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      if (videoEl && thStream) {
-        videoEl.srcObject = thStream;
-        videoEl.style.display = 'block';
-        if (fallbackEl) fallbackEl.style.display = 'none';
-      }
+      thStream = await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (err) {
-      console.warn('Camera access declined or unavailable, falling back to simulated view:', err);
-      if (videoEl) videoEl.style.display = 'none';
-      if (fallbackEl) fallbackEl.style.display = 'flex';
+      console.warn('Microphone unavailable; continuing without a live track:', err);
+      thStream = null;
     }
-  } else {
-    if (videoEl) videoEl.style.display = 'none';
-    if (fallbackEl) fallbackEl.style.display = 'flex';
   }
 
-  // Start call timer
   thTimerSeconds = 0;
   updateCallTimerDisplay();
   clearInterval(thTimerInterval);
@@ -368,40 +358,23 @@ function toggleTelehealthMic() {
   }
   if (btn) {
     btn.classList.toggle('active-off', thMicMuted);
-    btn.querySelector('span').innerText = thMicMuted ? 'Muted' : 'Mute';
-  }
-}
-
-function toggleTelehealthCam() {
-  thCamOff = !thCamOff;
-  const btn = document.getElementById('th-btn-cam');
-  const videoEl = document.getElementById('th-local-video');
-  const fallbackEl = document.getElementById('th-pip-fallback');
-
-  if (thStream) {
-    thStream.getVideoTracks().forEach(t => t.enabled = !thCamOff);
-  }
-  if (videoEl) videoEl.style.display = thCamOff ? 'none' : (thStream ? 'block' : 'none');
-  if (fallbackEl) fallbackEl.style.display = thCamOff || !thStream ? 'flex' : 'none';
-
-  if (btn) {
-    btn.classList.toggle('active-off', thCamOff);
-    btn.querySelector('span').innerText = thCamOff ? 'Cam Off' : 'Camera';
+    btn.querySelector('.th-ctrl-label').innerText = thMicMuted ? 'Muted' : 'Mute';
   }
 }
 
 function sendVitalsSnapshot() {
   syncTelehealthVitals();
-  const hudHeader = document.querySelector('.th-hud-header span');
-  if (hudHeader) {
-    const originalText = hudHeader.innerText;
-    hudHeader.innerHTML = icon('check', 13) + ' <span>Vitals Snapshot Transmitted to Dr. Rivera</span>';
-    hudHeader.style.color = '#4ade80';
-    setTimeout(() => {
-      hudHeader.innerText = originalText;
-      hudHeader.style.color = '#38bdf8';
-    }, 2400);
-  }
+  const title = document.querySelector('.th-hud-title');
+  const header = document.querySelector('.th-hud-header');
+  if (!title || !header) return;
+
+  const original = title.innerText;
+  title.innerText = 'Vitals snapshot sent to Dr. Rivera';
+  header.style.color = 'var(--call-live)';
+  setTimeout(() => {
+    title.innerText = original;
+    header.style.color = '';
+  }, 2400);
 }
 
 function endTelehealthCall() {
@@ -412,23 +385,14 @@ function endTelehealthCall() {
     thStream.getTracks().forEach(track => track.stop());
     thStream = null;
   }
-  const videoEl = document.getElementById('th-local-video');
-  if (videoEl) videoEl.srcObject = null;
 
   const callModal = document.getElementById('telehealth-call-modal');
   if (callModal) callModal.classList.remove('show');
 
-  // Reset controls state
   thMicMuted = false;
-  thCamOff = false;
   const micBtn = document.getElementById('th-btn-mic');
-  const camBtn = document.getElementById('th-btn-cam');
   if (micBtn) {
     micBtn.classList.remove('active-off');
-    micBtn.querySelector('span').innerText = 'Mute';
-  }
-  if (camBtn) {
-    camBtn.classList.remove('active-off');
-    camBtn.querySelector('span').innerText = 'Camera';
+    micBtn.querySelector('.th-ctrl-label').innerText = 'Mute';
   }
 }

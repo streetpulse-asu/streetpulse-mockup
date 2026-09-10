@@ -41,6 +41,17 @@
             --shadow-overlay: 0 16px 40px -12px rgba(16, 26, 44, 0.40);
             --shadow-soft:    var(--shadow-1);
 
+            /* ---------- Telehealth call surface ----------
+               The consultation runs full-bleed on a dark ground so the phone
+               reads as "in a call" at a glance. Flat, not gradient — the same
+               figure/ground rule as the light screens, inverted. */
+            --call-bg:      #101a2c;
+            --call-raised:  #1a2740;
+            --call-line:    rgba(255, 255, 255, 0.12);
+            --call-text:    #f2f5f9;
+            --call-muted:   #93a2b8;
+            --call-live:    #4ade80;
+
             /* ---------- Clinical status ----------
                The values documented in DESIGN_SYSTEM.md section 2. Reserved
                for vitals and alerts; never reused for categories or chrome. */

@@ -20,11 +20,11 @@
     <!-- Design tokens first, then base/shell, then shared components, then
          per-screen styles. Change a color or spacing value once in tokens.css
          and it updates everywhere. -->
-    <link rel="stylesheet" href="css/tokens.css?v=v24">
-    <link rel="stylesheet" href="css/base.css?v=v24">
-    <link rel="stylesheet" href="css/components.css?v=v24">
-    <link rel="stylesheet" href="css/map.css?v=v24">
-    <link rel="stylesheet" href="css/scanner.css?v=v24">
+    <link rel="stylesheet" href="css/tokens.css?v=v25">
+    <link rel="stylesheet" href="css/base.css?v=v25">
+    <link rel="stylesheet" href="css/components.css?v=v25">
+    <link rel="stylesheet" href="css/map.css?v=v25">
+    <link rel="stylesheet" href="css/scanner.css?v=v25">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
@@ -131,7 +131,7 @@
                 You also have the option to call telehealth directly if a sensor is unavailable or immediate clinical support is needed.
             </p>
             <button class="btn btn-telehealth lock-telehealth-btn" onclick="openTelehealthPrompt()">
-                <span class="icon" data-icon="video" data-size="20"></span>
+                <span class="icon" data-icon="phone" data-size="20"></span>
                 <span>Call Telehealth</span>
             </button>
         </div>
@@ -176,7 +176,13 @@
                 </div>
             </div>
 
-            <div class="status-panel" id="status-panel">
+            <button class="btn btn-secondary btn-add-manual" onclick="openManualEntry()">
+                <span class="icon" data-icon="clipboard-pen" data-size="18"></span>
+                Add manual entry
+            </button>
+
+            <div class="status-panel" id="status-panel" onclick="openStatusGuide()"
+                 role="button" tabindex="0" aria-describedby="status-text">
                 <div class="status-icon" id="status-icon">
                     <span class="icon" data-icon="circle-check" data-size="18"></span>
                 </div>
@@ -184,21 +190,14 @@
                     <span class="status-label">Telemetry status</span>
                     <span class="status-value" id="status-text">All readings in normal range</span>
                 </div>
+                <span class="status-chevron icon" data-icon="chevron-right" data-size="18"></span>
             </div>
 
-            <button class="btn-more-info" id="btn-more-info" onclick="openFieldGuide(currentAlertTopic)" aria-label="Tap for more information">
-                <span class="more-info-title">TAP FOR MORE INFORMATION</span>
-                <span class="icon" data-icon="chevron-down" data-size="22"></span>
-            </button>
 
             <div class="controls-container">
                 <button class="btn btn-telehealth" id="btn-call-telehealth" onclick="openTelehealthPrompt()">
-                    <span class="icon" data-icon="video" data-size="20"></span>
+                    <span class="icon" data-icon="phone" data-size="20"></span>
                     <span>Call Telehealth</span>
-                </button>
-                <button class="btn btn-secondary" onclick="openManualEntry()" style="border: 2px dashed var(--accent); color: var(--accent-deep); background-color: var(--surface-sunken);">
-                    <span class="icon" data-icon="clipboard-pen" data-size="20"></span>
-                    Add manual entry
                 </button>
                 <button class="btn btn-primary" onclick="simulateNewReading()">
                     <span class="icon" data-icon="refresh-cw" data-size="18"></span>
@@ -227,7 +226,7 @@
             <div class="settings-row">
                 <div>
                     <div class="sr-label">App Shell Offline Cache</div>
-                    <div class="sr-desc">Service worker active · Version v22</div>
+                    <div class="sr-desc">Service worker active · Version v25</div>
                 </div>
                 <span class="status-pill-subtle">Ready</span>
             </div>
@@ -624,22 +623,24 @@
     </div>
 
     <!-- ============ TELEHEALTH CAMERA PERMISSION MODAL ============ -->
-    <div class="modal-overlay" id="telehealth-perm-modal" role="dialog" aria-modal="true" aria-label="Camera and microphone permission">
+    <div class="modal-overlay" id="telehealth-perm-modal" role="dialog" aria-modal="true" aria-label="Microphone permission">
         <div class="modal-card" style="padding: 26px 22px; max-width: 360px;">
             <div class="modal-icon" style="background: rgba(22, 35, 61, 0.08); color: var(--accent);">
-                <span class="icon" data-icon="camera" data-size="30"></span>
+                <span class="icon" data-icon="mic" data-size="30"></span>
             </div>
-            <h3 class="modal-title" style="font-size: 1.25rem;">Allow Camera Access?</h3>
-            <p class="modal-desc" style="font-size: 0.85rem; margin-bottom: 20px; line-height: 1.5;">
-                StreetPulse Outreach uses your camera for live telehealth video consultations with the on-call physician.
+            <h3 class="modal-title" style="font-size: 1.25rem;">Allow microphone access?</h3>
+            <p class="modal-desc" style="font-size: 0.85rem; margin-bottom: 8px; line-height: 1.5;">
+                Telehealth consultations are <strong>voice only</strong>. StreetPulse needs your
+                microphone to talk to the on-call physician.
+            </p>
+            <p class="modal-note">
+                <span class="icon" data-icon="video-off" data-size="14"></span>
+                No camera is used. The physician sees the shared vitals, never a video feed.
             </p>
             <div style="display: flex; flex-direction: column; gap: 8px;">
-                <button class="btn btn-primary" style="background: var(--accent-deep);" onclick="grantCameraAndCall(true)">
+                <button class="btn btn-primary" style="background: var(--accent-deep);" onclick="startTelehealthCall()">
                     <span class="icon" data-icon="check" data-size="18"></span>
-                    Allow Camera &amp; Connect
-                </button>
-                <button class="btn btn-secondary" onclick="grantCameraAndCall(false)" style="font-size: 0.82rem; margin-top: 0;">
-                    Continue with Simulated Video
+                    Allow microphone and connect
                 </button>
                 <button class="btn" style="background: transparent; color: var(--text-muted); font-size: 0.8rem; padding: 8px; margin-top: 2px;" onclick="closeTelehealthPrompt()">
                     Cancel
@@ -649,95 +650,76 @@
     </div>
 
     <!-- ============ TELEHEALTH ACTIVE CALL MODAL ============ -->
-    <div class="modal-overlay" id="telehealth-call-modal" role="dialog" aria-modal="true" aria-label="Telehealth consultation call" style="padding: 0; background: #0c1524;">
+    <div class="modal-overlay" id="telehealth-call-modal" role="dialog" aria-modal="true" aria-label="Telehealth voice consultation">
         <div class="telehealth-call-container">
-            <!-- Call Header -->
-            <div class="telehealth-top-bar">
-                <div class="th-clinician-info">
-                    <div class="th-live-dot"></div>
-                    <div>
-                        <div class="th-doctor-name">Dr. Maya Rivera, MD</div>
-                        <div class="th-dept">Valleywise Street Medicine &bull; On-Call</div>
-                    </div>
-                </div>
-                <div class="th-call-timer" id="th-call-timer">00:00</div>
+
+            <div class="th-top-bar">
+                <span class="th-live"><span class="th-live-dot"></span>Connected</span>
+                <span class="th-call-timer" id="th-call-timer">00:00</span>
             </div>
 
-            <!-- Video Stage -->
-            <div class="th-video-stage">
-                <!-- Clinician Remote Video Feed (Simulation) -->
-                <div class="th-remote-feed">
-                    <div class="th-avatar-container">
-                        <div class="th-doctor-avatar">
-                            <span class="icon" data-icon="stethoscope" data-size="68"></span>
-                        </div>
-                        <div class="th-audio-wave">
-                            <span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span>
-                        </div>
-                    </div>
-                    <div class="th-remote-tag">
-                        <span class="icon" data-icon="shield-check" data-size="14"></span>
-                        Encrypted Triage Channel &bull; Valleywise Medical Center
-                    </div>
+            <div class="th-stage">
+                <div class="th-avatar">
+                    <span class="icon" data-icon="stethoscope" data-size="52"></span>
+                </div>
+                <div class="th-doctor-name">Dr. Maya Rivera, MD</div>
+                <div class="th-dept">Valleywise Street Medicine &bull; On-Call</div>
+
+                <div class="th-mode-tag">
+                    <span class="icon" data-icon="phone" data-size="13"></span>
+                    Voice consultation
                 </div>
 
-                <!-- Self / Field Camera PIP -->
-                <div class="th-pip-window" id="th-pip-window">
-                    <video id="th-local-video" autoplay playsinline muted></video>
-                    <div class="th-pip-fallback" id="th-pip-fallback">
-                        <span class="icon" data-icon="user" data-size="22"></span>
-                        <span>Worker Cam</span>
-                    </div>
-                    <div class="th-pip-label">Field Cam (Self)</div>
+                <div class="th-audio-wave" aria-hidden="true">
+                    <span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span>
                 </div>
 
-                <!-- Live Synchronized Vitals HUD -->
-                <div class="th-vitals-hud">
-                    <div class="th-hud-header">
-                        <span class="icon" data-icon="activity" data-size="14"></span>
-                        <span>Live Outreach Telemetry Shared</span>
+                <div class="th-remote-tag">
+                    <span class="icon" data-icon="shield-check" data-size="13"></span>
+                    Encrypted triage channel
+                </div>
+            </div>
+
+            <div class="th-vitals-hud">
+                <div class="th-hud-header">
+                    <span class="icon" data-icon="activity" data-size="13"></span>
+                    <span class="th-hud-title">Live telemetry shared</span>
+                </div>
+                <div class="th-hud-metrics">
+                    <div class="th-metric">
+                        <span class="th-m-label">HR</span>
+                        <span class="th-m-val" id="th-val-hr">--</span>
+                        <span class="th-m-unit">bpm</span>
                     </div>
-                    <div class="th-hud-metrics">
-                        <div class="th-metric">
-                            <span class="th-m-label">HR</span>
-                            <span class="th-m-val" id="th-val-hr">--</span>
-                            <span class="th-m-unit">bpm</span>
-                        </div>
-                        <div class="th-metric">
-                            <span class="th-m-label">SpO2</span>
-                            <span class="th-m-val" id="th-val-spo2">--</span>
-                            <span class="th-m-unit">%</span>
-                        </div>
-                        <div class="th-metric">
-                            <span class="th-m-label">Temp</span>
-                            <span class="th-m-val" id="th-val-temp">--</span>
-                            <span class="th-m-unit">&deg;F</span>
-                        </div>
-                        <div class="th-metric">
-                            <span class="th-m-label">BP</span>
-                            <span class="th-m-val" id="th-val-bp">--/--</span>
-                        </div>
+                    <div class="th-metric">
+                        <span class="th-m-label">SpO&#8322;</span>
+                        <span class="th-m-val" id="th-val-spo2">--</span>
+                        <span class="th-m-unit">%</span>
+                    </div>
+                    <div class="th-metric">
+                        <span class="th-m-label">Temp</span>
+                        <span class="th-m-val" id="th-val-temp">--</span>
+                        <span class="th-m-unit">&deg;F</span>
+                    </div>
+                    <div class="th-metric">
+                        <span class="th-m-label">BP</span>
+                        <span class="th-m-val" id="th-val-bp">--/--</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Call Controls Bar -->
             <div class="th-controls-bar">
-                <button class="th-ctrl-btn" id="th-btn-mic" onclick="toggleTelehealthMic()" title="Mute/Unmute">
-                    <span class="icon" data-icon="mic" data-size="22"></span>
-                    <span>Mute</span>
+                <button class="th-ctrl-btn" id="th-btn-mic" onclick="toggleTelehealthMic()">
+                    <span class="icon" data-icon="mic" data-size="21"></span>
+                    <span class="th-ctrl-label">Mute</span>
                 </button>
-                <button class="th-ctrl-btn" id="th-btn-cam" onclick="toggleTelehealthCam()" title="Camera Toggle">
-                    <span class="icon" data-icon="video" data-size="22"></span>
-                    <span>Camera</span>
+                <button class="th-ctrl-btn" onclick="sendVitalsSnapshot()">
+                    <span class="icon" data-icon="send" data-size="21"></span>
+                    <span class="th-ctrl-label">Send vitals</span>
                 </button>
-                <button class="th-ctrl-btn" onclick="sendVitalsSnapshot()" title="Push Snapshot">
-                    <span class="icon" data-icon="send" data-size="22"></span>
-                    <span>Send Vitals</span>
-                </button>
-                <button class="th-ctrl-btn th-end-call" onclick="endTelehealthCall()" title="End Consultation">
-                    <span class="icon" data-icon="phone-off" data-size="24"></span>
-                    <span>End Call</span>
+                <button class="th-ctrl-btn th-end-call" onclick="endTelehealthCall()">
+                    <span class="icon" data-icon="phone-off" data-size="21"></span>
+                    <span class="th-ctrl-label">End call</span>
                 </button>
             </div>
         </div>
@@ -748,11 +730,11 @@
     <!-- Site data + HRN-feed mapping helpers first, then the screens that
          consume them. Order matters here: each file expects the one before
          it to already be loaded. -->
-    <script src="js/icons.js?v=v24"></script>
-    <script src="js/data.js?v=v24"></script>
-    <script src="js/map.js?v=v24"></script>
-    <script src="js/ui.js?v=v24"></script>
-    <script src="js/scanner.js?v=v24"></script>
+    <script src="js/icons.js?v=v25"></script>
+    <script src="js/data.js?v=v25"></script>
+    <script src="js/map.js?v=v25"></script>
+    <script src="js/ui.js?v=v25"></script>
+    <script src="js/scanner.js?v=v25"></script>
 
     <script>
       if ('serviceWorker' in navigator) {
