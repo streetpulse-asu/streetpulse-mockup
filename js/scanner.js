@@ -112,7 +112,7 @@ function renderSync() {
   bar.classList.toggle('synced', ENCOUNTER.online);
   text.innerText = ENCOUNTER.online
     ? 'Synced to the encounter record'
-    : 'Offline — encounter queued locally, syncs when signal returns';
+    : 'Offline - encounter queued locally, syncs when signal returns';
 }
 
 function renderEncounter() {

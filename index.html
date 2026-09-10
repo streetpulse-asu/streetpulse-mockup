@@ -20,11 +20,11 @@
     <!-- Design tokens first, then base/shell, then shared components, then
          per-screen styles. Change a color or spacing value once in tokens.css
          and it updates everywhere. -->
-    <link rel="stylesheet" href="css/tokens.css?v=v31">
-    <link rel="stylesheet" href="css/base.css?v=v31">
-    <link rel="stylesheet" href="css/components.css?v=v31">
-    <link rel="stylesheet" href="css/map.css?v=v31">
-    <link rel="stylesheet" href="css/scanner.css?v=v31">
+    <link rel="stylesheet" href="css/tokens.css?v=v32">
+    <link rel="stylesheet" href="css/base.css?v=v32">
+    <link rel="stylesheet" href="css/components.css?v=v32">
+    <link rel="stylesheet" href="css/map.css?v=v32">
+    <link rel="stylesheet" href="css/scanner.css?v=v32">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
@@ -215,7 +215,7 @@
                  plainly rather than hidden behind a settings screen. -->
             <div class="sync-bar" id="sync-bar" hidden>
                 <span class="icon" data-icon="cloud-off" data-size="15"></span>
-                <span id="sync-text">Offline &mdash; encounter queued locally, syncs when signal returns</span>
+                <span id="sync-text">Offline - encounter queued locally, syncs when signal returns</span>
             </div>
 
             <div class="act">
@@ -266,7 +266,7 @@
             <div class="settings-row">
                 <div>
                     <div class="sr-label">App Shell Offline Cache</div>
-                    <div class="sr-desc">Service worker active · Version v31</div>
+                    <div class="sr-desc">Service worker active · Version v32</div>
                 </div>
                 <span class="status-pill-subtle">Ready</span>
             </div>
@@ -770,11 +770,11 @@
     <!-- Site data + HRN-feed mapping helpers first, then the screens that
          consume them. Order matters here: each file expects the one before
          it to already be loaded. -->
-    <script src="js/icons.js?v=v31"></script>
-    <script src="js/data.js?v=v31"></script>
-    <script src="js/map.js?v=v31"></script>
-    <script src="js/ui.js?v=v31"></script>
-    <script src="js/scanner.js?v=v31"></script>
+    <script src="js/icons.js?v=v32"></script>
+    <script src="js/data.js?v=v32"></script>
+    <script src="js/map.js?v=v32"></script>
+    <script src="js/ui.js?v=v32"></script>
+    <script src="js/scanner.js?v=v32"></script>
 
     <script>
       if ('serviceWorker' in navigator) {

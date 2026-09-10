@@ -347,39 +347,44 @@
         }
 
         /* ---------- the board ---------- */
-        .board { background: var(--ink); color: #fff; }
+        .board {
+            background: var(--surface);
+            color: var(--ink);
+            border-bottom: 1px solid var(--border-soft);
+        }
         .chan {
             display: grid; grid-template-columns: 1fr auto; align-items: center;
             gap: 4px 12px; padding: 13px 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+            border-bottom: 1px solid var(--border-soft);
             position: relative;
         }
         .chan-k { display: flex; align-items: baseline; gap: 9px; grid-column: 1; }
         .chan-name {
             font-size: 0.62rem; font-weight: 800; letter-spacing: 1px;
-            text-transform: uppercase; color: var(--call-muted);
+            text-transform: uppercase; color: var(--text-muted);
         }
+        .chan-lim { font-size: 0.58rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.4px; }
         .chan-v { display: flex; align-items: baseline; gap: 5px; grid-column: 1; }
         .chan-n {
-            font-family: 'Fraunces', Georgia, serif; font-size: 2.3rem; font-weight: 700;
-            line-height: 1.05; letter-spacing: -1.2px;
+            font-family: inherit; font-size: 2.3rem; font-weight: 800;
+            line-height: 1.05; letter-spacing: -1.2px; color: var(--ink);
         }
-        .chan-u { font-size: 0.7rem; font-weight: 700; color: var(--call-muted); }
+        .chan-u { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); }
         .chan-meta {
             grid-column: 2; grid-row: 1 / span 2;
             display: flex; flex-direction: column; align-items: flex-end; gap: 5px;
         }
         .chan-age {
-            font-size: 0.58rem; font-weight: 700; color: #6c7c93;
+            font-size: 0.58rem; font-weight: 700; color: var(--text-muted);
             letter-spacing: 0.5px; text-transform: uppercase;
         }
-        .chan.empty .chan-n { color: #4a5a72; }
-        .chan.stale .chan-age { color: #e0a34a; }
+        .chan.empty .chan-n { color: #94a3b8; }
+        .chan.stale .chan-age { color: var(--warning-text); }
 
         .chan-trio { display: grid; grid-template-columns: 1fr 1fr 1fr; }
         .chan-trio .chan {
             grid-template-columns: 1fr; align-items: start; gap: 3px;
-            padding: 10px 14px; border-right: 1px solid rgba(255, 255, 255, 0.10);
+            padding: 10px 14px; border-right: 1px solid var(--border-soft);
             border-bottom: 0;
         }
         .chan-trio .chan:last-child { border-right: 0; }
