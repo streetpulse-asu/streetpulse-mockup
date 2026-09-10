@@ -20,11 +20,11 @@
     <!-- Design tokens first, then base/shell, then shared components, then
          per-screen styles. Change a color or spacing value once in tokens.css
          and it updates everywhere. -->
-    <link rel="stylesheet" href="css/tokens.css?v=v23">
-    <link rel="stylesheet" href="css/base.css?v=v23">
-    <link rel="stylesheet" href="css/components.css?v=v23">
-    <link rel="stylesheet" href="css/map.css?v=v23">
-    <link rel="stylesheet" href="css/scanner.css?v=v23">
+    <link rel="stylesheet" href="css/tokens.css?v=v24">
+    <link rel="stylesheet" href="css/base.css?v=v24">
+    <link rel="stylesheet" href="css/components.css?v=v24">
+    <link rel="stylesheet" href="css/map.css?v=v24">
+    <link rel="stylesheet" href="css/scanner.css?v=v24">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
@@ -124,10 +124,13 @@
                 <span class="icon" data-icon="bluetooth" data-size="18"></span>
                 Connect StreetPulse Sensor
             </button>
-            <button class="btn btn-secondary" onclick="openManualEntry()" style="margin-top: 10px; border: 1px dashed var(--border-soft); width: 100%; max-width: 280px;">
-                Record Manual Vitals Instead
-            </button>
-            <button class="btn btn-telehealth" style="margin-top: 10px; width: 100%; max-width: 280px;" onclick="openTelehealthPrompt()">
+            <div class="lock-divider">
+                <span>or</span>
+            </div>
+            <p class="lock-alt-desc">
+                You also have the option to call telehealth directly if a sensor is unavailable or immediate clinical support is needed.
+            </p>
+            <button class="btn btn-telehealth lock-telehealth-btn" onclick="openTelehealthPrompt()">
                 <span class="icon" data-icon="video" data-size="20"></span>
                 <span>Call Telehealth</span>
             </button>
@@ -745,11 +748,11 @@
     <!-- Site data + HRN-feed mapping helpers first, then the screens that
          consume them. Order matters here: each file expects the one before
          it to already be loaded. -->
-    <script src="js/icons.js?v=v23"></script>
-    <script src="js/data.js?v=v23"></script>
-    <script src="js/map.js?v=v23"></script>
-    <script src="js/ui.js?v=v23"></script>
-    <script src="js/scanner.js?v=v23"></script>
+    <script src="js/icons.js?v=v24"></script>
+    <script src="js/data.js?v=v24"></script>
+    <script src="js/map.js?v=v24"></script>
+    <script src="js/ui.js?v=v24"></script>
+    <script src="js/scanner.js?v=v24"></script>
 
     <script>
       if ('serviceWorker' in navigator) {

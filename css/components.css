@@ -126,6 +126,24 @@
             width: 100%; max-width: 280px; display: flex; align-items: center;
             justify-content: center; gap: 8px;
         }
+        .lock-divider {
+            display: flex; align-items: center; width: 100%; max-width: 280px;
+            margin: 18px 0 14px 0; color: var(--text-muted);
+            font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .lock-divider::before, .lock-divider::after {
+            content: ''; flex: 1; height: 1px; background: var(--border-soft);
+        }
+        .lock-divider span {
+            padding: 0 10px;
+        }
+        .lock-alt-desc {
+            font-size: 0.8rem; line-height: 1.45; color: var(--text-muted);
+            max-width: 280px; margin: 0 0 12px 0;
+        }
+        .lock-telehealth-btn {
+            width: 100%; max-width: 280px;
+        }
         .badge-disconnect {
             background: rgba(46, 125, 50, 0.1); color: #1e6b23;
             border: 1px solid rgba(46, 125, 50, 0.25); border-radius: 12px;
