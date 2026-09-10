@@ -545,3 +545,64 @@
             padding: 5px 12px; border-radius: 20px;
         }
         .th-sent-chip[hidden] { display: none; }
+
+        /* ---------- Secondary tiles ----------
+           Temp, BP, Resp and Narcan only exist once someone has entered them.
+           An empty row of "Not taken" placeholders told the worker nothing and
+           took up a third of the board. The row lays out by how many are
+           actually showing, so four falls into a 2x2 rather than squeezing. */
+        .chan-trio { grid-template-columns: 1fr; }
+        .chan-trio[data-shown="0"] { display: none; }
+        .chan-trio[data-shown="2"] { grid-template-columns: 1fr 1fr; }
+        .chan-trio[data-shown="3"] { grid-template-columns: 1fr 1fr 1fr; }
+        .chan-trio[data-shown="4"] { grid-template-columns: 1fr 1fr; }
+        .chan-trio .chan[hidden] { display: none; }
+        /* with two rows, the top pair needs its own divider */
+        .chan-trio[data-shown="4"] .chan:nth-child(-n+2) {
+            border-bottom: 1px solid rgba(16, 26, 44, 0.10);
+        }
+
+        .chan-intervention .chan-n { font-size: 1.05rem; }
+
+        /* ---------- Narcan control in manual entry ---------- */
+        .intervention-group {
+            border: 0; padding: 0; margin: 0 0 18px;
+        }
+        .intervention-group legend {
+            padding: 0; margin-bottom: 8px;
+            font-size: 0.62rem; font-weight: 800; letter-spacing: 0.8px;
+            text-transform: uppercase; color: var(--text-muted);
+        }
+        .narcan-btn {
+            width: 100%; display: flex; align-items: center; gap: 12px;
+            padding: 12px 14px; border-radius: 12px; cursor: pointer;
+            background: var(--surface); border: 1.5px solid var(--border-soft);
+            font-family: inherit; text-align: left;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+        .narcan-mark {
+            width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0;
+            border: 1.5px solid var(--border-strong); background: var(--surface);
+            position: relative;
+        }
+        .narcan-btn[aria-pressed="true"] {
+            background: var(--amber-soft); border-color: var(--amber);
+        }
+        .narcan-btn[aria-pressed="true"] .narcan-mark {
+            background: var(--amber); border-color: var(--amber);
+        }
+        .narcan-btn[aria-pressed="true"] .narcan-mark::after {
+            content: ''; position: absolute; left: 7px; top: 3px;
+            width: 5px; height: 10px; border: solid #fff;
+            border-width: 0 2px 2px 0; transform: rotate(45deg);
+        }
+        .narcan-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+        .narcan-title { font-size: 0.86rem; font-weight: 700; color: var(--ink); }
+        .narcan-sub { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); }
+        .narcan-count {
+            flex-shrink: 0; min-width: 26px; height: 26px; border-radius: 13px;
+            background: var(--amber); color: #fff;
+            font-size: 0.78rem; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .narcan-count[hidden] { display: none; }

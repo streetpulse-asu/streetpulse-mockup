@@ -32,6 +32,12 @@ const VITALS = {
   rr:   { v: null, at: null, src: null }
 };
 
+/* Narcan is an intervention rather than a measurement, so it has a count and
+   a time given rather than a value and a source. `pending` is what the open
+   manual-entry sheet is proposing: doses only become real on save, so backing
+   out of the sheet does not leave a dose on the record. */
+const NARCAN = { doses: 0, at: null, pending: 0 };
+
 const LOG = [];
 
 function clockOf(ts) {
@@ -82,6 +88,51 @@ function recordVital(key, value, source) {
   entry.src = source;
 }
 
+/* Which secondary tiles exist right now. An empty "Not taken" row told the
+   worker nothing, so a tile only appears once its value has been entered. */
+function renderSecondaryTiles() {
+  const row = document.getElementById('chan-trio');
+  if (!row) return;
+  let shown = 0;
+  [['chan-temp', VITALS.temp.v !== null],
+   ['chan-bp',   VITALS.bp.v   !== null],
+   ['chan-rr',   VITALS.rr.v   !== null],
+   ['chan-narcan', NARCAN.doses > 0]].forEach(([id, on]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.hidden = !on;
+    if (on) shown++;
+  });
+  row.setAttribute('data-shown', String(shown));
+}
+
+function renderNarcan() {
+  const val = document.getElementById('narcan-val');
+  const age = document.getElementById('narcan-age');
+  if (val) val.innerText = NARCAN.doses ? NARCAN.doses + (NARCAN.doses === 1 ? ' dose' : ' doses') : '\u2014';
+  if (age) age.innerText = NARCAN.at ? 'Given ' + clockOf(NARCAN.at) : 'Not given';
+
+  const btn = document.getElementById('manual-narcan');
+  const count = document.getElementById('manual-narcan-count');
+  const sub = document.getElementById('manual-narcan-sub');
+  const p = NARCAN.pending;
+  if (btn) btn.setAttribute('aria-pressed', String(p > 0));
+  if (count) { count.hidden = p === 0; count.innerText = String(p); }
+  if (sub) sub.innerText = p === 0
+    ? 'Tap once per dose given'
+    : p + (p === 1 ? ' dose' : ' doses') + ' \u00b7 tap to add another';
+}
+
+/* Doses accumulate rather than toggling off: a second dose is its own event,
+   and the 2-dose protocol in the field guide makes the count meaningful.
+   Tapping past the recorded count and back down to it is how you correct a
+   mis-tap without leaving the sheet. */
+function toggleNarcanDose() {
+  NARCAN.pending = NARCAN.pending >= NARCAN.doses + 4 ? NARCAN.doses : NARCAN.pending + 1;
+  renderNarcan();
+  triggerSilentHaptic();
+}
+
 const VITAL_UI = {
   hr:   { val: 'hr-val',   age: 'hr-age',   chan: 'chan-hr'   },
   spo2: { val: 'spo2-val', age: 'spo2-age', chan: 'chan-spo2' },
@@ -103,6 +154,7 @@ function renderVitals() {
       chanEl.classList.toggle('stale', isStale(entry));
     }
   });
+  renderSecondaryTiles();
   renderSync();
 }
 
@@ -133,6 +185,9 @@ function renderEncounter() {
    worse than no timestamp at all. */
 function startEncounter() {
   ENCOUNTER.startedAt = Date.now();
+  NARCAN.doses = 0;
+  NARCAN.at = null;
+  NARCAN.pending = 0;
   LOG.length = 0;
   logEvent('Verbal consent recorded · encounter opened');
   renderEncounter();
@@ -232,6 +287,8 @@ function simulateNewReading() {
 function openManualEntry() {
   document.getElementById('manual-modal').classList.add('show');
   clearManualErrors();
+  NARCAN.pending = NARCAN.doses;
+  renderNarcan();
   const bp = VITALS.bp.v;
   const parts = (bp && bp.includes('/')) ? bp.split('/') : ['', ''];
   document.getElementById('manual-bp-sys').value = parts[0];
@@ -241,7 +298,11 @@ function openManualEntry() {
   document.getElementById('manual-spo2').value = VITALS.spo2.v || '';
   document.getElementById('manual-temp').value = VITALS.temp.v || '';
 }
-function closeManualEntry() { document.getElementById('manual-modal').classList.remove('show'); }
+function closeManualEntry() {
+  NARCAN.pending = NARCAN.doses;   // discard anything the sheet was proposing
+  renderNarcan();
+  document.getElementById('manual-modal').classList.remove('show');
+}
 
 /* ---------- Manual entry validation ----------
    Physiologic bounds, not clinical thresholds: they only reject values a
@@ -320,7 +381,16 @@ function saveManualEntry() {
   set('spo2', get('manual-spo2'), 'SpO₂');
   set('temp', get('manual-temp'), 'Temp');
 
+  if (NARCAN.pending > NARCAN.doses) {
+    const added = NARCAN.pending - NARCAN.doses;
+    NARCAN.doses = NARCAN.pending;
+    NARCAN.at = Date.now();
+    logEvent('Narcan administered by ' + ENCOUNTER.worker + ' \u00b7 ' +
+             (added === 1 ? 'dose ' + NARCAN.doses : added + ' doses, ' + NARCAN.doses + ' total'));
+  }
+
   renderVitals();
+  renderNarcan();
   if (entered.length) logEvent(entered.join(', ') + ' entered manually by ' + ENCOUNTER.worker);
 
   syncTelehealthVitals();

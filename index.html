@@ -21,11 +21,11 @@
     <!-- Design tokens first, then base/shell, then shared components, then
          per-screen styles. Change a color or spacing value once in tokens.css
          and it updates everywhere. -->
-    <link rel="stylesheet" href="css/tokens.css?v=v42">
-    <link rel="stylesheet" href="css/base.css?v=v42">
-    <link rel="stylesheet" href="css/components.css?v=v42">
-    <link rel="stylesheet" href="css/map.css?v=v42">
-    <link rel="stylesheet" href="css/scanner.css?v=v42">
+    <link rel="stylesheet" href="css/tokens.css?v=v43">
+    <link rel="stylesheet" href="css/base.css?v=v43">
+    <link rel="stylesheet" href="css/components.css?v=v43">
+    <link rel="stylesheet" href="css/map.css?v=v43">
+    <link rel="stylesheet" href="css/scanner.css?v=v43">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
@@ -195,21 +195,26 @@
                     </div>
                 </div>
 
-                <div class="chan-trio">
-                    <div class="chan chan-sm" id="chan-temp">
+                <div class="chan-trio" id="chan-trio">
+                    <div class="chan chan-sm" id="chan-temp" hidden>
                         <span class="chan-name">Temp</span>
                         <div class="chan-v"><span class="chan-n num" id="temp-val">&mdash;</span><span class="chan-u">&deg;F</span></div>
                         <span class="chan-age num" id="temp-age">Not taken</span>
                     </div>
-                    <div class="chan chan-sm" id="chan-bp">
+                    <div class="chan chan-sm" id="chan-bp" hidden>
                         <span class="chan-name">BP</span>
                         <div class="chan-v"><span class="chan-n num" id="bp-val">&mdash;</span></div>
                         <span class="chan-age num" id="bp-age">Not taken</span>
                     </div>
-                    <div class="chan chan-sm" id="chan-rr">
+                    <div class="chan chan-sm" id="chan-rr" hidden>
                         <span class="chan-name">Resp</span>
                         <div class="chan-v"><span class="chan-n num" id="rr-val">&mdash;</span><span class="chan-u">rpm</span></div>
                         <span class="chan-age num" id="rr-age">Not taken</span>
+                    </div>
+                    <div class="chan chan-sm chan-intervention" id="chan-narcan" hidden>
+                        <span class="chan-name">Narcan</span>
+                        <div class="chan-v"><span class="chan-n num" id="narcan-val">&mdash;</span></div>
+                        <span class="chan-age num" id="narcan-age">Not given</span>
                     </div>
                 </div>
             </div>
@@ -659,6 +664,19 @@
                        min="80" max="115" aria-describedby="hint-temp">
                 <p class="form-hint" id="hint-temp">80.0&ndash;115.0 &deg;F</p>
             </div>
+            <fieldset class="intervention-group">
+                <legend>Interventions</legend>
+                <button type="button" class="narcan-btn" id="manual-narcan"
+                        onclick="toggleNarcanDose()" aria-pressed="false">
+                    <span class="narcan-mark" aria-hidden="true"></span>
+                    <span class="narcan-text">
+                        <span class="narcan-title">Narcan administered</span>
+                        <span class="narcan-sub" id="manual-narcan-sub">Tap once per dose given</span>
+                    </span>
+                    <span class="narcan-count num" id="manual-narcan-count" hidden>0</span>
+                </button>
+            </fieldset>
+
             <p class="form-error" id="manual-error" role="alert" hidden></p>
             <button class="btn btn-primary" onclick="saveManualEntry()">Save entry</button>
             <button class="btn btn-secondary" onclick="closeManualEntry()">Cancel</button>
@@ -837,11 +855,11 @@
     <!-- Site data + HRN-feed mapping helpers first, then the screens that
          consume them. Order matters here: each file expects the one before
          it to already be loaded. -->
-    <script src="js/icons.js?v=v42"></script>
-    <script src="js/data.js?v=v42"></script>
-    <script src="js/map.js?v=v42"></script>
-    <script src="js/ui.js?v=v42"></script>
-    <script src="js/scanner.js?v=v42"></script>
+    <script src="js/icons.js?v=v43"></script>
+    <script src="js/data.js?v=v43"></script>
+    <script src="js/map.js?v=v43"></script>
+    <script src="js/ui.js?v=v43"></script>
+    <script src="js/scanner.js?v=v43"></script>
 
     <script>
       if ('serviceWorker' in navigator) {
