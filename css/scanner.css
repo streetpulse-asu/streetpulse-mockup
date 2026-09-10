@@ -294,7 +294,7 @@
            it never interprets a reading or renders a verdict on one.
            ========================================================== */
 
-        .scanner-active-container { gap: 0; flex: 1; min-height: 0; background: var(--surface); }
+        .scanner-active-container { gap: 0; flex: 1 0 auto; background: var(--surface); }
 
         .enc-bar {
             display: flex; align-items: baseline; gap: 9px;
@@ -433,7 +433,7 @@
         /* ---------- the record ---------- */
         /* The ledger fills whatever is left, so a fresh encounter reads as an
            empty page rather than as unused screen. */
-        .log { flex: 1; background: var(--surface); border-top: 1px solid var(--border-soft); }
+        .log { flex: 1 0 auto; background: var(--surface); border-top: 1px solid var(--border-soft); }
         .log-hd {
             display: flex; justify-content: space-between; align-items: center;
             padding: 8px 16px; background: var(--surface-sunken);

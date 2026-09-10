@@ -62,7 +62,10 @@ function logEvent(text) {
 function renderLog() {
   const box = document.getElementById('log-rows');
   if (!box) return;
-  box.innerHTML = LOG.slice(0, 6).map(e =>
+  // The whole encounter, not a window onto it. This used to render only the
+  // six most recent events, so older entries silently vanished and the log
+  // had nothing to scroll through - it was capped, not scrollable.
+  box.innerHTML = LOG.map(e =>
     '<div class="log-row">' +
       '<span class="log-t num">' + clockOf(e.at) + '</span>' +
       '<span class="log-d">' + e.text + '</span>' +
