@@ -16,8 +16,9 @@ css/
   components.css           Shared chrome: header, dropdown, bottom nav, modals, buttons
   map.css                   Map screen only (Leaflet, filter chips, site
                             detail card, resource list sheet)
-  scanner.css               Vitals scanner screen only (vitals cards,
-                            status panel, field guide modal)
+  scanner.css               Vitals scan screen only (encounter header, the
+                            telemetry board, encounter log, field guide and
+                            the telehealth call)
 js/
   icons.js                Generated icon set (lucide-static, ISC). Every glyph
                           in the app comes from here — never paste an SVG path
@@ -102,7 +103,13 @@ Two things worth knowing:
 
 ## Known gaps (cosmetic, not blocking)
 
-- `assets/icon.png` is a single 192×192 image reused for the 512×512
-  manifest entry too (that was already true of the original inline
-  version) — fine for a mockup, worth swapping for a real 512×512 export
-  before using this as a production PWA icon.
+- `assets/icon.png` is a real 512×512 export and the manifest now declares
+  it as such (it previously claimed 192×192). A dedicated smaller size would
+  save a few KB on install but changes nothing visually.
+- `node_modules/` is committed — 2,268 files, mostly Puppeteer, which is only
+  used for local screenshots. Adding a `.gitignore` and untracking it would
+  drop the repo from ~16 MB to well under one, but rewrites history for
+  anyone who has already cloned.
+- `mockup_1…5.html` and `map_ui_redesign_plan.md` are frozen reference
+  material from the September redesign. They describe a palette and a layout
+  the app has since moved off, so read them as history, not as guidance.

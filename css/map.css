@@ -207,6 +207,7 @@
         .card-status.amber { color: #b45309; }
         .card-status.grey  { color: var(--text-muted); }
         .btn-card-more {
+            min-height: 40px; min-width: 88px;
             background: var(--surface); color: var(--ink);
             border: 1px solid var(--border-soft); border-radius: 8px;
             padding: 4px 10px; font-size: 0.72rem; font-weight: 700; cursor: pointer;

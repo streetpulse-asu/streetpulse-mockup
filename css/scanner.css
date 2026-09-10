@@ -378,7 +378,8 @@
             font-size: 0.58rem; font-weight: 700; color: var(--text-muted);
             letter-spacing: 0.5px; text-transform: uppercase;
         }
-        .chan.empty .chan-n { color: #94a3b8; }
+        /* the placeholder still has to be readable: #94a3b8 sat at 2.56:1 */
+        .chan.empty .chan-n { color: var(--text-muted); }
         .chan.stale .chan-age { color: var(--warning-text); }
 
         .chan-trio { display: grid; grid-template-columns: 1fr 1fr 1fr; }
@@ -438,7 +439,7 @@
             padding: 8px 16px; background: var(--surface-sunken);
             border-bottom: 1px solid var(--border-soft);
             font-size: 0.6rem; font-weight: 800; letter-spacing: 0.9px;
-            text-transform: uppercase; color: var(--text-muted);
+            text-transform: uppercase; color: var(--ink-2);
         }
         .log-worker { letter-spacing: 0.5px; }
         .log-row {
