@@ -137,12 +137,7 @@
         </div>
 
         <!-- Active View (unlocked when sensor is connected) -->
-        <div class="scanner-active-container" id="scanner-active-view" style="display: none; flex-direction: column; gap: 16px; width: 100%;">
-            <div class="guidance-banner">
-                <span class="icon" data-icon="info" data-size="18"></span>
-                <span><strong>Scan required:</strong> Apply optical telemetry sensor and hold steady for 5 seconds.</span>
-            </div>
-
+        <div class="scanner-active-container" id="scanner-active-view" style="display: none; flex-direction: column; gap: 14px; width: 100%;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px;">Live telemetry</span>
@@ -153,26 +148,77 @@
                 </button>
             </div>
 
-            <div class="vitals-grid">
-                <div class="vital-card" id="bp-card" style="display: none;">
-                    <div class="vital-label">Blood pressure</div>
-                    <div class="vital-value-container"><span class="vital-value vital-bp" id="bp-val">--/--</span></div>
+            <div class="clin-telemetry-board">
+                <!-- Primary Metric: Heart Rate -->
+                <div class="clin-tile clin-primary clickable-vital" onclick="openFieldGuide('pulse')" title="Heart Rate Guidelines">
+                    <div class="clin-cap">
+                        <span class="clin-cap-title">Heart Rate</span>
+                    </div>
+                    <div class="clin-body">
+                        <div class="clin-num-wrap">
+                            <span class="clin-val" id="hr-val">80</span>
+                            <span class="clin-unit">bpm</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="vital-card" id="rr-card" style="display: none;">
-                    <div class="vital-label">Resp. rate</div>
-                    <div class="vital-value-container"><span class="vital-value" id="rr-val">--</span><span class="vital-unit">rpm</span></div>
+
+                <!-- Primary Metric: SpO2 -->
+                <div class="clin-tile clin-primary clickable-vital" onclick="openFieldGuide('spo2')" title="SpO2 Guidelines">
+                    <div class="clin-cap">
+                        <span class="clin-cap-title">SpO₂ Oxygen</span>
+                    </div>
+                    <div class="clin-body">
+                        <div class="clin-num-wrap">
+                            <span class="clin-val" id="spo2-val">100</span>
+                            <span class="clin-unit">%</span>
+                        </div>
+                        <div class="clin-stability" title="Pulse Oximetry Signal Quality">
+                            <span class="clin-sig-text">Signal Quality</span>
+                            <div class="clin-sig-bars" aria-hidden="true">
+                                <span class="bar on"></span>
+                                <span class="bar on"></span>
+                                <span class="bar on"></span>
+                                <span class="bar on"></span>
+                                <span class="bar"></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="vital-card clickable-vital" onclick="openFieldGuide('pulse')" title="View Heart Rate Field Guidelines">
-                    <div class="vital-label">Heart rate</div>
-                    <div class="vital-value-container"><span class="vital-value" id="hr-val">--</span><span class="vital-unit">bpm</span></div>
-                </div>
-                <div class="vital-card clickable-vital" onclick="openFieldGuide('spo2')" title="View SpO2 Field Guidelines">
-                    <div class="vital-label">Oxygen sat.</div>
-                    <div class="vital-value-container"><span class="vital-value" id="spo2-val">--</span><span class="vital-unit">%</span></div>
-                </div>
-                <div class="vital-card full-width clickable-vital" id="temp-card" style="display: none;" onclick="openFieldGuide('hyper')" title="View Temperature & Heat Guidelines">
-                    <div class="vital-label">Temperature (Manual)</div>
-                    <div class="vital-value-container"><span class="vital-value" id="temp-val">--</span><span class="vital-unit">&deg;F</span></div>
+
+                <!-- Secondary 3-Column Spot Check Grid -->
+                <div class="clin-secondary-row">
+                    <!-- Blood Pressure -->
+                    <div class="clin-tile clin-sub clickable-vital" id="bp-card" onclick="openManualEntry()" title="Blood Pressure (Tap to edit)">
+                        <div class="clin-cap">
+                            <span class="clin-cap-title">Blood Press.</span>
+                        </div>
+                        <div class="clin-sub-body">
+                            <span class="clin-sub-val" id="bp-val">120/78</span>
+                            <span class="clin-sub-unit">mmHg</span>
+                        </div>
+                    </div>
+
+                    <!-- Respiration -->
+                    <div class="clin-tile clin-sub clickable-vital" id="rr-card" onclick="openManualEntry()" title="Respiratory Rate (Tap to edit)">
+                        <div class="clin-cap">
+                            <span class="clin-cap-title">Respiration</span>
+                        </div>
+                        <div class="clin-sub-body">
+                            <span class="clin-sub-val" id="rr-val">16</span>
+                            <span class="clin-sub-unit">rpm</span>
+                        </div>
+                    </div>
+
+                    <!-- Core Temp -->
+                    <div class="clin-tile clin-sub clickable-vital" id="temp-card" onclick="openFieldGuide('hyper')" title="Core Temperature Guidelines">
+                        <div class="clin-cap">
+                            <span class="clin-cap-title">Core Temp</span>
+                        </div>
+                        <div class="clin-sub-body">
+                            <span class="clin-sub-val" id="temp-val">98.8</span>
+                            <span class="clin-sub-unit">&deg;F</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -180,18 +226,6 @@
                 <span class="icon" data-icon="clipboard-pen" data-size="18"></span>
                 Add manual entry
             </button>
-
-            <div class="status-panel" id="status-panel" onclick="openStatusGuide()"
-                 role="button" tabindex="0" aria-describedby="status-text">
-                <div class="status-icon" id="status-icon">
-                    <span class="icon" data-icon="circle-check" data-size="18"></span>
-                </div>
-                <div class="status-text-group">
-                    <span class="status-label">Telemetry status</span>
-                    <span class="status-value" id="status-text">All readings in normal range</span>
-                </div>
-                <span class="status-chevron icon" data-icon="chevron-right" data-size="18"></span>
-            </div>
 
 
             <div class="controls-container">

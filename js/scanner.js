@@ -106,37 +106,37 @@ function evaluateVitals(temp, spo2, hr) {
   if (tempNum !== null && tempNum >= 104.0) {
     currentAlertTopic = 'hyper';
     if (iconContainer) iconContainer.innerHTML = iconTelemetry;
-    textEl.innerText = 'High body temperature';
+    if (textEl) textEl.innerText = 'High body temperature';
     markStatusAlert(panel);
   } else if (tempNum !== null && tempNum < 95.0 && tempNum > 0) {
     currentAlertTopic = 'hypo';
     if (iconContainer) iconContainer.innerHTML = iconTelemetry;
-    textEl.innerText = 'Low body temperature';
+    if (textEl) textEl.innerText = 'Low body temperature';
     markStatusAlert(panel);
   } else if (spo2 < 93) {
     currentAlertTopic = 'spo2';
     if (iconContainer) iconContainer.innerHTML = iconTelemetry;
-    textEl.innerText = 'Low oxygen level (SpO2)';
+    if (textEl) textEl.innerText = 'Low oxygen level (SpO2)';
     markStatusAlert(panel);
   } else if (hr > 140 || hr < 50) {
     currentAlertTopic = 'pulse';
     if (iconContainer) iconContainer.innerHTML = iconTelemetry;
-    textEl.innerText = 'Abnormal heart rate';
+    if (textEl) textEl.innerText = 'Abnormal heart rate';
     markStatusAlert(panel);
   } else if (tempNum !== null && tempNum >= 100.4) {
     currentAlertTopic = 'hyper';
     if (iconContainer) iconContainer.innerHTML = iconTelemetry;
-    textEl.innerText = 'Elevated body temperature';
+    if (textEl) textEl.innerText = 'Elevated body temperature';
     markStatusAlert(panel);
   } else if (spo2 < 95) {
     currentAlertTopic = 'spo2';
     if (iconContainer) iconContainer.innerHTML = iconTelemetry;
-    textEl.innerText = 'Mildly decreased oxygen (SpO2)';
+    if (textEl) textEl.innerText = 'Mildly decreased oxygen (SpO2)';
     markStatusAlert(panel);
   } else {
     currentAlertTopic = 'spo2';
     if (iconContainer) iconContainer.innerHTML = iconCheck;
-    textEl.innerText = 'All readings in normal range';
+    if (textEl) textEl.innerText = 'All readings in normal range';
     if (panel) panel.classList.remove('alert');
   }
 }
