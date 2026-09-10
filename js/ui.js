@@ -32,12 +32,22 @@ function setDeviceConnected(connected) {
   const lockedView = document.getElementById('scanner-locked-view');
   const activeView = document.getElementById('scanner-active-view');
 
+  const scannerTab = document.getElementById('tab-scanner');
+  if (scannerTab) scannerTab.classList.toggle('encounter-open', connected);
+
   if (connected) {
     if (lockedView) lockedView.style.display = 'none';
     if (activeView) activeView.style.display = 'flex';
+    // linking the probe is what opens the encounter record
+    if (typeof startEncounter === 'function' && !startEncounter._tick) startEncounter();
+    if (typeof logEvent === 'function') logEvent('Probe SP-4471 linked');
   } else {
     if (lockedView) lockedView.style.display = 'flex';
     if (activeView) activeView.style.display = 'none';
+    if (typeof startEncounter === 'function') {
+      clearInterval(startEncounter._tick);
+      startEncounter._tick = null;
+    }
   }
   setTimeout(resizeAll, 60);
 }

@@ -5,6 +5,177 @@ const iconCheck = icon('circle-check', 20);
 const iconTelemetry = icon('activity', 20);
 
 
+
+/* ==========================================================
+   ENCOUNTER RECORD
+   Readings used to live in the DOM, which meant a number on screen carried
+   no history: no capture time, no idea whether a probe or a person put it
+   there. Everything now goes through VITALS, and the board is rendered from
+   it — so "75 bpm" is always accompanied by when it was taken and from what.
+   ========================================================== */
+
+const ENCOUNTER = {
+  id: '0417',
+  worker: 'A. Reyes',
+  badge: '#4471',
+  location: '12th Ave & W Jackson St',
+  startedAt: Date.now(),
+  online: false
+};
+
+/* Alarm limits, printed next to each channel. These are the field-guide
+   thresholds the app already triages against, stated openly rather than
+   applied invisibly. */
+const LIMITS = {
+  hr:   { min: 50,  max: 140,   topic: 'pulse', flag: 'Out of range' },
+  spo2: { min: 93,  max: 100,   topic: 'spo2',  flag: 'Below limit'  },
+  temp: { min: 95,  max: 100.4, topic: 'hyper', flag: 'Out of range' }
+};
+
+/* value, when it was taken, and where it came from */
+const VITALS = {
+  hr:   { v: null, at: null, src: null },
+  spo2: { v: null, at: null, src: null },
+  temp: { v: null, at: null, src: null },
+  bp:   { v: null, at: null, src: null },
+  rr:   { v: null, at: null, src: null }
+};
+
+const LOG = [];
+
+function clockOf(ts) {
+  const d = new Date(ts);
+  return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+
+function minutesSince(ts) { return Math.floor((Date.now() - ts) / 60000); }
+
+/* A reading is "live" for its first minute, then starts showing its age —
+   staleness matters more than precision when someone is deciding whether to
+   trust the number in front of them. */
+function ageLabel(entry) {
+  if (!entry.at) return 'Not taken';
+  const mins = minutesSince(entry.at);
+  const src = entry.src === 'probe' ? 'Probe' : 'Manual';
+  if (mins < 1) return src + ' · live';
+  return src + ' · ' + mins + ' min ago';
+}
+
+function isStale(entry) { return entry.at !== null && minutesSince(entry.at) >= 3; }
+
+function outOfRange(key) {
+  const lim = LIMITS[key], entry = VITALS[key];
+  if (!lim || entry.v === null) return false;
+  const n = parseFloat(entry.v);
+  return !isNaN(n) && (n < lim.min || n > lim.max);
+}
+
+function logEvent(text, flagged) {
+  LOG.unshift({ at: Date.now(), text: text, flag: !!flagged });
+  renderLog();
+}
+
+function renderLog() {
+  const box = document.getElementById('log-rows');
+  if (!box) return;
+  box.innerHTML = LOG.slice(0, 6).map(e =>
+    '<div class="log-row' + (e.flag ? ' flag' : '') + '">' +
+      '<span class="log-t num">' + clockOf(e.at) + '</span>' +
+      '<span class="log-d">' + e.text + '</span>' +
+    '</div>').join('');
+}
+
+function recordVital(key, value, source) {
+  const entry = VITALS[key];
+  if (!entry) return;
+  const clean = (value === '' || value === null || value === undefined || value === '--') ? null : value;
+  if (clean === null) { entry.v = null; entry.at = null; entry.src = null; return; }
+  entry.v = clean;
+  entry.at = Date.now();
+  entry.src = source;
+}
+
+const VITAL_UI = {
+  hr:   { val: 'hr-val',   age: 'hr-age',   chan: 'chan-hr'   },
+  spo2: { val: 'spo2-val', age: 'spo2-age', chan: 'chan-spo2' },
+  temp: { val: 'temp-val', age: 'temp-age', chan: 'chan-temp' },
+  bp:   { val: 'bp-val',   age: 'bp-age',   chan: 'chan-bp'   },
+  rr:   { val: 'rr-val',   age: 'rr-age',   chan: 'chan-rr'   }
+};
+
+function renderVitals() {
+  Object.keys(VITAL_UI).forEach(key => {
+    const ui = VITAL_UI[key], entry = VITALS[key];
+    const valEl = document.getElementById(ui.val);
+    const ageEl = document.getElementById(ui.age);
+    const chanEl = document.getElementById(ui.chan);
+    if (valEl) valEl.innerText = entry.v === null ? (key === 'bp' ? '—/—' : '—') : entry.v;
+    if (ageEl) ageEl.innerText = ageLabel(entry);
+    if (chanEl) {
+      chanEl.classList.toggle('empty', entry.v === null);
+      chanEl.classList.toggle('stale', isStale(entry));
+      chanEl.classList.toggle('alarm', outOfRange(key));
+      const flagEl = chanEl.querySelector('.chan-flag');
+      if (flagEl && LIMITS[key]) flagEl.innerText = LIMITS[key].flag;
+    }
+  });
+  renderEscalation();
+  renderSync();
+}
+
+/* Escalation only takes the alert treatment once a reading has earned it, and
+   says which one — a permanently red button stops meaning anything. */
+function renderEscalation() {
+  const btn = document.getElementById('btn-call-telehealth');
+  const reason = document.getElementById('act-reason');
+  if (!btn || !reason) return;
+
+  const breached = Object.keys(LIMITS).filter(outOfRange);
+  btn.classList.toggle('urgent', breached.length > 0);
+  if (!breached.length) { reason.hidden = true; return; }
+
+  const NAMES = { hr: 'HR', spo2: 'SpO₂', temp: 'Temp' };
+  reason.hidden = false;
+  reason.innerText = breached.map(k => NAMES[k] + ' ' + VITALS[k].v).join(' · ') +
+    (breached.length > 1 ? ' — out of range' : ' — out of range');
+  if (breached.length) currentAlertTopic = LIMITS[breached[0]].topic;
+}
+
+function renderSync() {
+  const bar = document.getElementById('sync-bar');
+  const text = document.getElementById('sync-text');
+  if (!bar || !text) return;
+  const anyReading = Object.keys(VITALS).some(k => VITALS[k].v !== null);
+  bar.hidden = !anyReading;
+  bar.classList.toggle('synced', ENCOUNTER.online);
+  text.innerText = ENCOUNTER.online
+    ? 'Synced to the encounter record'
+    : 'Offline — encounter queued locally, syncs when signal returns';
+}
+
+function renderEncounter() {
+  const el = document.getElementById('enc-elapsed');
+  if (el) el.innerText = 'Open ' + Math.max(0, minutesSince(ENCOUNTER.startedAt)) + ' min';
+  const idEl = document.getElementById('enc-id');
+  if (idEl) idEl.innerText = ENCOUNTER.id;
+  const whereEl = document.getElementById('enc-where');
+  if (whereEl) whereEl.innerText = ENCOUNTER.location;
+  const wEl = document.getElementById('log-worker');
+  if (wEl) wEl.innerText = ENCOUNTER.worker + ' · ' + ENCOUNTER.badge;
+}
+
+/* Ages and the elapsed clock have to keep moving; a frozen "3 min ago" is
+   worse than no timestamp at all. */
+function startEncounter() {
+  ENCOUNTER.startedAt = Date.now();
+  LOG.length = 0;
+  logEvent('Verbal consent recorded · encounter opened');
+  renderEncounter();
+  renderVitals();
+  clearInterval(startEncounter._tick);
+  startEncounter._tick = setInterval(() => { renderEncounter(); renderVitals(); }, 15000);
+}
+
 /* ==========================================================
    CLINICAL FIELD GUIDE CONTROLLER & DEEP-LINKING
    ========================================================== */
@@ -79,98 +250,50 @@ function triggerSilentHaptic() {
   } catch (e) {}
 }
 
-/* The full-width "tap for more information" banner is gone; the status panel
-   itself opens the guide, but only while a reading is actually out of range.
-   openStatusGuide() is a no-op otherwise, so a normal panel is inert. */
-function markStatusAlert(panel) {
-  if (panel) panel.classList.add('alert');
-  triggerSilentHaptic();
-}
-
-function openStatusGuide() {
-  const panel = document.getElementById('status-panel');
-  if (panel && panel.classList.contains('alert')) openFieldGuide(currentAlertTopic);
-}
-
 function evaluateVitals(temp, spo2, hr) {
-  const panel = document.getElementById('status-panel');
-  const iconContainer = document.getElementById('status-icon');
-  const textEl = document.getElementById('status-text');
-  
-  // Convert to numbers to prevent string comparison bugs
-  const hasTemp = temp !== undefined && temp !== null && temp !== '--' && temp !== '' && !isNaN(parseFloat(temp));
-  const tempNum = hasTemp ? parseFloat(temp) : null;
-  spo2 = parseInt(spo2) || 99;
-  hr = parseInt(hr) || 80;
-  
-  if (tempNum !== null && tempNum >= 104.0) {
-    currentAlertTopic = 'hyper';
-    if (iconContainer) iconContainer.innerHTML = iconTelemetry;
-    if (textEl) textEl.innerText = 'High body temperature';
-    markStatusAlert(panel);
-  } else if (tempNum !== null && tempNum < 95.0 && tempNum > 0) {
-    currentAlertTopic = 'hypo';
-    if (iconContainer) iconContainer.innerHTML = iconTelemetry;
-    if (textEl) textEl.innerText = 'Low body temperature';
-    markStatusAlert(panel);
-  } else if (spo2 < 93) {
-    currentAlertTopic = 'spo2';
-    if (iconContainer) iconContainer.innerHTML = iconTelemetry;
-    if (textEl) textEl.innerText = 'Low oxygen level (SpO2)';
-    markStatusAlert(panel);
-  } else if (hr > 140 || hr < 50) {
-    currentAlertTopic = 'pulse';
-    if (iconContainer) iconContainer.innerHTML = iconTelemetry;
-    if (textEl) textEl.innerText = 'Abnormal heart rate';
-    markStatusAlert(panel);
-  } else if (tempNum !== null && tempNum >= 100.4) {
-    currentAlertTopic = 'hyper';
-    if (iconContainer) iconContainer.innerHTML = iconTelemetry;
-    if (textEl) textEl.innerText = 'Elevated body temperature';
-    markStatusAlert(panel);
-  } else if (spo2 < 95) {
-    currentAlertTopic = 'spo2';
-    if (iconContainer) iconContainer.innerHTML = iconTelemetry;
-    if (textEl) textEl.innerText = 'Mildly decreased oxygen (SpO2)';
-    markStatusAlert(panel);
-  } else {
-    currentAlertTopic = 'spo2';
-    if (iconContainer) iconContainer.innerHTML = iconCheck;
-    if (textEl) textEl.innerText = 'All readings in normal range';
-    if (panel) panel.classList.remove('alert');
-  }
+  const t = parseFloat(temp), s = parseInt(spo2), h = parseInt(hr);
+
+  if (!isNaN(t) && (t >= 104.0 || t >= 100.4)) currentAlertTopic = 'hyper';
+  else if (!isNaN(t) && t < 95.0 && t > 0)     currentAlertTopic = 'hypo';
+  else if (!isNaN(s) && s < 93)                currentAlertTopic = 'spo2';
+  else if (!isNaN(h) && (h > 140 || h < 50))   currentAlertTopic = 'pulse';
+  else if (!isNaN(s) && s < 95)                currentAlertTopic = 'spo2';
+
+  triggerSilentHaptic();
 }
 
 function simulateNewReading() {
   const hr = Math.floor(Math.random() * (115 - 72 + 1)) + 72;
   const spo2 = Math.floor(Math.random() * (100 - 88 + 1)) + 88;
-  document.getElementById('hr-val').innerText = hr;
-  document.getElementById('spo2-val').innerText = spo2;
-  
-  // Check if temperature was manually entered
-  const tempEl = document.getElementById('temp-val');
-  const tempVal = tempEl ? tempEl.innerText : '--';
-  evaluateVitals(tempVal === '--' ? null : tempVal, parseInt(spo2), hr);
+
+  recordVital('hr', hr, 'probe');
+  recordVital('spo2', spo2, 'probe');
+  renderVitals();
+
+  const breached = ['hr', 'spo2'].filter(outOfRange);
+  logEvent('HR ' + hr + ', SpO₂ ' + spo2 + ' captured from probe');
+  breached.forEach(k => {
+    const lim = LIMITS[k];
+    logEvent((k === 'spo2' ? 'SpO₂' : 'HR') + ' ' + VITALS[k].v + ' crossed ' +
+             (parseFloat(VITALS[k].v) < lim.min ? 'below ' + lim.min : 'above ' + lim.max) +
+             ' — flagged', true);
+  });
+
+  evaluateVitals(VITALS.temp.v, spo2, hr);
   syncTelehealthVitals();
 }
 
 function openManualEntry() {
   document.getElementById('manual-modal').classList.add('show');
   clearManualErrors();
-  const getVal = id => { const v = document.getElementById(id).innerText; return v === '--' ? '' : v; };
-  const bpText = document.getElementById('bp-val').innerText;
-  if (bpText !== '--/--' && bpText.includes('/')) {
-    const p = bpText.split('/');
-    document.getElementById('manual-bp-sys').value = p[0];
-    document.getElementById('manual-bp-dia').value = p[1];
-  } else {
-    document.getElementById('manual-bp-sys').value = '';
-    document.getElementById('manual-bp-dia').value = '';
-  }
-  document.getElementById('manual-rr').value = getVal('rr-val');
-  document.getElementById('manual-hr').value = getVal('hr-val');
-  document.getElementById('manual-spo2').value = getVal('spo2-val');
-  document.getElementById('manual-temp').value = getVal('temp-val');
+  const bp = VITALS.bp.v;
+  const parts = (bp && bp.includes('/')) ? bp.split('/') : ['', ''];
+  document.getElementById('manual-bp-sys').value = parts[0];
+  document.getElementById('manual-bp-dia').value = parts[1];
+  document.getElementById('manual-rr').value = VITALS.rr.v || '';
+  document.getElementById('manual-hr').value = VITALS.hr.v || '';
+  document.getElementById('manual-spo2').value = VITALS.spo2.v || '';
+  document.getElementById('manual-temp').value = VITALS.temp.v || '';
 }
 function closeManualEntry() { document.getElementById('manual-modal').classList.remove('show'); }
 
@@ -235,59 +358,37 @@ function validateManualEntry() {
 function saveManualEntry() {
   if (!validateManualEntry()) return;
 
-  const sys = document.getElementById('manual-bp-sys').value;
-  const dia = document.getElementById('manual-bp-dia').value;
-  const rr = document.getElementById('manual-rr').value;
-  const hr = document.getElementById('manual-hr').value || '--';
-  const spo2 = document.getElementById('manual-spo2').value || '--';
-  const temp = document.getElementById('manual-temp').value || '--';
+  const get = id => document.getElementById(id).value.trim();
+  const sys = get('manual-bp-sys'), dia = get('manual-bp-dia');
+  const entered = [];
 
-  const bpEl = document.getElementById('bp-val');
-  if (bpEl) {
-    if (sys && dia) {
-      bpEl.innerText = sys + '/' + dia;
-      bpEl.classList.remove('grey');
-    } else {
-      bpEl.innerText = '--';
-      bpEl.classList.add('grey');
-    }
-  }
+  const set = (key, value, label) => {
+    const before = VITALS[key].v;
+    recordVital(key, value, 'manual');
+    if (VITALS[key].v !== null && VITALS[key].v !== before) entered.push(label + ' ' + VITALS[key].v);
+  };
 
-  const rrEl = document.getElementById('rr-val');
-  if (rrEl) {
-    if (rr && rr !== '--') {
-      rrEl.innerText = rr;
-      rrEl.classList.remove('grey');
-    } else {
-      rrEl.innerText = '--';
-      rrEl.classList.add('grey');
-    }
-  }
+  set('bp', (sys && dia) ? sys + '/' + dia : null, 'BP');
+  set('rr', get('manual-rr'), 'RR');
+  set('hr', get('manual-hr'), 'HR');
+  set('spo2', get('manual-spo2'), 'SpO₂');
+  set('temp', get('manual-temp'), 'Temp');
 
-  const tempEl = document.getElementById('temp-val');
-  if (tempEl) {
-    if (temp && temp !== '--' && temp.trim() !== '') {
-      tempEl.innerText = temp;
-      tempEl.classList.remove('grey');
-    } else {
-      tempEl.innerText = '--';
-      tempEl.classList.add('grey');
-    }
-  }
-  document.getElementById('hr-val').innerText = hr;
-  document.getElementById('spo2-val').innerText = spo2;
+  renderVitals();
+  if (entered.length) logEvent(entered.join(', ') + ' entered manually by ' + ENCOUNTER.worker);
 
-  // Always evaluate, passing hr
-  evaluateVitals(temp === '--' ? null : temp, spo2, hr);
+  evaluateVitals(VITALS.temp.v, VITALS.spo2.v, VITALS.hr.v);
   syncTelehealthVitals();
   closeManualEntry();
 
-  // Reveal active vitals view if currently locked
   const lockedView = document.getElementById('scanner-locked-view');
   const activeView = document.getElementById('scanner-active-view');
   if (lockedView && activeView && lockedView.style.display !== 'none') {
     lockedView.style.display = 'none';
     activeView.style.display = 'flex';
+    const scannerTab = document.getElementById('tab-scanner');
+    if (scannerTab) scannerTab.classList.add('encounter-open');
+    startEncounter();
   }
 }
 
@@ -343,20 +444,12 @@ function updateCallTimerDisplay() {
 }
 
 function syncTelehealthVitals() {
-  const hr = document.getElementById('hr-val')?.innerText || '--';
-  const spo2 = document.getElementById('spo2-val')?.innerText || '--';
-  const temp = document.getElementById('temp-val')?.innerText || '--';
-  const bp = document.getElementById('bp-val')?.innerText || '--/--';
-
-  const thHr = document.getElementById('th-val-hr');
-  const thSpo2 = document.getElementById('th-val-spo2');
-  const thTemp = document.getElementById('th-val-temp');
-  const thBp = document.getElementById('th-val-bp');
-
-  if (thHr) thHr.innerText = hr;
-  if (thSpo2) thSpo2.innerText = spo2;
-  if (thTemp) thTemp.innerText = temp;
-  if (thBp) thBp.innerText = bp;
+  const show = key => VITALS[key].v === null ? '--' : VITALS[key].v;
+  const put = (id, text) => { const el = document.getElementById(id); if (el) el.innerText = text; };
+  put('th-val-hr', show('hr'));
+  put('th-val-spo2', show('spo2'));
+  put('th-val-temp', show('temp'));
+  put('th-val-bp', VITALS.bp.v === null ? '--/--' : VITALS.bp.v);
 }
 
 function toggleTelehealthMic() {

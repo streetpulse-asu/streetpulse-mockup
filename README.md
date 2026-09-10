@@ -28,8 +28,11 @@ js/
                             directions, walk-time estimates)
   ui.js                     App chrome shared by both screens (mode
                             dropdown, tab switching, BLE-pairing simulation)
-  scanner.js                 Vitals scanner logic (simulated readings,
-                            threshold evaluation, field guide, manual entry)
+  scanner.js                 Vitals scanner logic. Holds the encounter
+                            record: ENCOUNTER, LIMITS and VITALS (value +
+                            capture time + source), with the board rendered
+                            from them, plus the encounter log, field guide,
+                            manual entry and the telehealth call
 assets/
   icon.png                 App icon (used as favicon, apple-touch-icon, and
                             in the manifest)

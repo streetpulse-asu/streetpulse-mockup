@@ -20,11 +20,11 @@
     <!-- Design tokens first, then base/shell, then shared components, then
          per-screen styles. Change a color or spacing value once in tokens.css
          and it updates everywhere. -->
-    <link rel="stylesheet" href="css/tokens.css?v=v26">
-    <link rel="stylesheet" href="css/base.css?v=v26">
-    <link rel="stylesheet" href="css/components.css?v=v26">
-    <link rel="stylesheet" href="css/map.css?v=v26">
-    <link rel="stylesheet" href="css/scanner.css?v=v26">
+    <link rel="stylesheet" href="css/tokens.css?v=v30">
+    <link rel="stylesheet" href="css/base.css?v=v30">
+    <link rel="stylesheet" href="css/components.css?v=v30">
+    <link rel="stylesheet" href="css/map.css?v=v30">
+    <link rel="stylesheet" href="css/scanner.css?v=v30">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
@@ -137,111 +137,105 @@
         </div>
 
         <!-- Active View (unlocked when sensor is connected) -->
-        <div class="scanner-active-container" id="scanner-active-view" style="display: none; flex-direction: column; gap: 14px; width: 100%;">
-            <div class="telem-header-row">
-                <span class="telem-status-label">Live telemetry</span>
-                <div class="telem-btn-group">
-                    <button class="btn-telem btn-telem-connect" onclick="openPairModal()" title="Connect sensor probe">
-                        <span class="connected-dot"></span> Connect
-                    </button>
-                    <button class="btn-telem btn-telem-disconnect" onclick="disconnectDevice()" title="Disconnect sensor probe">
-                        Disconnect
-                    </button>
-                </div>
-                <button class="guide-kebab-btn" onclick="openFieldGuide()" aria-label="Clinical Field Guide" title="Clinical Field Guide">
-                    <span class="icon" data-icon="book-open-text" data-size="18"></span>
+        <div class="scanner-active-container" id="scanner-active-view" style="display: none; flex-direction: column; width: 100%;">
+
+            <!-- Encounter header: who, where, how long, consent. Every reading
+                 below is attributed to this record. -->
+            <div class="enc-bar">
+                <div class="enc-id">Encounter <span class="num" id="enc-id">0417</span></div>
+                <div class="enc-where" id="enc-where">12th Ave &amp; W Jackson St</div>
+                <div class="enc-elapsed num" id="enc-elapsed">OPEN 0 MIN</div>
+                <button class="guide-kebab-btn" onclick="openFieldGuide()" aria-label="Clinical field guide" title="Clinical field guide">
+                    <span class="icon" data-icon="book-open-text" data-size="17"></span>
                 </button>
             </div>
 
-            <div class="clin-telemetry-board">
-                <!-- Primary Metric: Heart Rate -->
-                <div class="clin-tile clin-primary">
-                    <div class="clin-cap">
-                        <span class="clin-cap-title">Heart Rate</span>
+            <!-- Live channels. Alarm limits are printed beside each label, the
+                 way a monitor shows them — a reading means nothing without the
+                 threshold it is being judged against. -->
+            <div class="board">
+                <div class="chan" id="chan-hr">
+                    <div class="chan-k">
+                        <span class="chan-name">Heart rate</span>
+                        <span class="chan-lim num">50&ndash;140</span>
                     </div>
-                    <div class="clin-body">
-                        <div class="clin-num-wrap">
-                            <span class="clin-val" id="hr-val">80</span>
-                            <span class="clin-unit">bpm</span>
-                        </div>
+                    <div class="chan-v">
+                        <span class="chan-n num" id="hr-val">&mdash;</span>
+                        <span class="chan-u">bpm</span>
                     </div>
-                </div>
-
-                <!-- Primary Metric: SpO2 -->
-                <div class="clin-tile clin-primary">
-                    <div class="clin-cap">
-                        <span class="clin-cap-title">SpO₂ Oxygen</span>
-                    </div>
-                    <div class="clin-body">
-                        <div class="clin-num-wrap">
-                            <span class="clin-val" id="spo2-val">100</span>
-                            <span class="clin-unit">%</span>
-                        </div>
-                        <div class="clin-stability" title="Pulse Oximetry Signal Quality">
-                            <span class="clin-sig-text">Signal Quality</span>
-                            <div class="clin-sig-bars" aria-hidden="true">
-                                <span class="bar on"></span>
-                                <span class="bar on"></span>
-                                <span class="bar on"></span>
-                                <span class="bar on"></span>
-                                <span class="bar"></span>
-                            </div>
-                        </div>
+                    <div class="chan-meta">
+                        <span class="chan-flag">Out of range</span>
+                        <span class="chan-age num" id="hr-age">Not taken</span>
                     </div>
                 </div>
 
-                <!-- Secondary 3-Column Spot Check Grid -->
-                <div class="clin-secondary-row">
-                    <!-- Blood Pressure -->
-                    <div class="clin-tile clin-sub" id="bp-card">
-                        <div class="clin-cap">
-                            <span class="clin-cap-title">Blood Press.</span>
-                        </div>
-                        <div class="clin-sub-body">
-                            <span class="clin-sub-val grey" id="bp-val">--</span>
-                            <span class="clin-sub-unit">mmHg</span>
-                        </div>
+                <div class="chan" id="chan-spo2">
+                    <div class="chan-k">
+                        <span class="chan-name">SpO&#8322;</span>
+                        <span class="chan-lim num">&ge; 93</span>
                     </div>
-
-                    <!-- Respiration -->
-                    <div class="clin-tile clin-sub" id="rr-card">
-                        <div class="clin-cap">
-                            <span class="clin-cap-title">Respiration</span>
-                        </div>
-                        <div class="clin-sub-body">
-                            <span class="clin-sub-val grey" id="rr-val">--</span>
-                            <span class="clin-sub-unit">rpm</span>
-                        </div>
+                    <div class="chan-v">
+                        <span class="chan-n num" id="spo2-val">&mdash;</span>
+                        <span class="chan-u">%</span>
                     </div>
+                    <div class="chan-meta">
+                        <span class="chan-flag">Below limit</span>
+                        <span class="chan-age num" id="spo2-age">Not taken</span>
+                    </div>
+                </div>
 
-                    <!-- Core Temp -->
-                    <div class="clin-tile clin-sub" id="temp-card">
-                        <div class="clin-cap">
-                            <span class="clin-cap-title">Core Temp</span>
-                        </div>
-                        <div class="clin-sub-body">
-                            <span class="clin-sub-val grey" id="temp-val">--</span>
-                            <span class="clin-sub-unit">&deg;F</span>
-                        </div>
+                <div class="chan-trio">
+                    <div class="chan chan-sm" id="chan-temp">
+                        <span class="chan-name">Temp</span>
+                        <div class="chan-v"><span class="chan-n num" id="temp-val">&mdash;</span><span class="chan-u">&deg;F</span></div>
+                        <span class="chan-age num" id="temp-age">Not taken</span>
+                    </div>
+                    <div class="chan chan-sm" id="chan-bp">
+                        <span class="chan-name">BP</span>
+                        <div class="chan-v"><span class="chan-n num" id="bp-val">&mdash;</span></div>
+                        <span class="chan-age num" id="bp-age">Not taken</span>
+                    </div>
+                    <div class="chan chan-sm" id="chan-rr">
+                        <span class="chan-name">Resp</span>
+                        <div class="chan-v"><span class="chan-n num" id="rr-val">&mdash;</span><span class="chan-u">rpm</span></div>
+                        <span class="chan-age num" id="rr-age">Not taken</span>
                     </div>
                 </div>
             </div>
 
-            <button class="btn btn-secondary btn-add-manual" onclick="openManualEntry()">
-                <span class="icon" data-icon="clipboard-pen" data-size="18"></span>
-                Add manual entry
-            </button>
+            <!-- Offline is the normal state in the field, so it is stated
+                 plainly rather than hidden behind a settings screen. -->
+            <div class="sync-bar" id="sync-bar" hidden>
+                <span class="icon" data-icon="cloud-off" data-size="15"></span>
+                <span id="sync-text">Offline &mdash; encounter queued locally, syncs when signal returns</span>
+            </div>
 
+            <div class="act">
+                <div class="act-row">
+                    <button class="btn btn-primary act-capture" onclick="simulateNewReading()">
+                        <span class="icon" data-icon="refresh-cw" data-size="18"></span>
+                        Capture
+                    </button>
+                    <button class="btn btn-secondary act-manual" onclick="openManualEntry()">
+                        <span class="icon" data-icon="clipboard-pen" data-size="18"></span>
+                        Manual
+                    </button>
+                </div>
+                <p class="act-reason" id="act-reason" hidden></p>
+                <button class="btn btn-escalate" id="btn-call-telehealth" onclick="openTelehealthPrompt()">
+                    <span class="icon" data-icon="phone" data-size="19"></span>
+                    <span>Escalate to telehealth</span>
+                </button>
+            </div>
 
-            <div class="controls-container">
-                <button class="btn btn-telehealth" id="btn-call-telehealth" onclick="openTelehealthPrompt()">
-                    <span class="icon" data-icon="phone" data-size="20"></span>
-                    <span>Call Telehealth</span>
-                </button>
-                <button class="btn btn-primary" onclick="simulateNewReading()">
-                    <span class="icon" data-icon="refresh-cw" data-size="18"></span>
-                    Capture from device
-                </button>
+            <!-- The record. Provenance is the point: what was measured, when,
+                 by what, and who was standing there. -->
+            <div class="log">
+                <div class="log-hd">
+                    <span>Encounter log</span>
+                    <span class="log-worker" id="log-worker">A. Reyes &middot; #4471</span>
+                </div>
+                <div id="log-rows"></div>
             </div>
         </div>
     </main>
@@ -265,7 +259,7 @@
             <div class="settings-row">
                 <div>
                     <div class="sr-label">App Shell Offline Cache</div>
-                    <div class="sr-desc">Service worker active · Version v25</div>
+                    <div class="sr-desc">Service worker active · Version v30</div>
                 </div>
                 <span class="status-pill-subtle">Ready</span>
             </div>
@@ -769,11 +763,11 @@
     <!-- Site data + HRN-feed mapping helpers first, then the screens that
          consume them. Order matters here: each file expects the one before
          it to already be loaded. -->
-    <script src="js/icons.js?v=v26"></script>
-    <script src="js/data.js?v=v26"></script>
-    <script src="js/map.js?v=v26"></script>
-    <script src="js/ui.js?v=v26"></script>
-    <script src="js/scanner.js?v=v26"></script>
+    <script src="js/icons.js?v=v30"></script>
+    <script src="js/data.js?v=v30"></script>
+    <script src="js/map.js?v=v30"></script>
+    <script src="js/ui.js?v=v30"></script>
+    <script src="js/scanner.js?v=v30"></script>
 
     <script>
       if ('serviceWorker' in navigator) {

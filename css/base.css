@@ -17,4 +17,9 @@
         .tab-content { flex: 1; min-height: 0; display: none; flex-direction: column; }
         .tab-content.active { display: flex; }
         #tab-scanner { padding: 16px 20px 0 20px; gap: 16px; overflow-y: auto; }
+        /* The active encounter is full-bleed: the board and the log run edge
+           to edge like a device panel, so the padding above is dropped once
+           the probe is linked. */
+        #tab-scanner.encounter-open { padding: 0; gap: 0; }
         #tab-scanner::after { content: ''; display: block; flex: 0 0 calc(env(safe-area-inset-bottom) + 90px); }
+        #tab-scanner.encounter-open::after { flex: 0 0 calc(env(safe-area-inset-bottom) + 74px); }

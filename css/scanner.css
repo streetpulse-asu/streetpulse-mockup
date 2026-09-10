@@ -1,19 +1,8 @@
-        .status-text-group { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 
         /* The status panel is the way into the field guide now that the
            full-width "tap for more information" banner is gone. It is only
            interactive while an alert is showing. */
-        .status-panel { cursor: default; }
-        .status-chevron { color: var(--text-muted); opacity: 0; transition: opacity 0.2s ease; }
-        .status-panel.alert { cursor: pointer; }
-        .status-panel.alert .status-chevron { opacity: 1; }
-        .status-panel.alert:active { transform: scale(0.99); }
 
-        .btn-add-manual {
-            border: 1px dashed var(--border-strong);
-            color: var(--ink-2);
-            background-color: var(--surface);
-        }
 
         .guide-modal-card {
             background: var(--surface); width: 100%; max-width: 440px; border-radius: 24px;
@@ -145,121 +134,17 @@
             color: var(--ink); cursor: pointer; font-size: 1.15rem; font-weight: 800; padding: 0;
         }
         .guide-kebab-btn:active { background: #e5decb; }
-        .clickable-vital { cursor: pointer; transition: transform 0.12s ease; }
-        .clickable-vital:active { transform: scale(0.98); }
 
         /* ---------- SCANNER ---------- */
-        .guidance-banner { background-color: rgba(22, 35, 61, 0.06); border: 1px solid var(--border-soft); padding: 12px 16px; border-radius: 12px; font-size: 0.82rem; color: var(--accent-deep); font-weight: 500; display: flex; align-items: flex-start; gap: 10px; line-height: 1.45; }
-        .guidance-banner svg { flex-shrink: 0; margin-top: 2px; }
-        .vitals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .vital-card { background-color: var(--surface); border-radius: 14px; padding: 12px; border: 1px solid var(--border-soft); box-shadow: var(--shadow-soft); display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
-        .vital-card::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--accent); opacity: 0.55; }
-        .vital-card.full-width { grid-column: span 2; }
-        .vital-card.full-width::before { background: var(--accent); }
-        .vital-label { font-size: 0.66rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; }
-        .vital-value-container { display: flex; align-items: baseline; margin-top: 7px; }
-        .vital-value { font-family: 'Fraunces', Georgia, serif; font-size: 2rem; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -0.5px; }
-        .vital-unit { font-size: 0.78rem; color: var(--text-muted); margin-left: 5px; font-weight: 600; }
-        .vital-bp { font-size: 1.6rem; }
 
         /* ---------- CLINICAL SPOT-CHECK TELEMETRY GRID (CONCEPT 1 - BLOCKY, NO OUTLINE ON WHITE) ---------- */
-        .telem-header-row {
-            display: flex; justify-content: space-between; align-items: center; margin-top: 2px;
-        }
-        .telem-status-label {
-            font-size: 0.72rem; font-weight: 700; color: var(--text-muted);
-            text-transform: uppercase; letter-spacing: 0.6px;
-        }
-        .telem-btn-group { display: flex; gap: 6px; align-items: center; }
-        .btn-telem {
-            font-family: inherit; font-size: 0.68rem; font-weight: 800;
-            text-transform: uppercase; letter-spacing: 0.4px;
-            padding: 4px 9px; border-radius: 2px;
-            background: var(--surface); color: var(--ink);
-            border: 1.5px solid var(--ink); cursor: pointer;
-            display: inline-flex; align-items: center; gap: 5px;
-        }
-        .btn-telem-connect {
-            background: rgba(22, 163, 74, 0.1); color: #166534;
-            border-color: rgba(22, 163, 74, 0.4);
-        }
-        .btn-telem-disconnect {
-            background: var(--surface); color: var(--ink);
-            border-color: var(--border-strong);
-        }
-        .btn-telem-disconnect:hover {
-            background: rgba(185, 28, 28, 0.08); color: #991b1b;
-            border-color: #991b1b;
-        }
 
-        .clin-telemetry-board { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-        .clin-tile {
-            background: #ffffff; border: none;
-            border-radius: 2px; overflow: hidden; box-shadow: none;
-        }
-        .clin-cap {
-            background: var(--ink); color: #ffffff; padding: 6px 12px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-radius: 0;
-        }
-        .clin-cap-title {
-            font-size: 0.74rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px;
-        }
-        .clin-body {
-            background: #ffffff; border: none;
-            padding: 14px 16px; display: flex; justify-content: space-between; align-items: flex-end;
-        }
-        .clin-num-wrap { display: flex; align-items: baseline; gap: 6px; }
-        .clin-val {
-            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-            font-size: 3.1rem; font-weight: 800; color: var(--ink); line-height: 1;
-            font-variant-numeric: tabular-nums; letter-spacing: -2px;
-        }
-        .clin-unit { font-size: 1.05rem; font-weight: 700; color: var(--text-muted); }
 
         /* Signal Stability Meter */
-        .clin-stability { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; margin-bottom: 3px; }
-        .clin-sig-text { font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
-        .clin-sig-bars { display: flex; gap: 3px; align-items: center; }
-        .clin-sig-bars .bar { width: 13px; height: 8px; border-radius: 0; background: var(--border-soft); }
-        .clin-sig-bars .bar.on { background: var(--ink); }
 
         /* 3-Column Secondary Row */
-        .clin-secondary-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; width: 100%; }
-        .clin-sub { border-radius: 2px; border: none; background: #ffffff; }
-        .clin-sub .clin-cap { padding: 4px 6px; justify-content: center; background: var(--ink-2); border-radius: 0; }
-        .clin-sub .clin-cap-title { font-size: 0.64rem; letter-spacing: 0.4px; }
-        .clin-sub-body {
-            background: #ffffff; border: none;
-            padding: 12px 4px; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; text-align: center;
-        }
-        .clin-sub-val {
-            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-            font-size: 1.3rem; font-weight: 800; color: var(--ink); line-height: 1.1;
-            font-variant-numeric: tabular-nums; letter-spacing: -0.5px;
-        }
-        .clin-sub-val.grey { color: var(--text-muted) !important; font-weight: 700; }
-        .clin-sub-unit { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); margin-top: 2px; }
 
-        .btn-add-manual {
-            border-radius: 2px;
-            margin-top: 4px;
-            height: 44px;
-            font-weight: 700;
-            border: 2px dashed var(--ink-2);
-            box-shadow: none;
-        }
-        .btn-add-manual:hover { border-color: var(--ink); }
 
-        .controls-container { display: flex; flex-direction: column; gap: 10px; margin-top: auto; padding-top: 12px; }
-        .controls-container .btn {
-            border-radius: 2px;
-            height: 48px;
-            font-weight: 800;
-            box-shadow: none;
-            border: 2px solid var(--ink);
-        }
 
         /* ---------- TELEHEALTH INTERFACE & CONTROLS ---------- */
         .btn-telehealth {
@@ -401,3 +286,138 @@
             background: var(--alert-text); color: #ffffff; border-color: var(--alert-text);
         }
         .th-ctrl-btn.th-end-call:active { background: #8f1616; }
+
+        /* ==========================================================
+           VITALS SCAN — encounter record
+           Live channels read as an instrument (dark board, printed alarm
+           limits); everything recorded reads as a chart (timestamp, source,
+           log). Depth comes from the ground/surface step, not from shadow.
+           ========================================================== */
+
+        .scanner-active-container { gap: 0; flex: 1; min-height: 0; }
+
+        .enc-bar {
+            display: flex; align-items: baseline; gap: 9px;
+            padding: 11px 16px 12px;
+            background: var(--surface); border-bottom: 1px solid var(--border-soft);
+        }
+        .enc-id { font-size: 0.8rem; font-weight: 800; color: var(--ink); flex-shrink: 0; }
+        .enc-id .num { color: var(--text-muted); }
+        .enc-where {
+            font-size: 0.72rem; font-weight: 600; color: var(--text-muted);
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
+        }
+        .enc-elapsed {
+            font-size: 0.6rem; font-weight: 800; letter-spacing: 0.7px;
+            text-transform: uppercase; color: var(--text-muted); flex-shrink: 0;
+        }
+        .enc-bar .guide-kebab-btn { align-self: center; flex-shrink: 0; }
+
+        /* ---------- the board ---------- */
+        .board { background: var(--ink); color: #fff; }
+        .chan {
+            display: grid; grid-template-columns: 1fr auto; align-items: center;
+            gap: 4px 12px; padding: 13px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+            position: relative;
+        }
+        .chan-k { display: flex; align-items: baseline; gap: 9px; grid-column: 1; }
+        .chan-name {
+            font-size: 0.62rem; font-weight: 800; letter-spacing: 1px;
+            text-transform: uppercase; color: var(--call-muted);
+        }
+        .chan-lim { font-size: 0.58rem; font-weight: 700; color: #6c7c93; letter-spacing: 0.4px; }
+        .chan-v { display: flex; align-items: baseline; gap: 5px; grid-column: 1; }
+        .chan-n {
+            font-family: 'Fraunces', Georgia, serif; font-size: 2.3rem; font-weight: 700;
+            line-height: 1.05; letter-spacing: -1.2px;
+        }
+        .chan-u { font-size: 0.7rem; font-weight: 700; color: var(--call-muted); }
+        .chan-meta {
+            grid-column: 2; grid-row: 1 / span 2;
+            display: flex; flex-direction: column; align-items: flex-end; gap: 5px;
+        }
+        .chan-age {
+            font-size: 0.58rem; font-weight: 700; color: #6c7c93;
+            letter-spacing: 0.5px; text-transform: uppercase;
+        }
+        .chan-flag {
+            display: none;
+            font-size: 0.55rem; font-weight: 800; letter-spacing: 0.9px;
+            text-transform: uppercase; background: var(--alert-text); color: #fff;
+            padding: 2px 7px; border-radius: 4px;
+        }
+        .chan.empty .chan-n { color: #4a5a72; }
+        .chan.stale .chan-age { color: #e0a34a; }
+        .chan.alarm { background: #3a1113; }
+        .chan.alarm .chan-n, .chan.alarm .chan-name { color: #fca5a5; }
+        .chan.alarm .chan-flag { display: inline-block; }
+
+        .chan-trio { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+        .chan-trio .chan {
+            grid-template-columns: 1fr; align-items: start; gap: 3px;
+            padding: 10px 14px; border-right: 1px solid rgba(255, 255, 255, 0.10);
+            border-bottom: 0;
+        }
+        .chan-trio .chan:last-child { border-right: 0; }
+        .chan-trio .chan-n { font-size: 1.3rem; letter-spacing: -0.5px; }
+        .chan-trio .chan-age { font-size: 0.55rem; letter-spacing: 0.3px; white-space: nowrap; }
+        .chan.empty .chan-u { display: none; }
+        .chan-trio .chan-meta { grid-column: 1; grid-row: auto; align-items: flex-start; }
+
+        /* ---------- sync state ---------- */
+        .sync-bar {
+            display: flex; align-items: center; gap: 9px;
+            padding: 9px 16px; font-size: 0.72rem; font-weight: 700;
+            background: var(--warning-bg); color: var(--warning-text);
+            border-bottom: 1px solid var(--warning-border);
+        }
+        .sync-bar[hidden] { display: none; }
+        .sync-bar.synced {
+            background: var(--success-bg); color: var(--success-text);
+            border-bottom-color: var(--success-border);
+        }
+
+        /* ---------- actions ----------
+           Capture is routine and filled; escalation is a different species and
+           only takes the alert treatment once a reading has earned it. */
+        .act { padding: 13px 16px 14px; display: flex; flex-direction: column; gap: 8px; }
+        .act-row { display: flex; gap: 8px; }
+        .act-capture { flex: 1; margin: 0; }
+        .act-manual { flex: 0 0 124px; margin: 0; border: 1px solid var(--border-soft); }
+        .act-reason {
+            margin: 2px 0 0; text-align: center;
+            font-size: 0.6rem; font-weight: 800; letter-spacing: 0.7px;
+            text-transform: uppercase; color: var(--text-muted);
+        }
+        .act-reason[hidden] { display: none; }
+        .btn-escalate {
+            margin: 0; background: var(--surface); color: var(--ink-2);
+            border: 1px solid var(--border-soft);
+        }
+        .btn-escalate.urgent {
+            background: var(--alert-bg); color: var(--alert-text);
+            border: 1.5px solid var(--alert-border);
+        }
+
+        /* ---------- the record ---------- */
+        /* The ledger fills whatever is left, so a fresh encounter reads as an
+           empty page rather than as unused screen. */
+        .log { flex: 1; background: var(--surface); border-top: 1px solid var(--border-soft); }
+        .log-hd {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 16px; background: var(--surface-sunken);
+            border-bottom: 1px solid var(--border-soft);
+            font-size: 0.6rem; font-weight: 800; letter-spacing: 0.9px;
+            text-transform: uppercase; color: var(--text-muted);
+        }
+        .log-worker { letter-spacing: 0.5px; }
+        .log-row {
+            display: grid; grid-template-columns: 52px 1fr; gap: 10px;
+            padding: 7px 16px; border-bottom: 1px solid var(--border-soft);
+            font-size: 0.71rem;
+        }
+        .log-row:last-child { border-bottom: 0; }
+        .log-t { font-size: 0.66rem; font-weight: 800; color: var(--text-muted); }
+        .log-d { font-weight: 600; color: var(--ink-2); }
+        .log-row.flag .log-d { color: var(--warning-text); font-weight: 700; }

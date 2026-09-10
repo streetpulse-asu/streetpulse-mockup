@@ -68,4 +68,15 @@ Every icon comes from **Lucide** (ISC), baked into `js/icons.js` at build time �
 - **Markup** writes `<span class="icon" data-icon="phone" data-size="16"></span>`; code building HTML strings calls `icon(name, size)`. Map pins call `iconGlyph(name)` and supply their own centred wrapper.
 - **Never hand-draw a path.** Before this the app carried 45 hand-drawn SVGs across six stroke widths (1.6 / 2 / 2.2 / 2.3 / 2.5 / 3) plus pin glyphs at 1.3-1.5 in their own coordinate space, which is what made the walking glyph look unlike its neighbours. Add the icon's name to the generator and regenerate.
 - **No emoji, ever** — and no dingbat stand-ins either (`✕`, `✓`, `🗣️` were all replaced with real icons).
+
+---
+
+## 6. The Encounter Record
+The vitals screen is a record, not a dashboard, and that is what keeps it from reading as generated. Three rules:
+
+- **Every reading states when it was taken and where it came from.** `VITALS` in `js/scanner.js` stores `{ value, at, source }` and the board renders from it — a number never appears without `Probe · live` or `Manual · 4 min ago` beside it. A reading is live for its first minute, then starts showing its age; past three minutes the age turns amber.
+- **Alarm limits are printed, not hidden.** Each channel shows the threshold it is judged against (`50–140`, `≥ 93`). A reading means nothing without it, and consumer health apps never show you the number — which is exactly why showing it reads as clinical.
+- **Escalation is a different species from routine action, and is earned.** Capture is a filled navy button. Escalate to telehealth is quiet until a limit is actually breached, then takes the alert treatment and names the offending reading above itself. A permanently red button stops meaning anything.
+
+The encounter log underneath is the audit trail: consent, probe link, every capture, every limit crossing, attributed to the worker on scene. Provenance is the aesthetic.
 - **Bottom Drawer / Sheet**: Clean peek sheet with drag bar, instant walk time calculation, and direct action buttons.
