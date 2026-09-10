@@ -12,7 +12,14 @@
                Hardcoded pixel guesses do not survive a home indicator. */
             --nav-h: 58px;
             --drawer-h: 212px;
-            width: 100vw; height: 100dvh;
+            width: 100vw;
+            /* dvh is iOS 15.4+. Without a fallback the whole declaration is
+               dropped on an older iPhone, the shell collapses to auto height
+               and nothing inside it can scroll. Last valid value wins, so the
+               modern unit still applies where it is understood. */
+            height: 100vh;
+            height: -webkit-fill-available;
+            height: 100dvh;
             background-color: var(--bg-app);
             position: relative; overflow: hidden; display: flex; flex-direction: column;
         }
@@ -20,7 +27,11 @@
         /* ---------- TABS ---------- */
         .tab-content { flex: 1; min-height: 0; display: none; flex-direction: column; }
         .tab-content.active { display: flex; }
-        #tab-scanner { padding: 16px 20px 0 20px; gap: 16px; overflow-y: auto; }
+        #tab-scanner {
+            padding: 16px 20px 0 20px; gap: 16px;
+            overflow-y: auto; -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+        }
         /* The active encounter is full-bleed: the board and the log run edge
            to edge like a device panel, so the padding above is dropped once
            the probe is linked. */

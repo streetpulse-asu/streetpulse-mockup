@@ -324,7 +324,9 @@
             cursor: pointer; line-height: 1;
         }
         .filter-dialog-body {
-            padding: 16px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px;
+            padding: 16px 20px; display: flex; flex-direction: column; gap: 18px;
+            overflow-y: auto; -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
         }
         .filter-section-label {
             font-size: 0.68rem; font-weight: 800; text-transform: uppercase;

@@ -172,7 +172,9 @@
         .modal-card {
             background: var(--surface); width: 86%; max-width: 380px; border-radius: 26px; padding: 26px;
             text-align: center; box-shadow: var(--shadow-overlay); box-sizing: border-box;
-            border: 1px solid var(--border-soft); max-height: 86%; overflow-y: auto;
+            border: 1px solid var(--border-soft); max-height: 86%;
+            overflow-y: auto; -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
         }
         .modal-icon {
             width: 58px; height: 58px; background: rgba(22, 35, 61, 0.06); color: var(--accent);
@@ -206,7 +208,8 @@
         #tab-settings {
             display: none;
             padding: 20px 20px calc(env(safe-area-inset-bottom) + 90px) 20px;
-            overflow-y: auto; flex-direction: column; gap: 20px;
+            overflow-y: auto; -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain; flex-direction: column; gap: 20px;
         }
         #tab-settings.active {
             display: flex;

@@ -838,42 +838,48 @@ function toggleDrawer() {
     const grip = drawer && drawer.querySelector('.drawer-grip');
     if (!drawer || !grip) return;
 
-    let originY = null, moved = 0, wasDrag = false;
+    let originY = null, moved = 0, wasDrag = false, activeId = null;
     const THRESHOLD = 28;  // px of vertical travel before a drag counts
 
     const onDown = (e) => {
-      originY = (e.touches ? e.touches[0].clientY : e.clientY);
+      activeId = e.pointerId;
+      originY = e.clientY;
       moved = 0;
       drawer.classList.add('dragging');
+      // Capture to the grip so move and up are delivered here even if the
+      // finger wanders. The previous version listened on window and called
+      // preventDefault there, which meant a pointer state left open by a
+      // cancelled gesture would block scrolling everywhere on the page.
+      try { grip.setPointerCapture(e.pointerId); } catch (err) { /* not fatal */ }
     };
     const onMove = (e) => {
-      if (originY === null) return;
-      const y = (e.touches ? e.touches[0].clientY : e.clientY);
-      moved = y - originY;
-      // follow the finger a little so the handle feels attached
+      if (originY === null || e.pointerId !== activeId) return;
+      moved = e.clientY - originY;
       const give = Math.max(-14, Math.min(48, moved));
       drawer.style.transform = 'translateY(' + (give > 0 ? give : give / 3) + 'px)';
       if (e.cancelable) e.preventDefault();
     };
-    const onUp = () => {
-      if (originY === null) return;
+    const onUp = (e) => {
+      if (originY === null || (e && e.pointerId !== activeId)) return;
       drawer.classList.remove('dragging');
       drawer.style.transform = '';
       // Latch the verdict before clearing state: the click event fires after
-      // pointerup, and reading `moved` there would always see zero — which
-      // let the click toggle straight back and made a drag look inert.
+      // pointerup, and reading `moved` there would always see zero.
       wasDrag = Math.abs(moved) >= THRESHOLD;
       if (wasDrag) setDrawerCollapsed(moved > 0);
+      try { if (e) grip.releasePointerCapture(e.pointerId); } catch (err) { /* already gone */ }
       originY = null;
       moved = 0;
+      activeId = null;
     };
 
     grip.addEventListener('pointerdown', onDown);
-    window.addEventListener('pointermove', onMove, { passive: false });
-    window.addEventListener('pointerup', onUp);
-    window.addEventListener('pointercancel', onUp);
+    grip.addEventListener('pointermove', onMove, { passive: false });
+    grip.addEventListener('pointerup', onUp);
+    grip.addEventListener('pointercancel', onUp);
+    // belt and braces: never leave the page in a state where moves are eaten
+    window.addEventListener('blur', () => onUp(null));
 
-    // a drag that crosses the threshold should not also fire the click
     grip.addEventListener('click', (e) => {
       if (wasDrag) { wasDrag = false; e.preventDefault(); e.stopImmediatePropagation(); }
     }, true);
