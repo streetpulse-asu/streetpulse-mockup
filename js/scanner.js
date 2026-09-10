@@ -432,6 +432,13 @@ function endTelehealthCall() {
   clearInterval(thTimerInterval);
   thTimerInterval = null;
 
+  // the photo sheet may still be open, and its camera track must not outlive
+  // the call it belongs to
+  closePhotoCapture();
+  thPhotoCount = 0;
+  const chip = document.getElementById('th-sent-chip');
+  if (chip) chip.hidden = true;
+
   if (thStream) {
     thStream.getTracks().forEach(track => track.stop());
     thStream = null;
@@ -446,4 +453,125 @@ function endTelehealthCall() {
     micBtn.classList.remove('active-off');
     micBtn.querySelector('.th-ctrl-label').innerText = 'Mute';
   }
+}
+
+/* ==========================================================
+   TELEHEALTH — SEND A PHOTO
+   A still, not a video feed: the camera is opened only for as long as it
+   takes to frame and take one shot, the worker reviews it before it goes,
+   and the track is stopped the moment the sheet closes. Nothing is written
+   to disk — the image lives in a canvas data URL for the length of the call.
+   ========================================================== */
+
+let thPhotoStream = null;
+let thPhotoData = null;
+let thPhotoCount = 0;
+
+function photoStep(name) {
+  ['ask', 'view', 'review'].forEach(s => {
+    const el = document.getElementById('th-photo-' + s);
+    if (el) el.hidden = (s !== name);
+  });
+}
+
+function photoError(msg) {
+  const el = document.getElementById('th-photo-error');
+  if (!el) return;
+  el.hidden = !msg;
+  el.textContent = msg || '';
+}
+
+function openPhotoCapture() {
+  const sheet = document.getElementById('th-photo');
+  if (!sheet) return;
+  photoError('');
+  photoStep('ask');
+  sheet.hidden = false;
+}
+
+/* Releasing the camera is not optional housekeeping: a preview left running
+   keeps the device's camera indicator lit, which in a street encounter looks
+   like covert recording. */
+function stopPhotoCamera() {
+  if (thPhotoStream) {
+    thPhotoStream.getTracks().forEach(t => t.stop());
+    thPhotoStream = null;
+  }
+  const v = document.getElementById('th-photo-preview');
+  if (v) v.srcObject = null;
+}
+
+function closePhotoCapture() {
+  stopPhotoCamera();
+  thPhotoData = null;
+  const sheet = document.getElementById('th-photo');
+  if (sheet) sheet.hidden = true;
+  photoError('');
+}
+
+async function startPhotoCamera() {
+  photoError('');
+  const video = document.getElementById('th-photo-preview');
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    photoError('This device has no camera available to the app.');
+    return;
+  }
+
+  stopPhotoCamera();
+  photoStep('view');
+
+  try {
+    thPhotoStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment' }, audio: false
+    });
+  } catch (err) {
+    photoStep('ask');
+    photoError(err && err.name === 'NotAllowedError'
+      ? 'Camera access was declined. The consultation continues without a photo.'
+      : 'The camera could not be opened. The consultation continues without a photo.');
+    return;
+  }
+
+  if (video) {
+    video.srcObject = thPhotoStream;
+    try { await video.play(); } catch (e) { /* autoplay attribute covers this */ }
+  }
+}
+
+function takePhoto() {
+  const video = document.getElementById('th-photo-preview');
+  const canvas = document.getElementById('th-photo-canvas');
+  const still = document.getElementById('th-photo-still');
+  if (!video || !canvas || !video.videoWidth) {
+    photoError('The camera is still starting up — try again in a moment.');
+    return;
+  }
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+  thPhotoData = canvas.toDataURL('image/jpeg', 0.85);
+  if (still) still.src = thPhotoData;
+
+  // the shot is taken, so the camera goes off before the worker reviews it
+  stopPhotoCamera();
+  photoStep('review');
+}
+
+function sendPhoto() {
+  if (!thPhotoData) { photoError('Take a photo first.'); return; }
+  thPhotoCount++;
+
+  const chip = document.getElementById('th-sent-chip');
+  const chipText = document.getElementById('th-sent-text');
+  if (chip) chip.hidden = false;
+  if (chipText) chipText.innerText = thPhotoCount === 1
+    ? 'Photo sent to Dr. Rivera'
+    : thPhotoCount + ' photos sent to Dr. Rivera';
+
+  if (typeof logEvent === 'function') {
+    logEvent('Photo sent to Dr. Rivera during consultation');
+  }
+  closePhotoCapture();
 }

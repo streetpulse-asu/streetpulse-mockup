@@ -78,5 +78,11 @@ The vitals screen is a record, not a dashboard, and that is what keeps it from r
 - **Alarm limits are printed, not hidden.** Each channel shows the threshold it is judged against (`50–140`, `≥ 93`). A reading means nothing without it, and consumer health apps never show you the number — which is exactly why showing it reads as clinical.
 - **Escalation is a different species from routine action, and is earned.** Capture is a filled navy button. Escalate to telehealth is quiet until a limit is actually breached, then takes the alert treatment and names the offending reading above itself. A permanently red button stops meaning anything.
 
-The encounter log underneath is the audit trail: consent, probe link, every capture, every limit crossing, attributed to the worker on scene. Provenance is the aesthetic.
+The encounter log underneath is the audit trail: consent, probe link, every capture, every photo sent, attributed to the worker on scene. Provenance is the aesthetic.
+
+### Camera
+The consultation is voice. The one camera use is a **single still**, taken deliberately from the call and reviewed before it is sent — never a live feed. Three steps, in this order: consent, viewfinder, review. Two rules that are not negotiable:
+
+- **The track is stopped the instant the shot is taken**, and again on cancel and on ending the call. A preview left running keeps the device's camera indicator lit, which in a street encounter looks like covert recording.
+- **The consent line comes before the permission request**, not after: *"Ask before photographing anyone. Nothing is stored on the device."* The worker is photographing a person who has not consented to a camera by consenting to a vitals check.
 - **Bottom Drawer / Sheet**: Clean peek sheet with drag bar, instant walk time calculation, and direct action buttons.
