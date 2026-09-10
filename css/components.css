@@ -8,10 +8,10 @@
         }
         .app-header-row { display: flex; justify-content: space-between; align-items: center; }
         .brand-header { display: flex; align-items: center; gap: 10px; }
-        .brand-mark { height: 36px; width: 36px; display: block; flex-shrink: 0; }
+        .brand-mark { height: 34px; width: 34px; display: block; flex-shrink: 0; }
         .brand-text-block { display: flex; flex-direction: column; justify-content: center; }
         .brand-name {
-            font-family: 'Literata', Georgia, serif; font-size: 1.38rem; font-weight: 700;
+            font-family: 'Literata', Georgia, serif; font-size: 1.35rem; font-weight: 700;
             line-height: 1.05; letter-spacing: -0.3px;
         }
         .name-street { color: var(--ink); }
@@ -20,6 +20,70 @@
             font-family: 'Work Sans', 'Plus Jakarta Sans', sans-serif;
             font-size: 0.58rem; font-weight: 600; text-transform: uppercase;
             letter-spacing: 0.85px; color: #64748b; line-height: 1.1; margin-top: 2px;
+        }
+        .filter-header-btn {
+            display: flex; align-items: center; gap: 6px;
+            background: #f1f5f9; color: var(--accent);
+            border: 1px solid rgba(15, 110, 106, 0.22);
+            padding: 7px 13px; border-radius: 20px;
+            font-size: 0.78rem; font-weight: 700; cursor: pointer;
+            font-family: inherit; transition: all 0.15s ease;
+        }
+        .filter-header-btn:hover { background: #e6f4f3; }
+        .filter-header-btn svg { width: 14px; height: 14px; stroke: var(--accent); }
+        .filter-count-badge {
+            background: var(--accent); color: #fff; font-size: 0.65rem;
+            padding: 1px 6px; border-radius: 10px; font-weight: 800;
+        }
+
+        /* ---------- FLOATING BUBBLE HEADER (MOCKUP 2: MAP TAB ONLY) ---------- */
+        .phone-container.tab-map-active .app-header {
+            position: absolute;
+            top: calc(env(safe-area-inset-top) + 14px);
+            left: 14px;
+            right: 14px;
+            height: 52px;
+            padding: 0 12px 0 16px;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(22, 35, 61, 0.12);
+            border-radius: 26px;
+            box-shadow: 0 4px 18px rgba(22, 35, 61, 0.08);
+            z-index: 1000;
+            justify-content: center;
+        }
+        .phone-container.tab-map-active .app-header-row {
+            height: 100%;
+        }
+        .phone-container.tab-map-active .brand-header {
+            gap: 8px;
+        }
+        .phone-container.tab-map-active .brand-mark {
+            height: 24px;
+            width: 24px;
+        }
+        .phone-container.tab-map-active .brand-name {
+            font-size: 1.05rem;
+            letter-spacing: -0.2px;
+        }
+        .phone-container.tab-map-active .brand-subtitle {
+            display: none;
+        }
+        .phone-container.tab-map-active .filter-header-btn {
+            padding: 6px 12px;
+            font-size: 0.76rem;
+            border-radius: 20px;
+        }
+        .phone-container.tab-map-active #tab-map {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
         /* ---------- BOTTOM NAV (PERMANENT OUTREACH NAV) ---------- */
         .bottom-nav {
@@ -119,4 +183,40 @@
         .btn-secondary:active { background-color: var(--bg-app); transform: scale(0.98); }
         .loader { border: 3px solid rgba(255,255,255,0.25); border-top: 3px solid #fff; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ---------- SETTINGS SCREEN ---------- */
+        #tab-settings {
+            display: none;
+            padding: 20px 20px calc(env(safe-area-inset-bottom) + 90px) 20px;
+            overflow-y: auto; flex-direction: column; gap: 20px;
+        }
+        #tab-settings.active {
+            display: flex;
+        }
+        .settings-header { margin-bottom: 4px; }
+        .settings-title {
+            font-family: 'Literata', serif; font-size: 1.45rem; font-weight: 700;
+            color: var(--ink); margin-bottom: 4px;
+        }
+        .settings-sub { font-size: 0.8rem; color: var(--text-muted); }
+        .settings-card {
+            background: var(--surface); border: 1px solid var(--border-soft);
+            border-radius: 18px; padding: 18px 20px;
+            box-shadow: 0 4px 14px rgba(22, 35, 61, 0.05);
+            display: flex; flex-direction: column; gap: 14px;
+        }
+        .settings-card-title {
+            font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.8px; color: #64748b; margin-bottom: 2px;
+        }
+        .settings-row {
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .sr-label { font-size: 0.88rem; font-weight: 700; color: var(--ink); }
+        .sr-desc { font-size: 0.74rem; color: var(--text-muted); margin-top: 2px; }
+        .status-pill-subtle {
+            font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 20px;
+            background: #e6f4f3; color: var(--accent);
+        }
+
 

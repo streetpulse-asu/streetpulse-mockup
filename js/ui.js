@@ -23,7 +23,7 @@ function simulatePairing() {
     pairBtn.disabled = false;
 
     setDeviceConnected(true);
-    switchTab('scanner', document.querySelectorAll('.nav-item')[1]);
+    switchTab('scanner');
   }, 950);
 }
 
@@ -54,7 +54,19 @@ function switchTab(tabId, element) {
 
   const targetTab = document.getElementById('tab-' + tabId);
   if (targetTab) targetTab.classList.add('active');
-  if (element) element.classList.add('active');
+  const targetNav = element || document.querySelector(`.nav-item[onclick*="${tabId}"]`);
+  if (targetNav) targetNav.classList.add('active');
+
+  const container = document.querySelector('.phone-container');
+  if (container) {
+    container.classList.toggle('tab-map-active', tabId === 'map');
+  }
+
+  // Only show map filter button when map tab is active
+  const filterBtn = document.getElementById('btn-open-filter');
+  if (filterBtn) {
+    filterBtn.style.display = (tabId === 'map') ? 'inline-flex' : 'none';
+  }
 
   // If opening scanner, ensure correct locked vs active view is shown
   if (tabId === 'scanner') {

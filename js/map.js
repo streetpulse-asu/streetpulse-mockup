@@ -275,11 +275,10 @@ function initMap() {
   });
   MAP.addLayer(clusterGroup);
 
-  MAP.on('moveend', () => { renderList(); });
+  MAP.on('moveend', () => { renderCarousel(); });
   MAP.on('click', closePoi);
 
   buildMarkers();
-  renderRail();
   applyFilters();
   refreshFromHRN();
 }
@@ -303,99 +302,131 @@ function applyFilters() {
     }
   });
   clusterGroup.addLayers(shown);
-  renderList();
+  updateHeaderFilterBadge();
+  renderCarousel();
 }
 
-/* ---------- Filter rail ---------- */
-function renderRail() {
-  const rail = document.getElementById('filter-rail');
-  rail.innerHTML = '';
-
-  const openChip = document.createElement('button');
-  openChip.className = 'chip chip-open' + (openOnly ? '' : ' off');
-  openChip.innerHTML = '<span class="dot live"></span>Open now';
-  openChip.onclick = () => {
-    openOnly = !openOnly;
-    openChip.classList.toggle('off', !openOnly);
-    applyFilters();
-  };
-  rail.appendChild(openChip);
-
-  const filterBtn = document.createElement('button');
-  const hasExtraFilters = activeCats.size !== Object.keys(CATEGORIES).length || activeSvcs.size > 0;
-  filterBtn.className = 'chip chip-filters' + (hasExtraFilters ? '' : ' off');
-  filterBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg> Filters';
-  filterBtn.onclick = () => {
-    showFiltersMenu();
-  };
-  rail.appendChild(filterBtn);
+function updateHeaderFilterBadge() {
+  const badge = document.getElementById('filter-count-badge');
+  if (!badge) return;
+  const isDefault = activeCats.size === 4 && activeSvcs.size === 0 && !openOnly;
+  if (isDefault) {
+    badge.innerText = '4';
+    badge.style.background = 'var(--accent)';
+  } else {
+    const totalActive = activeCats.size + activeSvcs.size + (openOnly ? 1 : 0);
+    badge.innerText = String(totalActive);
+    badge.style.background = '#2563eb';
+  }
 }
 
-function showFiltersMenu() {
-  activePoi = null;
-  document.getElementById('sheet-title-text').innerText = 'Filters';
-  document.getElementById('sheet-count').style.display = 'none';
-  document.getElementById('sheet-source').style.display = 'none';
-
-  let html = `
-    <div style="margin-bottom: 15px;">
-      <button class="btn-back" onclick="closeFiltersMenu()" style="background:none;border:none;color:var(--accent);font-weight:700;font-size:0.85rem;padding:0;cursor:pointer;display:flex;align-items:center;gap:4px;">
-        &larr; Apply & Back
-      </button>
-    </div>
-    <div style="margin-bottom: 10px; font-weight: 700; font-size: 0.85rem;">Categories</div>
-    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;" id="filter-cats"></div>
-    <div style="margin-bottom: 10px; font-weight: 700; font-size: 0.85rem;">Services</div>
-    <div style="display:flex; gap:8px; flex-wrap:wrap;" id="filter-svcs"></div>
-  `;
-  document.getElementById('sheet-list').innerHTML = html;
-
-  const catContainer = document.getElementById('filter-cats');
-  Object.keys(CATEGORIES).forEach(key => {
-    const cat = CATEGORIES[key];
-    const chip = document.createElement('button');
-    chip.className = 'chip' + (activeCats.has(key) ? '' : ' off');
-    chip.style.border = '1px solid var(--border-soft)';
-    chip.innerHTML = '<span class="dot" style="background:' + cat.raw + '"></span>' + cat.label;
-    chip.onclick = () => {
-      if (activeCats.has(key)) activeCats.delete(key); else activeCats.add(key);
-      chip.className = 'chip' + (activeCats.has(key) ? '' : ' off');
-      applyFilters(); 
-      renderRail();
-    };
-    catContainer.appendChild(chip);
-  });
-
-  const svcContainer = document.getElementById('filter-svcs');
-  Object.keys(SERVICES).forEach(key => {
-    const chip = document.createElement('button');
-    chip.className = 'chip chip-svc' + (activeSvcs.has(key) ? '' : ' off');
-    chip.style.border = '1px solid var(--border-soft)';
-    chip.textContent = SERVICES[key].label;
-    chip.onclick = () => {
-      if (activeSvcs.has(key)) activeSvcs.delete(key); else activeSvcs.add(key);
-      chip.className = 'chip chip-svc' + (activeSvcs.has(key) ? '' : ' off');
-      applyFilters();
-      renderRail();
-    };
-    svcContainer.appendChild(chip);
-  });
-
-  document.getElementById('sheet').classList.add('expanded');
+/* ---------- Dedicated Filter Modal (Mockup 4) ---------- */
+function openFilterModal() {
+  const modal = document.getElementById('filter-modal');
+  if (!modal) return;
+  modal.classList.add('open');
+  renderFilterModalContent();
+  updateModalMatchCount();
 }
 
-function closeFiltersMenu() {
-  document.getElementById('sheet-title-text').innerText = 'Heat relief nearby';
-  document.getElementById('sheet-count').style.display = 'block';
-  document.getElementById('sheet-source').style.display = 'block';
-  renderList();
+function closeFilterModal() {
+  const modal = document.getElementById('filter-modal');
+  if (modal) modal.classList.remove('open');
 }
 
-/* ---------- List, sorted by distance from where you're looking ---------- */
-function renderList() {
-  const list = document.getElementById('sheet-list');
+function onFilterModalOverlayClick(e) {
+  if (e.target.id === 'filter-modal') closeFilterModal();
+}
+
+function renderFilterModalContent() {
+  // Category Rows with live site counts
+  const catGrid = document.getElementById('modal-cat-grid');
+  if (catGrid) {
+    catGrid.innerHTML = Object.keys(CATEGORIES).map(key => {
+      const cat = CATEGORIES[key];
+      const isSel = activeCats.has(key) ? ' selected' : '';
+      const count = SITES.filter(s => s.c.indexOf(key) > -1).length;
+      return `
+        <div class="filter-cat-row${isSel}" onclick="toggleCategoryFilter('${key}')">
+          <div class="filter-cat-left">
+            <div class="filter-cat-dot" style="background:${cat.raw};"></div>
+            <span>${esc(cat.label)}</span>
+          </div>
+          <span class="filter-cat-count">${count} sites</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Service Chips
+  const svcCloud = document.getElementById('modal-svc-chips');
+  if (svcCloud) {
+    svcCloud.innerHTML = Object.keys(SERVICES).map(key => {
+      const isSel = activeSvcs.has(key) ? ' selected' : '';
+      return `
+        <div class="filter-service-chip${isSel}" onclick="toggleServiceFilter('${key}')">
+          ${isSel ? '✓ ' : ''}${esc(SERVICES[key].label)}
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Open Right Now Switch
+  const openSwitch = document.getElementById('modal-open-switch');
+  if (openSwitch) {
+    openSwitch.classList.toggle('on', openOnly);
+  }
+}
+
+function toggleCategoryFilter(key) {
+  if (activeCats.has(key)) {
+    if (activeCats.size > 1) activeCats.delete(key);
+  } else {
+    activeCats.add(key);
+  }
+  renderFilterModalContent();
+  updateModalMatchCount();
+}
+
+function toggleServiceFilter(key) {
+  if (activeSvcs.has(key)) activeSvcs.delete(key);
+  else activeSvcs.add(key);
+  renderFilterModalContent();
+  updateModalMatchCount();
+}
+
+function toggleOpenOnlyFilter() {
+  openOnly = !openOnly;
+  const openSwitch = document.getElementById('modal-open-switch');
+  if (openSwitch) openSwitch.classList.toggle('on', openOnly);
+  updateModalMatchCount();
+}
+
+function resetAllFilters() {
+  activeCats = new Set(['cool', 'hydr', 'resp', 'coll']);
+  activeSvcs.clear();
+  openOnly = false;
+  renderFilterModalContent();
+  updateModalMatchCount();
+}
+
+function updateModalMatchCount() {
+  const matchCount = SITES.filter(matchesFilters).length;
+  const btnLabel = document.getElementById('modal-btn-label');
+  if (btnLabel) btnLabel.innerText = `Show ${matchCount} Matching Sites`;
+}
+
+function applyAndCloseFilterModal() {
+  closeFilterModal();
+  applyFilters();
+}
+
+/* ---------- Horizontal Card Carousel (Mockup 2) ---------- */
+function renderCarousel() {
+  const track = document.getElementById('carousel-track');
+  if (!track) return;
+
   const from = userLL || (MAP ? [MAP.getCenter().lat, MAP.getCenter().lng] : PHX);
-
   const rows = [];
   SITES.forEach((s, i) => {
     if (!matchesFilters(s)) return;
@@ -404,40 +435,48 @@ function renderList() {
   });
   rows.sort((a, b) => a.d - b.d);
 
-  document.getElementById('sheet-count').innerText = rows.length + ' sites';
-  document.getElementById('sheet-source').innerText = dataStamp;
-
-  const titleEl = document.getElementById('sheet-title-text');
-  if (titleEl && titleEl.innerText !== 'Heat relief nearby') return;
+  const countEl = document.getElementById('carousel-count');
+  if (countEl) countEl.innerText = rows.length + ' sites';
 
   if (!rows.length) {
-    list.innerHTML = '<div class="empty-note">No sites match these filters. ' +
-      'Turn a filter back on, or clear <strong>Open now</strong> to see sites that open later.</div>';
+    track.innerHTML = `
+      <div style="padding: 18px 12px; color: var(--text-muted); font-size: 0.8rem; text-align: center; width: 100%;">
+        No sites match these filters. Tap <strong>Filters</strong> above to broaden your selection.
+      </div>`;
     return;
   }
 
-  list.innerHTML = rows.slice(0, 60).map(r => {
+  track.innerHTML = rows.slice(0, 30).map(r => {
     const s = r.s, st = statusOf(s), cat = primaryCat(s);
-    return '<div class="res-row" onclick="flyTo(' + r.i + ')">' +
-      '<div class="res-badge" style="background:' + CATEGORIES[cat].raw + '">' +
-        '<svg width="18" height="18" viewBox="-9 -9 18 18">' + ICONS[cat] + '</svg></div>' +
-      '<div class="res-body">' +
-        '<div class="res-name">' + esc(s.n) + '</div>' +
-        '<div class="res-meta">' + esc(s.a || s.ci || '') + '</div>' +
-        '<span class="res-tag ' + st.tone + '">' + esc(st.label) + '</span>' +
-      '</div>' +
-      '<div class="res-dist-col">' +
-        '<div class="res-dist">' + (r.walk ? r.walk.distText : r.d.toFixed(1) + ' mi') + '</div>' +
-        '<div class="res-walk-time">' + (r.walk ? r.walk.timeText : '') + '</div>' +
-      '</div>' +
-      '<button class="row-dir" aria-label="Walking directions to ' + esc(s.n) + '" ' +
-        'onclick="event.stopPropagation();openDirections(' + r.i + ',\'walking\')">' +
-        '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">' +
-        '<circle cx="13" cy="4" r="2"/><path d="m9 21 1.5-6.5L8 12l1-5 3.5 2 3 1.5"/><path d="M14.5 14.5 17 21"/></svg>' +
-      '</button></div>';
-  }).join('') +
-  (rows.length > 60 ? '<div class="empty-note">Showing the 60 closest of ' + rows.length +
-    '. Move the map or add a filter to narrow it down.</div>' : '');
+    const catObj = CATEGORIES[cat] || { label: 'Resource', raw: '#0f6e6a' };
+    const isSelected = activePoi === r.i ? ' selected' : '';
+
+    return `
+      <div class="site-card${isSelected}" onclick="flyTo(${r.i}); openPoi(${r.i});">
+        <div class="card-top">
+          <span class="card-cat-badge" style="background:${catObj.raw};">${esc(catObj.short || catObj.label)}</span>
+          <div class="card-walk">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="13" cy="4" r="2"/><path d="m9 21 1.5-6.5L8 12l1-5 3.5 2 3 1.5"/><path d="M14.5 14.5 17 21"/></svg>
+            ${r.walk ? esc(r.walk.distText) : esc(r.d.toFixed(1) + ' mi')}
+          </div>
+        </div>
+        <div>
+          <div class="site-card-name" title="${esc(s.n)}">${esc(s.n)}</div>
+          <div class="site-card-addr">${esc(s.a || s.ci || 'Phoenix')}</div>
+        </div>
+        <div class="card-footer">
+          <span class="card-status ${st.tone}">${esc(st.label)}</span>
+          <button class="btn-card-more" onclick="event.stopPropagation(); flyTo(${r.i}); openPoi(${r.i});">
+            More info
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderList() {
+  renderCarousel();
 }
 
 function esc(t) {
@@ -445,124 +484,106 @@ function esc(t) {
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 }
 
-/* ---------- Site detail ---------- */
+/* ---------- Floating POI Detail Card (Mockup 5 Option A) ---------- */
 function openPoi(i) {
   const s = SITES[i];
   if (!s) return;
   activePoi = i;
   const st = statusOf(s);
 
+  // Hide carousel drawer & map controls, show floating card
+  const carousel = document.getElementById('bottom-carousel-drawer');
+  const poiCard = document.getElementById('floating-poi-card');
+  const controls = document.getElementById('map-controls');
+  if (carousel) carousel.classList.add('hidden');
+  if (controls) controls.classList.add('hidden');
+  if (poiCard) poiCard.style.display = 'flex';
+
+  // Badges sorted by active filter match
   const sortedCats = s.c.slice().sort((a, b) => {
     const aActive = activeCats.has(a) ? 1 : 0;
     const bActive = activeCats.has(b) ? 1 : 0;
     return bActive - aActive;
   });
   const badgesHtml = sortedCats.map(c =>
-    '<span class="poi-badge" style="background:' + CATEGORIES[c].raw + '">' +
-    esc(CATEGORIES[c].short) + '</span>').join('');
+    '<span class="card-cat-badge" style="background:' + CATEGORIES[c].raw + '">' +
+    esc(CATEGORIES[c].short || CATEGORIES[c].label) + '</span>').join('');
 
-  const nameHtml = '<span class="poi-title">' + esc(s.n) + '</span>';
-  const orgHtml = s.o && s.o !== s.n
-    ? '<span class="poi-org">' + esc(s.o) + '</span>' : '';
+  document.getElementById('poi-badges').innerHTML = badgesHtml;
+  
+  const walkInfo = getWalkInfo(userLL || PHX, s, i);
+  document.getElementById('poi-walk-badge').innerHTML = `🚶 ${walkInfo.distText}`;
 
-  const statusHtml = '<span class="status-pill ' + st.tone + '">' + esc(st.label) + '</span>' +
-    (userLL ? '<span class="poi-dist">' + getWalkInfo(userLL, s, i).distText + ' away</span>' : '');
+  document.getElementById('poi-title').innerText = s.n;
+  document.getElementById('poi-org').innerText = (s.o && s.o !== s.n) ? s.o : '';
+  document.getElementById('poi-addr').innerText = s.a ? `${s.a} · ${s.ci || 'Phoenix'}, AZ` : (s.ci || 'Phoenix, AZ');
 
-  const addr = esc(s.a || '');
-  const addrHtml = addr ? '<div class="poi-addr">' + addr + '</div>' : '';
+  document.getElementById('poi-status-line').innerHTML = `
+    <span class="card-status ${st.tone}">● ${esc(st.label)}</span>
+    ${s.ph ? `<span style="color:var(--text-muted); font-size:0.75rem;">· ${esc(s.ph)}</span>` : ''}
+  `;
 
-  const hoursHtml = weekTable(s);
-
+  // Services tags
   const tags = [];
   (s.sv || []).forEach(v => { if (SERVICES[v]) tags.push(SERVICES[v].label); });
-  if (s.ct) tags.push(s.ct);
-  if (s.wc === 1) tags.push('Wheelchair accessible');
-  if (s.ada === 1) tags.push('ADA accessible');
-  if (s.pet === 1) tags.push('Pets welcome');
-  else if (s.pet === 0) tags.push('No pets');
-  
-  const tagsHtml = tags.map(t => '<span class="tag">' + esc(t) + '</span>').join('');
-  const noteHtml = s.nt ? '<div class="poi-note">' + esc(s.nt) + '</div>' : '';
-  
-  const callHtml = s.ph 
-    ? `<button class="dir-btn ghost" onclick="window.location.href='tel:${s.ph.replace(/[^0-9+]/g, '')}'" aria-label="Call ${esc(s.n)}">
-         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>
-         Call
-       </button>`
-    : '';
+  if (s.wc === 1) tags.push('Wheelchair ADA');
+  if (s.ada === 1) tags.push('ADA Accessible');
+  if (s.pet === 1) tags.push('Pets Welcome');
+  document.getElementById('poi-tags').innerHTML = tags.map(t => `<span class="fsc-tag">${esc(t)}</span>`).join('');
 
-  const actionsHtml = `
-    <div class="poi-actions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 7px;">
-      <button class="dir-btn" onclick="openDirections(${i},'walking')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="2"/><path d="m9 21 1.5-6.5L8 12l1-5 3.5 2 3 1.5"/><path d="M14.5 14.5 17 21"/></svg>
-        Walk there
-      </button>
-      <button class="dir-btn ghost" onclick="openDirections(${i},'transit')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 10h16"/><path d="m7 17-2 4M17 17l2 4"/></svg>
-        Bus
-      </button>
-      ${callHtml}
-    </div>
+  // Weekly hours table
+  document.getElementById('poi-hours-table').innerHTML = weekTableRows(s);
+
+  // Action buttons
+  const callBtn = s.ph ? `
+    <button class="btn-fsc-call" onclick="window.location.href='tel:${s.ph.replace(/[^0-9+]/g, '')}'">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>
+      Call
+    </button>
+  ` : '';
+
+  document.getElementById('poi-actions').innerHTML = `
+    <button class="btn-fsc-walk" onclick="openDirections(${i},'walking')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="13" cy="4" r="2"/><path d="m9 21 1.5-6.5L8 12l1-5 3.5 2 3 1.5"/><path d="M14.5 14.5 17 21"/></svg>
+      Walk There
+    </button>
+    ${callBtn}
   `;
 
-  document.getElementById('sheet-list').innerHTML = `
-    <div style="margin-bottom: 15px;">
-      <button class="btn-back" onclick="closePoi()" style="background:none;border:none;color:var(--accent);font-weight:700;font-size:0.85rem;padding:0;cursor:pointer;display:flex;align-items:center;gap:4px;">
-        &larr; Back to List
-      </button>
-    </div>
-    <div class="poi-badges" style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px;">${badgesHtml}</div>
-    <div style="font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;color:var(--ink);line-height:1.25;">${nameHtml}</div>
-    ${orgHtml ? `<div class="poi-org" style="font-size:0.7rem;color:var(--text-muted);font-weight:600;">${orgHtml}</div>` : ''}
-    <div class="poi-status" style="display:flex;align-items:center;gap:8px;margin-top:7px;flex-wrap:wrap;">${statusHtml}</div>
-    ${addrHtml}
-    ${hoursHtml}
-    ${tags.length ? `<div class="poi-tags" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:9px;">${tagsHtml}</div>` : ''}
-    ${noteHtml}
-    ${actionsHtml}
-  `;
-
-  document.getElementById('sheet-title-text').innerText = 'Site Details';
-  document.getElementById('sheet-count').style.display = 'none';
-  document.getElementById('sheet-source').style.display = 'none';
-
-  document.getElementById('sheet').classList.add('expanded');
-  positionOverlays();
+  if (s.ll && MAP) {
+    MAP.flyTo(s.ll, Math.max(MAP.getZoom(), 14.5), { duration: 0.5 });
+  }
 }
 
-/* The whole week, with today marked — an outreach worker is often planning
-   tomorrow's route, not just this minute. */
-function weekTable(s) {
+function weekTableRows(s) {
   const today = new Date().getDay();
   let rows = '';
   for (let i = 0; i < 7; i++) {
     const d = (today + i) % 7, row = (s.hr || [])[d];
-    rows += '<div class="hrow' + (i === 0 ? ' today' : '') + '">' +
-      '<span>' + (i === 0 ? 'Today' : DAY_NAMES[d]) + '</span>' +
-      '<span>' + (row ? fmtTime(row[0]) + ' – ' + fmtTime(row[1]) : 'Closed') + '</span></div>';
+    rows += '<div class="hrow' + (i === 0 ? ' today' : '') + '" style="display:flex; justify-content:space-between; font-size:0.72rem; padding:3px 0; color:var(--text-muted); border-bottom:1px solid var(--border-soft);">' +
+      '<span' + (i === 0 ? ' style="color:var(--ink); font-weight:800;"' : '') + '>' + (i === 0 ? 'Today' : DAY_NAMES[d]) + '</span>' +
+      '<span' + (i === 0 ? ' style="color:var(--ink); font-weight:800;"' : '') + '>' + (row ? fmtTime(row[0]) + ' – ' + fmtTime(row[1]) : 'Closed') + '</span></div>';
   }
   const season = s.sd && s.ed
-    ? '<div class="season">Season ' + esc(s.sd) + ' to ' + esc(s.ed) + '</div>' : '';
-  return '<details class="hours-wrap"><summary>Hours this week</summary>' + rows + season + '</details>';
+    ? '<div style="font-size:0.63rem; color:var(--text-muted); padding-top:4px; font-style:italic;">Season ' + esc(s.sd) + ' to ' + esc(s.ed) + '</div>' : '';
+  return rows + season;
 }
 
 function closePoi() {
   activePoi = null;
-  document.getElementById('sheet-title-text').innerText = 'Heat relief nearby';
-  document.getElementById('sheet-count').style.display = 'block';
-  document.getElementById('sheet-source').style.display = 'block';
-  renderList();
-  positionOverlays();
+  const poiCard = document.getElementById('floating-poi-card');
+  const carousel = document.getElementById('bottom-carousel-drawer');
+  const controls = document.getElementById('map-controls');
+  if (poiCard) poiCard.style.display = 'none';
+  if (carousel) carousel.classList.remove('hidden');
+  if (controls) controls.classList.remove('hidden');
 }
 
 function flyTo(i) {
   const s = SITES[i];
-  if (!s) return;
-  document.getElementById('sheet').classList.remove('expanded');
-  MAP.flyTo(s.ll, Math.max(MAP.getZoom(), 16), { duration: 0.7 });
-  openPoi(i);
+  if (!s || !MAP) return;
+  MAP.flyTo(s.ll, Math.max(MAP.getZoom(), 15), { duration: 0.6 });
 }
-
 
 /* ==========================================================
    DIRECTIONS
@@ -584,23 +605,27 @@ function openDirections(i, mode) {
 /* ---------- Where am I ---------- */
 function locateMe() {
   const btn = document.getElementById('btn-locate');
-  if (!navigator.geolocation) return;
-  btn.classList.add('busy');
+  if (!navigator.geolocation) {
+    alert('Geolocation is not supported by your browser.');
+    return;
+  }
+  if (btn) btn.classList.add('busy');
   navigator.geolocation.getCurrentPosition(pos => {
-    btn.classList.remove('busy');
+    if (btn) btn.classList.remove('busy');
     userLL = [pos.coords.latitude, pos.coords.longitude];
     enrichAllSitesWithOSRM(userLL);
     if (meMarker) MAP.removeLayer(meMarker);
     if (meCircle) MAP.removeLayer(meCircle);
     meCircle = L.circle(userLL, { radius: Math.min(pos.coords.accuracy || 60, 400),
-      color: '#2f6fd0', weight: 1, fillColor: '#2f6fd0', fillOpacity: 0.1 }).addTo(MAP);
+      color: '#2563eb', weight: 1.5, fillColor: '#2563eb', fillOpacity: 0.12 }).addTo(MAP);
     meMarker = L.circleMarker(userLL, { radius: 7, color: '#fff', weight: 2.5,
-      fillColor: '#2f6fd0', fillOpacity: 1 }).addTo(MAP);
+      fillColor: '#2563eb', fillOpacity: 1 }).addTo(MAP);
     MAP.flyTo(userLL, 15, { duration: 0.7 });
-    renderList();
+    renderCarousel();
+    if (activePoi != null) openPoi(activePoi);
   }, () => {
-    btn.classList.remove('busy');
-    MAP.flyTo(PHX, 12, { duration: 0.6 });
+    if (btn) btn.classList.remove('busy');
+    MAP.flyTo(PHX, 13, { duration: 0.6 });
   }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 });
 }
 
@@ -629,38 +654,9 @@ function refreshFromHRN() {
 }
 
 
-const sheet = document.getElementById('sheet');
-const grip = document.getElementById('sheet-grip');
-let gripStart = null;
-grip.addEventListener('pointerdown', e => {
-  grip.setPointerCapture(e.pointerId);
-  gripStart = { y: e.clientY };
-});
-grip.addEventListener('pointermove', e => {
-  if (!gripStart) return;
-  const dy = e.clientY - gripStart.y;
-  if (dy < -34) sheet.classList.add('expanded');
-  if (dy > 34) sheet.classList.remove('expanded');
-});
-grip.addEventListener('pointerup', e => {
-  if (gripStart && Math.abs(e.clientY - gripStart.y) < 8) sheet.classList.toggle('expanded');
-  gripStart = null;
-});
-
-/* Keep the zoom buttons clear of whatever is currently open */
 function positionOverlays() {
-  const wrap = document.querySelector('.map-wrap');
-  if (!wrap) return;
-  const wrapH = wrap.clientHeight;
-  const sheet = document.getElementById('sheet');
-  
-  let floor = wrapH - 200;
-  if (sheet && sheet.classList.contains('expanded')) {
-    floor = wrapH - sheet.offsetHeight;
-  }
-  document.getElementById('map-controls').style.top = Math.max(56, floor - 148) + 'px';
+  // Controls are positioned via CSS bottom in stacked lower-right
 }
-
 
 function resizeAll() {
   positionOverlays();
