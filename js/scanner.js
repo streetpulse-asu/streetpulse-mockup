@@ -389,13 +389,16 @@ function updateCallTimerDisplay() {
   if (timerEl) timerEl.innerText = `${m}:${s}`;
 }
 
+/* Placeholders match the board's em dash rather than the old double hyphen,
+   so an untaken vital reads the same in the call as it does on the screen the
+   worker just came from. */
 function syncTelehealthVitals() {
-  const show = key => VITALS[key].v === null ? '--' : VITALS[key].v;
+  const show = key => VITALS[key].v === null ? '\u2014' : VITALS[key].v;
   const put = (id, text) => { const el = document.getElementById(id); if (el) el.innerText = text; };
   put('th-val-hr', show('hr'));
   put('th-val-spo2', show('spo2'));
   put('th-val-temp', show('temp'));
-  put('th-val-bp', VITALS.bp.v === null ? '--/--' : VITALS.bp.v);
+  put('th-val-bp', VITALS.bp.v === null ? '\u2014/\u2014' : VITALS.bp.v);
 }
 
 function toggleTelehealthMic() {
