@@ -153,6 +153,7 @@ function simulateNewReading() {
 
 function openManualEntry() {
   document.getElementById('manual-modal').classList.add('show');
+  clearManualErrors();
   const getVal = id => { const v = document.getElementById(id).innerText; return v === '--' ? '' : v; };
   const bpText = document.getElementById('bp-val').innerText;
   if (bpText !== '--/--' && bpText.includes('/')) {
@@ -170,7 +171,67 @@ function openManualEntry() {
 }
 function closeManualEntry() { document.getElementById('manual-modal').classList.remove('show'); }
 
+/* ---------- Manual entry validation ----------
+   Physiologic bounds, not clinical thresholds: they only reject values a
+   worker could not have measured (a typo'd SpO2 of 900, a transposed HR).
+   Judgement about whether a real reading is concerning stays in
+   evaluateVitals(). Mirrors the min/max on the inputs so keyboard entry and
+   paste are both covered. */
+const MANUAL_FIELDS = [
+  { id: 'manual-bp-sys', label: 'Systolic BP', min: 40,  max: 300, required: false, pairs: 'manual-bp-dia' },
+  { id: 'manual-bp-dia', label: 'Diastolic BP', min: 20, max: 200, required: false, pairs: 'manual-bp-sys' },
+  { id: 'manual-rr',     label: 'Respiratory rate', min: 4,  max: 80,  required: false },
+  { id: 'manual-hr',     label: 'Heart rate', min: 20, max: 300, required: true },
+  { id: 'manual-spo2',   label: 'SpO\u2082', min: 50, max: 100, required: true },
+  { id: 'manual-temp',   label: 'Temperature', min: 80, max: 115, required: false }
+];
+
+function showManualError(msg, focusId) {
+  const box = document.getElementById('manual-error');
+  box.textContent = msg;
+  box.hidden = false;
+  const el = focusId && document.getElementById(focusId);
+  if (el) { el.setAttribute('aria-invalid', 'true'); el.focus(); }
+}
+
+function clearManualErrors() {
+  const box = document.getElementById('manual-error');
+  box.hidden = true;
+  box.textContent = '';
+  MANUAL_FIELDS.forEach(f => document.getElementById(f.id).removeAttribute('aria-invalid'));
+}
+
+function validateManualEntry() {
+  clearManualErrors();
+  for (const f of MANUAL_FIELDS) {
+    const raw = document.getElementById(f.id).value.trim();
+    if (raw === '') {
+      if (f.required) { showManualError(f.label + ' is required.', f.id); return false; }
+      continue;
+    }
+    const n = Number(raw);
+    if (!Number.isFinite(n)) { showManualError(f.label + ' must be a number.', f.id); return false; }
+    if (n < f.min || n > f.max) {
+      showManualError(f.label + ' must be between ' + f.min + ' and ' + f.max + '.', f.id);
+      return false;
+    }
+  }
+  const sys = document.getElementById('manual-bp-sys').value.trim();
+  const dia = document.getElementById('manual-bp-dia').value.trim();
+  if ((sys === '') !== (dia === '')) {
+    showManualError('Enter both systolic and diastolic, or neither.', sys === '' ? 'manual-bp-sys' : 'manual-bp-dia');
+    return false;
+  }
+  if (sys !== '' && dia !== '' && Number(dia) >= Number(sys)) {
+    showManualError('Diastolic must be lower than systolic.', 'manual-bp-dia');
+    return false;
+  }
+  return true;
+}
+
 function saveManualEntry() {
+  if (!validateManualEntry()) return;
+
   const sys = document.getElementById('manual-bp-sys').value;
   const dia = document.getElementById('manual-bp-dia').value;
   const rr = document.getElementById('manual-rr').value;

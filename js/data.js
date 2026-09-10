@@ -22,10 +22,15 @@ let SITES = [{"n":"Aguila Library","o":"Maricopa County Library District","a":"5
 let dataStamp = 'MAG Heat Relief Network · 2026 season snapshot';
 
 const CATEGORIES = {
-  cool: { label: 'Cooling center',    raw: '#64b5f6', short: 'Cooling' },   /* light sky blue  */
-  hydr: { label: 'Hydration station', raw: '#0288d1', short: 'Hydration' }, /* ocean blue      */
-  resp: { label: 'Respite center',    raw: '#e53935', short: 'Respite' },   /* warm red        */
-  coll: { label: 'Donation drop-off', raw: '#2e7d32', short: 'Donations' } /* forest green    */
+  /* Category is carried by the glyph (see ICONS); colour only has to keep the
+     four apart at 24px in daylight. Hues are spaced >=48 deg with distinct
+     lightness, and every fill clears 4.9:1 against its white glyph. The old
+     set put Cooling and Hydration 5.6 deg apart — the two most common pins —
+     and gave Respite an emergency red. */
+  cool: { label: 'Cooling center',    raw: '#0f766e', short: 'Cooling' },   /* teal   175 deg */
+  hydr: { label: 'Hydration station', raw: '#1d4ed8', short: 'Hydration' }, /* blue   224 deg */
+  resp: { label: 'Respite center',    raw: '#9d174d', short: 'Respite' },   /* rose   336 deg */
+  coll: { label: 'Donation drop-off', raw: '#4d7c0f', short: 'Donations' }  /* moss    86 deg */
 };
 
 const SERVICES = {

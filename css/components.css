@@ -11,28 +11,28 @@
         .brand-mark { height: 34px; width: 34px; display: block; flex-shrink: 0; }
         .brand-text-block { display: flex; flex-direction: column; justify-content: center; }
         .brand-name {
-            font-family: 'Literata', Georgia, serif; font-size: 1.35rem; font-weight: 700;
+            font-family: 'Fraunces', Georgia, serif; font-size: 1.35rem; font-weight: 700;
             line-height: 1.05; letter-spacing: -0.3px;
         }
         .name-street { color: var(--ink); }
-        .name-pulse { color: #2563eb; }
+        .name-pulse { color: var(--brand); }
         .brand-subtitle {
-            font-family: 'Work Sans', 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: 0.58rem; font-weight: 600; text-transform: uppercase;
-            letter-spacing: 0.85px; color: #64748b; line-height: 1.1; margin-top: 2px;
+            letter-spacing: 0.85px; color: var(--text-muted); line-height: 1.1; margin-top: 2px;
         }
         .filter-header-btn {
             display: flex; align-items: center; gap: 6px;
-            background: #f1f5f9; color: var(--accent);
-            border: 1px solid rgba(15, 110, 106, 0.22);
+            background: var(--surface); color: var(--accent);
+            border: 1px solid var(--border-soft);
             padding: 7px 13px; border-radius: 20px;
             font-size: 0.78rem; font-weight: 700; cursor: pointer;
             font-family: inherit; transition: all 0.15s ease;
         }
-        .filter-header-btn:hover { background: #e6f4f3; }
+        .filter-header-btn:hover { background: var(--surface-sunken); }
         .filter-header-btn svg { width: 14px; height: 14px; stroke: var(--accent); }
         .filter-count-badge {
-            background: var(--accent); color: #fff; font-size: 0.65rem;
+            background: var(--amber); color: #fff; font-size: 0.65rem;
             padding: 1px 6px; border-radius: 10px; font-weight: 800;
         }
 
@@ -49,7 +49,7 @@
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(22, 35, 61, 0.12);
             border-radius: 26px;
-            box-shadow: 0 4px 18px rgba(22, 35, 61, 0.08);
+            box-shadow: var(--shadow-2);
             z-index: 1000;
             justify-content: center;
         }
@@ -106,16 +106,16 @@
             display: flex; flex-direction: column; align-items: center; text-align: center;
             padding: 38px 22px 30px 22px; background: var(--surface);
             border: 1px solid var(--border-soft); border-radius: 20px;
-            box-shadow: 0 10px 25px -5px rgba(22, 35, 61, 0.08); margin: auto 0;
+            box-shadow: var(--shadow-3); margin: auto 0;
         }
         .lock-shield {
             width: 68px; height: 68px; border-radius: 50%;
-            background: rgba(15, 110, 106, 0.09); color: var(--accent);
+            background: rgba(22, 35, 61, 0.06); color: var(--accent);
             display: flex; align-items: center; justify-content: center;
             margin-bottom: 18px;
         }
         .lock-title {
-            font-family: 'Literata', Georgia, serif; font-size: 1.35rem; font-weight: 700;
+            font-family: 'Fraunces', Georgia, serif; font-size: 1.35rem; font-weight: 700;
             color: var(--ink); margin: 0 0 10px 0;
         }
         .lock-subtitle {
@@ -153,15 +153,15 @@
         .modal-overlay.show { display: flex; }
         .modal-card {
             background: var(--surface); width: 86%; max-width: 380px; border-radius: 26px; padding: 26px;
-            text-align: center; box-shadow: 0 30px 60px rgba(11, 14, 23, 0.35); box-sizing: border-box;
+            text-align: center; box-shadow: var(--shadow-overlay); box-sizing: border-box;
             border: 1px solid var(--border-soft); max-height: 86%; overflow-y: auto;
         }
         .modal-icon {
-            width: 58px; height: 58px; background: rgba(15, 110, 106, 0.1); color: var(--accent);
+            width: 58px; height: 58px; background: rgba(22, 35, 61, 0.06); color: var(--accent);
             border-radius: 50%; display: flex; justify-content: center; align-items: center;
             margin: 0 auto 16px auto;
         }
-        .modal-title { font-family: 'Fraunces', serif; font-size: 1.2rem; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
+        .modal-title { font-family: 'Fraunces', Georgia, serif; font-size: 1.2rem; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
         .modal-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
 
         .input-group { text-align: left; margin-bottom: 12px; }
@@ -177,7 +177,7 @@
         input[type="number"] { -moz-appearance: textfield; }
 
         .btn { border: none; border-radius: 12px; padding: 14px; font-size: 0.9rem; font-weight: 700; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; box-sizing: border-box; }
-        .btn-primary { background-color: var(--ink); color: white; box-shadow: 0 10px 22px -8px rgba(22, 35, 61, 0.5); }
+        .btn-primary { background-color: var(--ink); color: white; box-shadow: var(--shadow-2); }
         .btn-primary:active { transform: scale(0.98); }
         .btn-secondary { background-color: var(--surface); color: var(--text-main); border: 1px solid var(--border-soft); margin-top: 10px; }
         .btn-secondary:active { background-color: var(--bg-app); transform: scale(0.98); }
@@ -195,19 +195,19 @@
         }
         .settings-header { margin-bottom: 4px; }
         .settings-title {
-            font-family: 'Literata', serif; font-size: 1.45rem; font-weight: 700;
+            font-family: 'Fraunces', Georgia, serif; font-size: 1.45rem; font-weight: 700;
             color: var(--ink); margin-bottom: 4px;
         }
         .settings-sub { font-size: 0.8rem; color: var(--text-muted); }
         .settings-card {
             background: var(--surface); border: 1px solid var(--border-soft);
             border-radius: 18px; padding: 18px 20px;
-            box-shadow: 0 4px 14px rgba(22, 35, 61, 0.05);
+            box-shadow: var(--shadow-1);
             display: flex; flex-direction: column; gap: 14px;
         }
         .settings-card-title {
             font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
-            letter-spacing: 0.8px; color: #64748b; margin-bottom: 2px;
+            letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 2px;
         }
         .settings-row {
             display: flex; justify-content: space-between; align-items: center;
@@ -216,7 +216,35 @@
         .sr-desc { font-size: 0.74rem; color: var(--text-muted); margin-top: 2px; }
         .status-pill-subtle {
             font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 20px;
-            background: #e6f4f3; color: var(--accent);
+            background: var(--surface-sunken); color: var(--accent);
         }
 
 
+
+        /* ---------- Forms: required, hints, validation, focus ---------- */
+        .req { color: var(--alert-text); font-weight: 800; margin-left: 1px; }
+
+        .form-hint {
+            font-size: 0.68rem; color: var(--text-muted); font-weight: 500;
+            margin: 5px 0 0 0; line-height: 1.35;
+        }
+
+        .form-error {
+            font-size: 0.74rem; font-weight: 700; color: var(--alert-text);
+            background: var(--alert-bg); border: 1px solid var(--alert-border);
+            border-radius: 10px; padding: 9px 12px; margin: 0 0 14px 0;
+        }
+        .form-error[hidden] { display: none; }
+
+        .input-group input[aria-invalid="true"] {
+            border-color: var(--alert-text);
+            box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.18);
+        }
+
+        /* Keyboard focus is visible everywhere; pointer focus stays quiet. */
+        :focus-visible {
+            outline: 2px solid var(--amber);
+            outline-offset: 2px;
+            border-radius: 6px;
+        }
+        .modal-overlay:not(.show) { pointer-events: none; }

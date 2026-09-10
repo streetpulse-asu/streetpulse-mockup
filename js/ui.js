@@ -50,12 +50,18 @@ function disconnectDevice() {
 
 function switchTab(tabId, element) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.remove('active');
+    n.setAttribute('aria-selected', 'false');
+  });
 
   const targetTab = document.getElementById('tab-' + tabId);
   if (targetTab) targetTab.classList.add('active');
   const targetNav = element || document.querySelector(`.nav-item[onclick*="${tabId}"]`);
-  if (targetNav) targetNav.classList.add('active');
+  if (targetNav) {
+    targetNav.classList.add('active');
+    targetNav.setAttribute('aria-selected', 'true');
+  }
 
   const container = document.querySelector('.phone-container');
   if (container) {

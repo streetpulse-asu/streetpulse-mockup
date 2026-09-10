@@ -208,7 +208,7 @@ function pinIcon(cat, dimmed) {
   const col = CATEGORIES[cat].raw;
   const icon = (ICONS[cat] || '').replace(/stroke="#fff"/g, `stroke="${col}"`).replace(/fill="#fff"/g, `fill="${col}"`);
   // Teardrop outer shape (colored), white inner circle, colored icon on white
-  const shape = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 36 44">
+  const shape = `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 36 44">
     <path d="M18 1 C9.163 1 2 8.163 2 17 C2 26.5 10 35 18 43 C26 35 34 26.5 34 17 C34 8.163 26.837 1 18 1Z"
           fill="${col}" stroke="rgba(0,0,0,0.12)" stroke-width="0.8"/>
     <circle cx="18" cy="16" r="10" fill="white"/>
@@ -298,11 +298,11 @@ function updateHeaderFilterBadge() {
   const isDefault = activeCats.size === 4 && activeSvcs.size === 0 && !openOnly;
   if (isDefault) {
     badge.innerText = '4';
-    badge.style.background = 'var(--accent)';
+    badge.style.background = 'var(--amber)';
   } else {
     const totalActive = activeCats.size + activeSvcs.size + (openOnly ? 1 : 0);
     badge.innerText = String(totalActive);
-    badge.style.background = '#2563eb';
+    badge.style.background = 'var(--amber)';
   }
 }
 
@@ -434,7 +434,7 @@ function renderCarousel() {
 
   track.innerHTML = rows.slice(0, 30).map(r => {
     const s = r.s, st = statusOf(s), cat = primaryCat(s);
-    const catObj = CATEGORIES[cat] || { label: 'Resource', raw: '#0f6e6a' };
+    const catObj = CATEGORIES[cat] || { label: 'Resource', raw: '#16233d' };
     const isSelected = activePoi === r.i ? ' selected' : '';
 
     return `
@@ -442,7 +442,7 @@ function renderCarousel() {
         <div class="card-top">
           <span class="card-cat-badge" style="background:${catObj.raw};">${esc(catObj.short || catObj.label)}</span>
           <div class="card-walk">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="13" cy="4" r="2"/><path d="m9 21 1.5-6.5L8 12l1-5 3.5 2 3 1.5"/><path d="M14.5 14.5 17 21"/></svg>
+            <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="13" cy="4" r="2"/><path d="m9 21 1.5-6.5L8 12l1-5 3.5 2 3 1.5"/><path d="M14.5 14.5 17 21"/></svg>
             ${r.walk ? esc(r.walk.distText) : esc(r.d.toFixed(1) + ' mi')}
           </div>
         </div>
@@ -498,14 +498,14 @@ function openPoi(i) {
   document.getElementById('poi-badges').innerHTML = badgesHtml;
   
   const walkInfo = getWalkInfo(userLL || PHX, s, i);
-  document.getElementById('poi-walk-badge').innerHTML = `🚶 ${walkInfo.distText}`;
+  document.getElementById('poi-walk-badge').innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" aria-hidden="true"><circle cx="13" cy="4" r="2"/><path d="m9 21 1.5-6.5L8 12l1-5 3.5 2 3 1.5"/><path d="M14.5 14.5 17 21"/></svg> ${walkInfo.distText}`;
 
   document.getElementById('poi-title').innerText = s.n;
   document.getElementById('poi-org').innerText = (s.o && s.o !== s.n) ? s.o : '';
   document.getElementById('poi-addr').innerText = s.a ? `${s.a} · ${s.ci || 'Phoenix'}, AZ` : (s.ci || 'Phoenix, AZ');
 
   document.getElementById('poi-status-line').innerHTML = `
-    <span class="card-status ${st.tone}">● ${esc(st.label)}</span>
+    <span class="card-status ${st.tone}"><span aria-hidden="true">\u25CF</span> ${esc(st.label)}</span>
     ${s.ph ? `<span style="color:var(--text-muted); font-size:0.75rem;">· ${esc(s.ph)}</span>` : ''}
   `;
 
@@ -523,14 +523,14 @@ function openPoi(i) {
   // Action buttons
   const callBtn = s.ph ? `
     <button class="btn-fsc-call" onclick="window.location.href='tel:${s.ph.replace(/[^0-9+]/g, '')}'">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>
+      <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>
       Call
     </button>
   ` : '';
 
   document.getElementById('poi-actions').innerHTML = `
     <button class="btn-fsc-walk" onclick="openDirections(${i},'walking')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="13" cy="4" r="2"/><path d="m9 21 1.5-6.5L8 12l1-5 3.5 2 3 1.5"/><path d="M14.5 14.5 17 21"/></svg>
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="13" cy="4" r="2"/><path d="m9 21 1.5-6.5L8 12l1-5 3.5 2 3 1.5"/><path d="M14.5 14.5 17 21"/></svg>
       Walk There
     </button>
     ${callBtn}

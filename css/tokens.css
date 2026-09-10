@@ -1,26 +1,50 @@
         :root {
-            --primary: #16233d;
-            --ink: #16233d;
-            --accent: #0f6e6a;
-            --accent-deep: #0b524f;
-            --bg-app: #f7f4ee;
-            --surface: #fffdf9;
-            --text-main: #16233d;
-            --text-muted: #746e63;
-            --border-soft: rgba(120, 108, 88, 0.16);
-            --shadow-soft: 0 14px 34px -10px rgba(22, 35, 61, 0.14), 0 4px 10px -4px rgba(22, 35, 61, 0.06);
+            /* ---------- Ground: three real value steps, cool slate ----------
+               Elevation comes from these steps, not from blur. bg-app to
+               surface is 0.165 in relative luminance (the old cream pair was
+               0.077), so a card reads as a card behind a 1px border alone. */
+            --bg-app:         #e8ecf1;
+            --surface:        #ffffff;
+            --surface-sunken: #dde3ea;
 
-            --success-bg: #eef4ea; --success-text: #3f6b3a; --success-border: rgba(146, 179, 130, 0.5);
-            --warning-bg: #fbf1e2; --warning-text: #a8641c; --warning-border: rgba(216, 165, 103, 0.55);
-            --alert-bg: #fbeae5; --alert-text: #a13c22; --alert-border: rgba(207, 128, 100, 0.5);
+            /* ---------- Ink: three steps, all AA on both ground and surface --
+               17.4:1 / 8.7:1 / 5.4:1 on white. */
+            --ink:        #101a2c;
+            --ink-2:      #3d4c63;
+            --text-main:  #101a2c;
+            --text-muted: #5c6b82;
 
-            /* Resource category colors */
-            --cat-shelter: #16233d;
-            --cat-cooling: #0f6e6a;
-            --cat-water: #3f9c96;
-            --cat-meals: #a8641c;
-            --cat-medical: #3f6b3a;
-            --cat-naloxone: #b5502f;
-            --cat-hygiene: #5b6b7d;
-            --amber: #d8a567;
+            /* ---------- Action ----------
+               Navy carries every interactive surface. One action colour, not
+               two brand hues competing. --accent is the interactive role;
+               --primary is the same value kept for structural/brand use. */
+            --brand:       #2563eb;   /* wordmark + "you are here" only */
+            --primary:     #16233d;
+            --accent:      #16233d;
+            --accent-deep: #0b1626;
+
+            /* ---------- Attention ----------
+               Amber is scarce and never a button. It marks "look here":
+               active filter count, selected pin ring, unsynced cache. Sits at
+               ~40 deg hue — the true complement of the navy, and a clear 30
+               deg off the alert red so brand never reads as emergency. */
+            --amber:      #8f5a06;
+            --amber-soft: #fdf6e6;
+
+            /* ---------- Hairlines and elevation ---------- */
+            --border-soft:   #c8d2de;
+            --border-strong: #a9b7c9;
+
+            --shadow-1:       0 1px 2px rgba(16, 26, 44, 0.06);
+            --shadow-2:       0 2px 4px rgba(16, 26, 44, 0.08);
+            --shadow-3:       0 6px 16px -4px rgba(16, 26, 44, 0.14);
+            --shadow-overlay: 0 16px 40px -12px rgba(16, 26, 44, 0.40);
+            --shadow-soft:    var(--shadow-1);
+
+            /* ---------- Clinical status ----------
+               The values documented in DESIGN_SYSTEM.md section 2. Reserved
+               for vitals and alerts; never reused for categories or chrome. */
+            --success-bg: #f0fdf4; --success-text: #15803d; --success-border: #bbf7d0;
+            --warning-bg: #fffbeb; --warning-text: #b45309; --warning-border: #fde68a;
+            --alert-bg:   #fef2f2; --alert-text:   #b91c1c; --alert-border:   #fecaca;
         }

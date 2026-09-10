@@ -27,7 +27,7 @@
             color: #16233d;
             border-radius: 50%; text-align: center;
             font-weight: 800; font-size: 0.74rem; letter-spacing: -0.01em;
-            box-shadow: 0 2px 8px rgba(22,35,61,0.18);
+            box-shadow: var(--shadow-2);
         }
 
         /* Filter chips over the map */
@@ -36,7 +36,7 @@
             display: flex; gap: 4px; padding: 4px;
             background: rgba(255, 253, 249, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--border-soft); border-radius: 30px;
-            box-shadow: 0 4px 14px rgba(22,35,61,0.1);
+            box-shadow: var(--shadow-2);
         }
         .filter-rail::-webkit-scrollbar { display: none; }
         .chip {
@@ -47,10 +47,10 @@
         }
         .chip .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
         .chip.off { opacity: 0.6; font-weight: 600; }
-        .chip:not(.off) { background: rgba(255, 255, 255, 0.9); box-shadow: 0 2px 6px rgba(22,35,61,0.06); }
+        .chip:not(.off) { background: rgba(255, 255, 255, 0.9); box-shadow: var(--shadow-1); }
         .chip-open { color: var(--success-text); }
         .chip-open:not(.off) { background: #eef4ea; }
-        .chip-open .dot.live { background: #4b8b3f; box-shadow: 0 0 0 3px rgba(75,139,63,0.22); }
+        .chip-open .dot.live { background: #4b8b3f; box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.22); }
         .chip-open.off .dot.live { background: var(--text-muted); box-shadow: none; color: var(--text-main); }
         .chip-filters:not(.off) { background: var(--accent); color: white; }
         .chip-svc { font-weight: 600; }
@@ -70,7 +70,7 @@
             border: 1px solid var(--border-soft);
             border-radius: 20px; overflow: hidden;
             display: flex; flex-direction: column;
-            box-shadow: 0 4px 14px rgba(22, 35, 61, 0.1);
+            box-shadow: var(--shadow-2);
             backdrop-filter: blur(8px);
         }
         .map-btn {
@@ -79,7 +79,7 @@
             color: var(--ink); font-size: 1.25rem; font-weight: 700;
             cursor: pointer; font-family: inherit; transition: background 0.15s;
         }
-        .map-btn:active { background: #f1f5f9; }
+        .map-btn:active { background: var(--surface-sunken); }
         .map-btn.busy { opacity: 0.5; }
         .zoom-sep { height: 1px; background: var(--border-soft); }
 
@@ -87,18 +87,18 @@
             width: 44px; height: 44px; border-radius: 50%;
             background: rgba(255, 255, 255, 0.96);
             border: 1px solid var(--border-soft);
-            color: #2563eb; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 14px rgba(22, 35, 61, 0.12); cursor: pointer;
+            color: var(--brand); display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--shadow-2); cursor: pointer;
             backdrop-filter: blur(8px);
         }
-        .btn-locate-fab:active { background: #f1f5f9; transform: scale(0.96); }
+        .btn-locate-fab:active { background: var(--surface-sunken); transform: scale(0.96); }
 
         /* ---------- BOTTOM CAROUSEL DRAWER ---------- */
         .bottom-carousel-drawer {
             position: absolute; left: 0; right: 0; bottom: 58px; z-index: 900;
-            background: var(--surface); border-top: 1px solid var(--border-soft);
+            background: var(--bg-app); border-top: 1px solid var(--border-soft);
             border-radius: 22px 22px 0 0;
-            box-shadow: 0 -8px 26px rgba(22, 35, 61, 0.08);
+            box-shadow: 0 -1px 2px rgba(16, 26, 44, 0.06);
             display: flex; flex-direction: column;
             transition: transform 0.26s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s ease;
         }
@@ -107,7 +107,7 @@
         }
         .drawer-grip {
             width: 36px; height: 4px; border-radius: 2px;
-            background: #cbd5e1; margin: 10px auto 8px auto; flex-shrink: 0;
+            background: var(--border-strong); margin: 10px auto 8px auto; flex-shrink: 0;
         }
         .drawer-header {
             padding: 0 16px 8px 16px;
@@ -115,12 +115,12 @@
         }
         .drawer-title-group { display: flex; align-items: baseline; gap: 8px; }
         .drawer-title {
-            font-family: 'Literata', Georgia, serif; font-size: 1.08rem; font-weight: 700;
+            font-family: 'Fraunces', Georgia, serif; font-size: 1.08rem; font-weight: 700;
             color: var(--ink);
         }
         .drawer-count-tag {
             font-size: 0.72rem; font-weight: 700; color: var(--accent);
-            background: #e6f4f3; padding: 2px 8px; border-radius: 10px;
+            background: var(--surface-sunken); padding: 2px 8px; border-radius: 10px;
         }
         .offline-sync-tag {
             font-size: 0.68rem; font-weight: 600; color: var(--text-muted);
@@ -141,13 +141,13 @@
 
         .site-card {
             flex: 0 0 250px; scroll-snap-align: start;
-            background: #f8fafc; border: 1px solid var(--border-soft);
+            background: var(--surface); border: 1px solid var(--border-soft);
             border-radius: 16px; padding: 12px 14px;
             display: flex; flex-direction: column; justify-content: space-between;
             gap: 6px; cursor: pointer; transition: all 0.15s ease;
         }
-        .site-card:hover { border-color: rgba(15, 110, 106, 0.4); }
-        .site-card.selected { border-color: var(--accent); background: #f0fdfa; }
+        .site-card:hover { border-color: var(--border-strong); }
+        .site-card.selected { border-color: var(--accent); background: var(--amber-soft); }
         .card-top {
             display: flex; justify-content: space-between; align-items: flex-start;
         }
@@ -160,7 +160,7 @@
             display: flex; align-items: center; gap: 3px;
         }
         .site-card-name {
-            font-family: 'Literata', Georgia, serif; font-size: 0.95rem; font-weight: 700;
+            font-family: 'Fraunces', Georgia, serif; font-size: 0.95rem; font-weight: 700;
             color: var(--ink); line-height: 1.25; margin-top: 2px;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
@@ -175,21 +175,21 @@
         .card-status { font-size: 0.72rem; font-weight: 700; }
         .card-status.green { color: #15803d; }
         .card-status.amber { color: #b45309; }
-        .card-status.grey  { color: #64748b; }
+        .card-status.grey  { color: var(--text-muted); }
         .btn-card-more {
             background: var(--surface); color: var(--ink);
             border: 1px solid var(--border-soft); border-radius: 8px;
             padding: 4px 10px; font-size: 0.72rem; font-weight: 700; cursor: pointer;
             font-family: inherit;
         }
-        .btn-card-more:hover { background: #f1f5f9; }
+        .btn-card-more:hover { background: var(--surface-sunken); }
 
         /* ---------- FLOATING POI DETAIL CARD (MOCKUP 5 OPTION A) ---------- */
         .floating-poi-card {
             position: absolute; left: 14px; right: 14px; bottom: 74px; z-index: 950;
             background: var(--surface); border: 1px solid var(--border-soft);
             border-radius: 20px; padding: 16px 18px;
-            box-shadow: 0 12px 36px rgba(22, 35, 61, 0.16);
+            box-shadow: var(--shadow-3);
             display: flex; flex-direction: column; gap: 10px;
             animation: slideUpFade 0.22s cubic-bezier(0.32, 0.72, 0, 1);
         }
@@ -203,15 +203,15 @@
         .fsc-badges-row { display: flex; gap: 6px; flex-wrap: wrap; }
         .fsc-walk-badge {
             font-size: 0.76rem; font-weight: 700; color: var(--accent);
-            background: #e6f4f3; padding: 3px 8px; border-radius: 8px;
+            background: var(--surface-sunken); padding: 3px 8px; border-radius: 8px;
         }
         .btn-close-poi {
-            background: none; border: none; font-size: 1.15rem; color: #64748b;
+            background: none; border: none; font-size: 1.15rem; color: var(--text-muted);
             cursor: pointer; padding: 0 4px; line-height: 1;
         }
         .btn-close-poi:hover { color: var(--ink); }
         .fsc-title {
-            font-family: 'Literata', Georgia, serif; font-size: 1.15rem; font-weight: 700;
+            font-family: 'Fraunces', Georgia, serif; font-size: 1.15rem; font-weight: 700;
             color: var(--ink); line-height: 1.25; margin-top: 2px;
         }
         .fsc-org { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
@@ -232,7 +232,7 @@
             height: 42px; background: var(--accent); color: #fff;
             border: none; border-radius: 12px; font-size: 0.84rem; font-weight: 700;
             display: flex; align-items: center; justify-content: center; gap: 6px;
-            cursor: pointer; box-shadow: 0 2px 8px rgba(15, 110, 106, 0.25);
+            cursor: pointer; box-shadow: var(--shadow-2);
             font-family: inherit;
         }
         .btn-fsc-call {
@@ -263,7 +263,7 @@
         .filter-dialog {
             width: 100%; max-width: 480px; max-height: 84%;
             background: #ffffff; border-radius: 28px 28px 0 0;
-            box-shadow: 0 -12px 36px rgba(15, 23, 42, 0.25);
+            box-shadow: var(--shadow-3);
             display: flex; flex-direction: column; overflow: hidden;
             animation: slideUpModal 0.22s cubic-bezier(0.32, 0.72, 0, 1);
         }
@@ -273,14 +273,14 @@
         }
         .filter-dialog-grip {
             width: 38px; height: 4px; border-radius: 2px;
-            background: #cbd5e1; margin: 12px auto 6px auto; flex-shrink: 0;
+            background: var(--border-strong); margin: 12px auto 6px auto; flex-shrink: 0;
         }
         .filter-dialog-header {
             padding: 12px 20px 14px 20px; display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid #f1f5f9; flex-shrink: 0;
+            border-bottom: 1px solid var(--surface-sunken); flex-shrink: 0;
         }
         .filter-dialog-title {
-            font-family: 'Literata', Georgia, serif; font-size: 1.22rem; font-weight: 700; color: var(--ink);
+            font-family: 'Fraunces', Georgia, serif; font-size: 1.22rem; font-weight: 700; color: var(--ink);
         }
         .filter-dialog-actions { display: flex; align-items: center; gap: 14px; }
         .filter-btn-reset {
@@ -288,7 +288,7 @@
             background: none; border: none; cursor: pointer; font-family: inherit;
         }
         .filter-btn-close {
-            background: none; border: none; font-size: 1.25rem; color: #64748b;
+            background: none; border: none; font-size: 1.25rem; color: var(--text-muted);
             cursor: pointer; line-height: 1;
         }
         .filter-dialog-body {
@@ -296,7 +296,7 @@
         }
         .filter-section-label {
             font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
-            letter-spacing: 0.8px; color: #64748b; margin-bottom: 8px;
+            letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 8px;
         }
 
         /* Category Select Rows */
@@ -304,25 +304,25 @@
         .filter-cat-row {
             display: flex; align-items: center; justify-content: space-between;
             padding: 11px 14px; border-radius: 12px;
-            border: 1.5px solid #e2e8f0; background: #fff;
+            border: 1.5px solid var(--border-soft); background: #fff;
             cursor: pointer; transition: all 0.15s;
         }
         .filter-cat-row.selected {
-            border-color: var(--accent); background: #f0fdfa;
+            border-color: var(--accent); background: var(--amber-soft);
         }
         .filter-cat-left {
             display: flex; align-items: center; gap: 10px;
             font-size: 0.86rem; font-weight: 700; color: var(--ink);
         }
         .filter-cat-dot { width: 12px; height: 12px; border-radius: 50%; }
-        .filter-cat-count { font-size: 0.74rem; color: #64748b; font-weight: 600; }
+        .filter-cat-count { font-size: 0.74rem; color: var(--text-muted); font-weight: 600; }
 
         /* Service Chips */
         .filter-chips-cloud { display: flex; flex-wrap: wrap; gap: 8px; }
         .filter-service-chip {
             padding: 6px 12px; border-radius: 18px;
-            border: 1px solid #e2e8f0; background: #f8fafc;
-            font-size: 0.76rem; font-weight: 600; color: #334155;
+            border: 1px solid var(--border-soft); background: var(--surface);
+            font-size: 0.76rem; font-weight: 600; color: var(--ink-2);
             cursor: pointer; display: flex; align-items: center; gap: 6px;
             font-family: inherit;
         }
@@ -333,19 +333,19 @@
         /* Open Now Switch Row */
         .filter-switch-row {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 14px; background: #f8fafc; border-radius: 12px;
-            border: 1px solid #e2e8f0;
+            padding: 12px 14px; background: var(--surface-sunken); border-radius: 12px;
+            border: 1px solid var(--border-soft);
         }
         .filter-switch-label { font-size: 0.84rem; font-weight: 700; color: var(--ink); }
         .filter-toggle-switch {
             width: 44px; height: 26px; border-radius: 13px;
-            background: #cbd5e1; position: relative; cursor: pointer; transition: background 0.2s;
+            background: var(--border-strong); position: relative; cursor: pointer; transition: background 0.2s;
         }
         .filter-toggle-switch.on { background: #22c55e; }
         .filter-toggle-knob {
             width: 20px; height: 20px; border-radius: 50%; background: #fff;
             position: absolute; top: 3px; left: 3px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: transform 0.2s;
+            box-shadow: var(--shadow-1); transition: transform 0.2s;
         }
         .filter-toggle-switch.on .filter-toggle-knob {
             transform: translateX(18px);
@@ -353,14 +353,14 @@
 
         /* Modal Footer */
         .filter-dialog-footer {
-            padding: 14px 20px 24px 20px; border-top: 1px solid #f1f5f9; background: #fff;
+            padding: 14px 20px 24px 20px; border-top: 1px solid var(--surface-sunken); background: #fff;
         }
         .btn-apply-filters {
             width: 100%; height: 50px; background: var(--accent); color: #fff;
             border: none; border-radius: 14px;
             font-size: 0.92rem; font-weight: 700; letter-spacing: -0.01em;
             cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-            box-shadow: 0 4px 14px rgba(15, 110, 106, 0.3); font-family: inherit;
+            box-shadow: var(--shadow-2); font-family: inherit;
         }
         .btn-apply-filters:active { transform: scale(0.99); }
 
